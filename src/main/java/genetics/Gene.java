@@ -2,6 +2,7 @@ package genetics;
 
 import java.util.List;
 
+import ecology.Species;
 import utils.RNG;
 
 /* 
@@ -10,8 +11,8 @@ import utils.RNG;
 */
 public abstract class Gene {
 	
-	private static double mutationRate = 0.01;
-	private static double invMutationRate = 1/mutationRate;
+	private static double mutationRate = Species.mutationRate;
+	private static double invMutationRate = 1/mutationRate; // used to speed up computation
 
 	protected abstract Gene clone();
 

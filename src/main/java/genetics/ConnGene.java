@@ -4,7 +4,7 @@ import java.util.Arrays;
 import utils.RNG;
 
 public class ConnGene extends Gene {
-	double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
+	public double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
 	long signature;
 	
 	Mutation xprMutation = (gene) -> ((ConnGene) gene).xprLevel += RNG.getShiftDouble();
@@ -21,7 +21,7 @@ public class ConnGene extends Gene {
 	Mutation weightMutation = (gene) -> ((ConnGene) gene).weight += RNG.getShiftDouble();
 	Mutation signMutation = (gene) -> {
 		ConnGene mutant = (ConnGene) gene;
-		mutant.signature = mutant.signature ^ (long) Math.pow(2, RNG.getLongBits());
+		mutant.signature = mutant.signature ^ (long) Math.pow(2, RNG.getLongBit());
 	};
 	
 	public ConnGene(double xprLevel, double inLayNum, double inNodeNum,
