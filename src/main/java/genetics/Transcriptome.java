@@ -55,7 +55,7 @@ public class Transcriptome {
 	
 	private List<Gene> poolAllGenes(Genome genome) {
 		List<Gene> genes = new ArrayList<Gene>();
-		Consumer<Chromosome> chromConsumer = (chrom) -> genes.addAll(chrom.getGenes());
+		Consumer<HomologPair> chromConsumer = (pair) -> genes.addAll(pair.getGenes());
 		genome.forEach(chromConsumer);
 		return genes;
 	}
