@@ -8,7 +8,7 @@ public class LayerGene extends Gene {
 	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble();
 	Mutation layNumMutation = (gene) -> {
 		LayerGene mutant = (LayerGene) gene;
-		mutant.layerNum = Math.max(-1.0, mutant.layerNum + RNG.getShiftDouble());
+		mutant.layerNum = Math.max(1.0, mutant.layerNum + RNG.getShiftDouble());
 	};
 	
 	

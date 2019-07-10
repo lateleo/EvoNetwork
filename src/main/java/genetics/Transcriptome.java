@@ -16,12 +16,17 @@ import ecology.Species;
 import utils.ConnTuple;
 
 public class Transcriptome {
-	public Map<Integer,Map<Integer,Double>> nodeMap;
-	public TreeMap<ConnTuple,Double> connWeights;
+	private Map<Integer,Map<Integer,Double>> laysAndNodes = new TreeMap<>();
+	private Map<ConnTuple,Double> connWeights = new Hashtable<>();
 	
 	private static int bottomNodes = Species.bottomNodes;
 	private static int topNodes = Species.topNodes;
 	
+	/*
+	 * IMPORTANT: This constructor should *only* be called by the Genome.transcribe() method.
+	 * This will ensure that all the various Maps and Lists that are created in the process below
+	 * are discarded when garbage collection comes around, and only the 
+	 */
 	Transcriptome(Genome genome) {
 		List<LayerGene> layGenes = new ArrayList<LayerGene>();
 		List<NodeGene> nodeGenes = new ArrayList<NodeGene>();
@@ -40,11 +45,11 @@ public class Transcriptome {
 		parseFamGenes(famGenes, tripletMap);
 	}
 	
-	public Map<Integer, Map<Integer, Double>> getNodeMap() {
-		return nodeMap;
+	public Map<Integer, Map<Integer, Double>> getLaysAndNodes() {
+		return laysAndNodes;
 	}
 
-	public TreeMap<ConnTuple, Double> getConnWeights() {
+	public Map<ConnTuple, Double> getConnWeights() {
 		return connWeights;
 	}
 	
@@ -64,6 +69,7 @@ public class Transcriptome {
 			else layerMap.put(layNum, Arrays.asList(gene.xprLevel));
 		}
 		layerMap.entrySet().removeIf((entry) -> entry.getValue().stream().mapToDouble((d) -> d).sum() < 0);
+		layerMap.put(-1, null);
 		return layerMap.keySet();
 	}
 	
@@ -89,18 +95,17 @@ public class Transcriptome {
 	
 	private TreeMap<Integer,TreeMap<Integer,TupleSet>> filterNodes(Map<Integer,Map<Integer,PheneDummy>> nodePhenes) {
 		TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap = new TreeMap<Integer,TreeMap<Integer,TupleSet>>();
-		for (Map.Entry<Integer,Map<Integer,PheneDummy>> layer : nodePhenes.entrySet()) {
-			layer.getValue().entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0);
+		nodePhenes.forEach((layNum, nodeDummies) -> {
+			nodeDummies.entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0 && layNum != -1);
 			Map<Integer,Double> biasMap = new Hashtable<Integer,Double>();
 			TreeMap<Integer,TupleSet> nodeTuples = new TreeMap<Integer,TupleSet>();
-			BiConsumer<Integer, PheneDummy> sorter = (nodeNum, phene) -> {
+			nodeDummies.forEach((nodeNum, phene) -> {
 				biasMap.put(nodeNum, phene.getWeightedAvg());
 				nodeTuples.put(nodeNum, new TupleSet());
-			};
-			layer.getValue().forEach(sorter);
-			nodeMap.put(layer.getKey(), biasMap);
-			tupleMap.put(layer.getKey(), nodeTuples);
-		}
+			});
+			laysAndNodes.put(layNum, biasMap);
+			tupleMap.put(layNum,  nodeTuples);
+		});
 		return tupleMap;
 	}
 	
@@ -119,8 +124,8 @@ public class Transcriptome {
 			boolean valid = entry.getValue().stream().mapToDouble((trip) -> trip.xprLevel).sum() > 0;
 			ConnTuple tuple = entry.getKey();
 			if (valid) {
-				if (tuple.iLay != 0) tupleMap.get(tuple.iLay).get(tuple.iNode).addUp(tuple);
-				if (tuple.oLay != -1) tupleMap.get(tuple.oLay).get(tuple.oNode).addDown(tuple);
+				if (tuple.iLay() != 0) tupleMap.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
+				if (tuple.oLay() != -1) tupleMap.get(tuple.oLay()).get(tuple.oNode()).addDown(tuple);
 			}
 			return !valid;
 		};
@@ -129,20 +134,20 @@ public class Transcriptome {
 	}
 	
 	private boolean validTuple(ConnTuple tup) {
-		if (tup.oLay == 0) return false;
-		if (tup.oLay > 0 && tup.oLay < tup.iLay) return false;
+		if (tup.oLay() == 0) return false;
+		if (tup.oLay() > 0 && tup.oLay() < tup.iLay()) return false;
 		boolean bottomIn = false;
 		boolean topOut = false;
-		if (tup.iLay == 0) {
-			if (tup.iNode >= bottomNodes) bottomIn = true;
+		if (tup.iLay() == 0) {
+			if (tup.iNode() >= bottomNodes) bottomIn = true;
 			else return false;
 		}
-		if (tup.oLay == -1) {
-			if (tup.oNode < topNodes) topOut = true;
+		if (tup.oLay() == -1) {
+			if (tup.oNode() < topNodes) topOut = true;
 			else return false;
 		}
-		if (!bottomIn && (!nodeMap.containsKey(tup.iLay) || !nodeMap.get(tup.iLay).containsKey(tup.iNode))) return false;
-		if (!topOut && (!nodeMap.containsKey(tup.oLay) || !nodeMap.get(tup.oLay).containsKey(tup.oNode))) return false;
+		if (!bottomIn && (!laysAndNodes.containsKey(tup.iLay()) || !laysAndNodes.get(tup.iLay()).containsKey(tup.iNode()))) return false;
+		if (!topOut && (!laysAndNodes.containsKey(tup.oLay()) || !laysAndNodes.get(tup.oLay()).containsKey(tup.oNode()))) return false;
 		return true;
 	}
 
@@ -154,12 +159,12 @@ public class Transcriptome {
 				int nodeNum = nodeEntry.getKey();
 				TupleSet nodeTuples = nodeEntry.getValue();
 				boolean orphanNode = nodeTuples.isOrphan(tuples);
-				if (orphanNode) nodeMap.get(layNum).remove(nodeNum);
+				if (orphanNode) laysAndNodes.get(layNum).remove(nodeNum);
 				return orphanNode;
 			};
 			layer.entrySet().removeIf(nodeFilter);
 			boolean orphanLayer = layer.isEmpty();
-			if (orphanLayer) nodeMap.remove(layNum);
+			if (orphanLayer) laysAndNodes.remove(layNum);
 			return orphanLayer;
 		};
 		tupleMap.navigableKeySet().removeIf(layFilter);
@@ -277,8 +282,8 @@ public class Transcriptome {
 		}
 		
 		boolean isOrphan(Set<ConnTuple> tuples) {
-			upConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.oLay != -1);
-			downConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.iLay != 0);
+			upConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.oLay() != -1);
+			downConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.iLay() != 0);
 			boolean orphan = upConns.isEmpty() || downConns.isEmpty();
 			if (orphan) tuples.removeIf((tuple) -> upConns.contains(tuple) || downConns.contains(tuple));
 			return orphan;

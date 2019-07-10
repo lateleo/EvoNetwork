@@ -56,6 +56,8 @@ public class Genome extends ArrayList<Chromosome> {
 		return haploidSet;
 	}
 	
+	
+//	IMPORTANT: Use this instead of calling the Transcriptome constructor directly.
 	public Transcriptome trasncribe() {
 		return new Transcriptome(this);
 	}

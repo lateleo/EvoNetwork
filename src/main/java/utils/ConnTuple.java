@@ -8,7 +8,7 @@ import genetics.ConnGene;
  * from the Transcriptome as well, so it was moved here.
  */
 public class ConnTuple implements Comparable<ConnTuple> {
-	public int iLay, iNode, oLay, oNode;
+	private int iLay, iNode, oLay, oNode;
 	
 	public ConnTuple(ConnGene gene) {
 		this.iLay = (int) gene.inLayNum;
@@ -17,6 +17,22 @@ public class ConnTuple implements Comparable<ConnTuple> {
 		this.oNode = (int) gene.outNodeNum;
 	}
 	
+	public int iLay() {
+		return iLay;
+	}
+
+	public int iNode() {
+		return iNode;
+	}
+
+	public int oLay() {
+		return oLay;
+	}
+
+	public int oNode() {
+		return oNode;
+	}
+
 	boolean equals(ConnTuple other) {
 		return this.iLay == other.iLay &&
 				this.iNode == other.iNode &&

@@ -12,7 +12,7 @@ public class NodeGene extends Gene {
 	};
 	Mutation NodeNumMutation = (gene) -> {
 		NodeGene mutant = (NodeGene) gene;
-		mutant.nodeNum = Math.max(-1.0, mutant.nodeNum + RNG.getShiftDouble());
+		mutant.nodeNum = Math.max(0.0, mutant.nodeNum + RNG.getShiftDouble());
 	};
 	
 	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias) {
