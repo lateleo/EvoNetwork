@@ -8,7 +8,7 @@ import utils.CMUtils;
 import utils.NodeTuple;
 
 public class Node implements Runnable {
-	private double output;
+	protected double output;
 	private double bias;
 	Map<NodeTuple, Double> norms;
 	Map<NodeTuple, Double> weights;

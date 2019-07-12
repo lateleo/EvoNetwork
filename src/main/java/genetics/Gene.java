@@ -10,9 +10,8 @@ import utils.RNG;
  * Also contains code for the internal functional interface "Mutation".
 */
 public abstract class Gene {
-	
 	private static double mutationRate = Species.mutationRate;
-	private static double invMutationRate = 1/mutationRate; // used to speed up computation
+	private static double invMutationRate; // used to speed up computation
 
 	protected abstract Gene clone();
 

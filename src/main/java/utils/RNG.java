@@ -38,8 +38,16 @@ public class RNG {
 	}
 	
 	public static int getIntMax(int max) {
-		return ThreadLocalRandom.current().nextInt(max+1);
+		return ThreadLocalRandom.current().nextInt(max);
 	}
+	
+	public static int getIntLowBias(int max) {
+		int a = ThreadLocalRandom.current().nextInt(max);
+		int b = ThreadLocalRandom.current().nextInt(max);
+		return Math.min(a, b);
+	}
+	
+	
 	
 	public static boolean getBoolean() {
 		return ThreadLocalRandom.current().nextBoolean();

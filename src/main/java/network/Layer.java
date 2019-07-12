@@ -2,6 +2,7 @@ package network;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.TreeMap;
 
 import utils.CMUtils;
 import utils.ConnTuple;
@@ -11,7 +12,7 @@ import utils.Stats;
 public class Layer implements Runnable {
 	Map<NodeTuple, Node> inputs;
 	Map<NodeTuple, Double> normInputs;
-	Map<Integer, Node> nodes = new Hashtable<>();
+	Map<Integer, Node> nodes = new TreeMap<>();
 	
 	public Layer(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights, NeuralNetwork network) {
 		inputs = new Hashtable<NodeTuple,Node>();

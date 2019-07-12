@@ -17,8 +17,16 @@ public class Organism {
 		this.genome = genome;
 	}
 	
+	public Organism(Organism a, Organism b) {
+		this.genome = new Genome(a.genome.getHaploidSet(), b.genome.getHaploidSet());
+	}
+	
 	public double getFitness() {
 		return fitness;
+	}
+		
+	public void setFitness(double meanSize) {
+		fitness = network.getAccuracy()*meanSize/genome.size();
 	}
 	
 	public Genome getGenome() {
@@ -27,6 +35,10 @@ public class Organism {
 	
 	public NeuralNetwork getNetwork() {
 		return network;
+	}
+	
+	public int size() {
+		return genome.size();
 	}
 	
 	public void buildNetwork() {

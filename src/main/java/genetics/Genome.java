@@ -2,19 +2,16 @@ package genetics;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
-import ecology.Species;
-import utils.RNG;
 
 public class Genome extends ArrayList<HomologPair> {
 	private static final long serialVersionUID = -5681670623380224763L;  //This is just because ArrayLists are Serializable
 	
-	public Genome(List<Chromosome> listA, List<Chromosome> listB) {
-		Comparator<Chromosome> sorter = (x, y) -> x.chromNum() - y.chromNum();
-		listA.sort(sorter);
-		listB.sort(sorter);
-		for (int i = 0; i < listA.size(); i++) this.add(new HomologPair(listA.get(i), listB.get(i)));
+	public Genome(Map<Integer,Chromosome> mapA, Map<Integer,Chromosome> mapB) {
+		for (int i = 0; i < mapA.size(); i++) this.add(new HomologPair(mapA.get(i), mapB.get(i)));
 	}
 	
 	public Genome(List<HomologPair> pairs) {
@@ -28,10 +25,14 @@ public class Genome extends ArrayList<HomologPair> {
 	}
 
 	
-	public List<Chromosome> getHaploidSet() {
-		List<Chromosome> haploidSet = new ArrayList<Chromosome>();
-		for (HomologPair pair : this) haploidSet.add(pair.getRecombinant());
+	public Map<Integer,Chromosome> getHaploidSet() {
+		Map<Integer,Chromosome> haploidSet = new Hashtable<Integer,Chromosome>();
+		for (HomologPair pair : this) haploidSet.put(pair.chromNum, pair.getRecombinant());
 		return haploidSet;
+	}
+	
+	public int size() {
+		return stream().mapToInt(pair -> pair.size()).sum();
 	}
 	
 	

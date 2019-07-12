@@ -31,12 +31,12 @@ public class HomologPair {
 		int offsetA = randIndex, offsetB = randIndex;
 		int slip;
 		if (randIndex < 0) {
-			offsetA += (a.getHead()>minHead)? 0 - RNG.getIntMax(a.getHead()-minHead) : 0;
-			offsetB += (b.getHead()>minHead)? 0 - RNG.getIntMax(b.getHead()-minHead) : 0;
+			offsetA += (a.getHead()>minHead)? 0 - RNG.getIntMax(1+a.getHead()-minHead) : 0;
+			offsetB += (b.getHead()>minHead)? 0 - RNG.getIntMax(1+b.getHead()-minHead) : 0;
 			slip = (int) RNG.getBoundGauss(0-newChrom.getHead()-randIndex, 0-randIndex, slipChance);
 		} else {
-			offsetA += (a.getTail()>minTail)? RNG.getIntMax(a.getTail()-minTail) : 0;
-			offsetB += (b.getTail()>minTail)? RNG.getIntMax(b.getTail()-minTail) : 0;
+			offsetA += (a.getTail()>minTail)? RNG.getIntMax(1+a.getTail()-minTail) : 0;
+			offsetB += (b.getTail()>minTail)? RNG.getIntMax(1+b.getTail()-minTail) : 0;
 			slip = (int) RNG.getBoundGauss(0-randIndex, newChrom.getTail()-randIndex, slipChance);
 		}
 		List<Gene> subSequence = (whichChrom)? b.subSequence(offsetB) : a.subSequence(offsetA);
@@ -48,5 +48,9 @@ public class HomologPair {
 		List<Gene> genes = new ArrayList<Gene>(a);
 		genes.addAll(b.getGenes());
 		return genes;
+	}
+	
+	public int size() {
+		return a.size() + b.size() - 2;
 	}
 }

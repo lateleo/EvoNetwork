@@ -16,11 +16,12 @@ import ecology.Species;
 import utils.ConnTuple;
 
 public class Transcriptome {
+	private static int bottomNodes = Species.bottomNodes;
+	private static int topNodes = Species.topNodes;
+	
 	private Map<Integer,Map<Integer,Double>> laysAndNodes = new TreeMap<>();
 	private Map<ConnTuple,Double> connWeights = new Hashtable<>();
 	
-	private static int bottomNodes = Species.bottomNodes;
-	private static int topNodes = Species.topNodes;
 	
 	/*
 	 * IMPORTANT: This constructor should *only* be called by the Genome.transcribe() method.

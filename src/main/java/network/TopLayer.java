@@ -1,5 +1,8 @@
 package network;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -8,7 +11,7 @@ import utils.ConnTuple;
 
 public class TopLayer extends Layer {
 	private static int nodeCount = Species.topNodes;
-	Map<Integer,Double> squishedOutputs = new TreeMap<Integer,Double>();
+	double[] outputs = new double[nodeCount];
 	
 	public TopLayer(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights, NeuralNetwork network) {
 		super(nodeBiases, inputConnWeights, network);
@@ -22,9 +25,8 @@ public class TopLayer extends Layer {
 	@Override
 	public void run() {
 		super.run();
-		Map<Integer,Double> outputs = new TreeMap<Integer,Double>();
-		nodes.forEach((nodeNum,node) -> outputs.put(nodeNum, node.getOutput()));
-		
+		double sum = nodes.values().stream().mapToDouble(d->d.output).sum();
+		nodes.forEach((nodeNum,node)-> outputs[nodeNum] = node.output/sum);
 	}
 
 }
