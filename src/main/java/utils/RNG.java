@@ -10,27 +10,50 @@ public class RNG {
 
 	
 	public static double getShiftDouble() {
-		return ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		double out = ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		return out/3.0;
 	}
 	
 	public static double getDouble() {
-		return ThreadLocalRandom.current().nextDouble();
+		return ThreadLocalRandom.current().nextDouble(0.0, Math.nextUp(1.0));
 	}
 	
 	public static double getPsuedoGauss(double bound) {
 		return (getShiftDouble()+getShiftDouble()+getShiftDouble()+getShiftDouble())*bound/4.0;
 	}
 	
-	public static double getBoundGauss(double min, double max, double sigma) {
-		double output;
-		do {
-			output = ThreadLocalRandom.current().nextGaussian()/sigma;
-		} while (output > max || output < min);
-		return output;
+	public static double getGauss() {
+		return ThreadLocalRandom.current().nextGaussian();
 	}
 	
-	public static int getLongBit() {
-		return ThreadLocalRandom.current().nextInt(64);
+	public static double getGauss(double sigma, double mean) {
+		return ThreadLocalRandom.current().nextGaussian()*sigma + mean;
+	}
+	
+	public static double getBoundGauss(double min, double max, double sigma, double mean) {
+		double output;
+		do {
+			output = getGauss(sigma, mean);
+		} while (output > max || output < min);
+		return output;		
+	}
+	
+	public static double getBoundGauss(double min, double max, double sigma) {
+		return getBoundGauss(min, max, sigma, 0.0);
+	}
+	
+	public static double getMinGauss(double min, double sigma, double mean) {
+		return getBoundGauss(min, Double.POSITIVE_INFINITY, sigma, mean);
+	}
+	
+	public static double getMinGauss(double min, double sigma) {
+		return getMinGauss(min, sigma, 0.0);
+	}
+	
+	public static int getBit() {
+		return ThreadLocalRandom.current().nextInt(32);
 	}
 	
 	public static int getIntRange(int min, int max) {

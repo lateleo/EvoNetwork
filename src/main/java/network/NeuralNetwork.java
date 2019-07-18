@@ -2,11 +2,9 @@ package network;
 
 import java.util.Arrays;
 import java.util.TreeMap;
-
-import data.MnistImage;
 import ecology.Species;
 
-public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
+public class NeuralNetwork extends TreeMap<Integer, AbstractLayer> implements Runnable {
 	private static final long serialVersionUID = -2513726838630426232L;
 	private static int imageCount = Species.images.length;
 	private BottomLayer bottom;
@@ -16,7 +14,7 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	@Override
 	public void run() {
 		double loss = 0.0;
-		while (!bottom.complete()) {
+		while (!bottom.allImagesComplete()) {
 			forEach((layNum, layer) -> layer.run());
 			double[] outputs = top.outputs;
 			int label = bottom.currentImage.getLabel();
@@ -28,14 +26,14 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	}
 	
 	void setBottom(BottomLayer bottom) {
-		if (this.bottom.equals(null)) {
+		if (this.bottom == null) {
 			this.bottom = bottom;
 			put(0, bottom);
 		}
 	}
 	
 	void setTop(TopLayer top) {
-		if (this.top.equals(null)) {
+		if (this.top == null) {
 			this.top = top;
 			put(-1, top);
 		}

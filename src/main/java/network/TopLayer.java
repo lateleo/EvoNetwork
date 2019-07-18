@@ -1,10 +1,7 @@
 package network;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Hashtable;
 import java.util.Map;
-import java.util.TreeMap;
 
 import ecology.Species;
 import utils.ConnTuple;
@@ -18,7 +15,12 @@ public class TopLayer extends Layer {
 	}
 	
 	protected void fillNodes(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights) {
-		for (int i = 0; i < nodeCount; i++) if (!nodeBiases.containsKey(i)) nodeBiases.put(i, 0.0);
+		if (nodeBiases == null) nodeBiases = new Hashtable<>();
+		for (int i = 0; i < nodeCount; i++) {
+			if (!nodeBiases.containsKey(i)) {
+				nodeBiases.put(i, 0.0);
+			}
+		}
 		super.fillNodes(nodeBiases, inputConnWeights);
 	}
 	

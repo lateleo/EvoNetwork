@@ -1,7 +1,5 @@
 package utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -62,6 +60,16 @@ public class CMUtils {
 	}
 	
 	/*
+	 * Returns a Map with the same keys, but different value Type as source Map, with new values determined by
+	 * calling the given Function on each value in source.
+	 */
+	public static <K, V, T> Map<K, T> transformMapValues(Map<K, V> source, Function<V, T> function) {
+		Map<K, T> newMap = new Hashtable<>();
+		source.forEach((key,value) -> newMap.put(key, function.apply(value)));
+		return newMap;
+	}
+	
+	/*
 	 * Returns a Map of ConnTuple/Doubles, representing all connections that the given layNum takes as inputs.
 	 */
 	public static Map<ConnTuple,Double> getConnsForLayer(Map<ConnTuple,Double> source, int layNum) {
@@ -74,7 +82,7 @@ public class CMUtils {
 	 */
 	public static Map<NodeTuple,Double> getConnsForNode(Map<ConnTuple,Double> source, int nodeNum) {
 		Map<ConnTuple,Double> subMap = subMap(source, tuple -> tuple.oNode() == nodeNum);
-		return transformMapKeys(subMap, connTuple -> new NodeTuple(connTuple));
+		return transformMapKeys(subMap, connTuple -> connTuple.getKey());
 	}
 	
 	

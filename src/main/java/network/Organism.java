@@ -1,8 +1,6 @@
 package network;
 
 import java.util.Map;
-import java.util.TreeMap;
-
 import genetics.Genome;
 import genetics.Transcriptome;
 import utils.CMUtils;
@@ -11,10 +9,12 @@ import utils.ConnTuple;
 public class Organism {
 	private double fitness;
 	private Genome genome;
+	private int size;
 	private NeuralNetwork network;
 	
 	public Organism(Genome genome) {
 		this.genome = genome;
+		size = genome.size();
 	}
 	
 	public Organism(Organism a, Organism b) {
@@ -29,16 +29,12 @@ public class Organism {
 		fitness = network.getAccuracy()*meanSize/genome.size();
 	}
 	
-	public Genome getGenome() {
-		return genome;
-	}
-	
 	public NeuralNetwork getNetwork() {
 		return network;
 	}
 	
 	public int size() {
-		return genome.size();
+		return size;
 	}
 	
 	public void buildNetwork() {

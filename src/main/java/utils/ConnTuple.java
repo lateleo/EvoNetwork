@@ -1,56 +1,41 @@
 package utils;
 
+import org.apache.commons.math3.util.Pair;
+
 import genetics.ConnGene;
 
 /*
  * This class is used exclusively as a Key object for the 'conns' map that is produced by the Transcriptome.
- * It was originally a nested class within Transcriptome, but it will be useful when constructing the network 
- * from the Transcriptome as well, so it was moved here.
  */
-public class ConnTuple implements Comparable<ConnTuple> {
-	private int iLay, iNode, oLay, oNode;
+public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<ConnTuple> {
 	
+	public ConnTuple(NodeTuple in, NodeTuple out) {
+		super(in,out);
+	}
+
 	public ConnTuple(ConnGene gene) {
-		this.iLay = (int) gene.inLayNum;
-		this.iNode = (int) gene.inNodeNum;
-		this.oLay = (int) Math.floor(gene.outLayNum); //This is different because negative doubles round up when cast to int
-		this.oNode = (int) gene.outNodeNum;
+		super(new NodeTuple((int) gene.inLayNum, (int) gene.inNodeNum),
+				new NodeTuple((int) Math.floor(gene.outLayNum), (int) gene.outNodeNum));
 	}
 	
 	public int iLay() {
-		return iLay;
+		return getKey().layer();
 	}
 
 	public int iNode() {
-		return iNode;
+		return getKey().node();
 	}
 
 	public int oLay() {
-		return oLay;
+		return getValue().layer();
 	}
 
 	public int oNode() {
-		return oNode;
-	}
-
-	boolean equals(ConnTuple other) {
-		return this.iLay == other.iLay &&
-				this.iNode == other.iNode &&
-				this.oLay == other.oLay &&
-				this.oNode == other.oNode;
-	}
-	
-	public int hashCode() {
-		return (Integer.toString(iLay) + "." +
-				Integer.toString(iNode) + "." +
-				Integer.toString(oLay) + "." +
-				Integer.toString(oNode)).hashCode();
+		return getValue().node();
 	}
 
 	public int compareTo(ConnTuple other) {
-		if (this.iLay != other.iLay) return this.iLay - other.iLay;
-		else if (this.iNode != other.iNode) return this.iNode - other.iNode;
-		else if (this.oLay != other.oLay) return this.oLay - other.oLay;
-		else return this.oNode - other.oNode;
+		if (!getKey().equals(other.getKey())) return getKey().compareTo(other.getKey());
+		else return getValue().compareTo(other.getValue());
 	}
 }

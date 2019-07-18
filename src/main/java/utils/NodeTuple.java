@@ -1,34 +1,28 @@
 package utils;
 
-public class NodeTuple implements Comparable<NodeTuple> {
-	private int layer, node;
+import org.apache.commons.math3.util.Pair;
+
+public class NodeTuple extends Pair<Integer, Integer> implements Comparable<NodeTuple>{
+
 	
-	public NodeTuple(ConnTuple connTuple) {
-		this.layer = connTuple.iLay();
-		this.node = connTuple.iNode();
+	public NodeTuple(Integer k, Integer v) {
+		super(k, v);
 	}
 	
 	public int layer() {
-		return layer;
+		return getKey();
 	}
 	
 	public int node() {
-		return node;
+		return getValue();
 	}
 
-	boolean equals(NodeTuple other) {
-		return this.layer == other.layer &&
-				this.node == other.node;
-	}
-	
-	public int hashCode() {
-		return (Integer.toString(layer) + "." +
-				Integer.toString(node)).hashCode();
-	}
-
+	@Override
 	public int compareTo(NodeTuple other) {
-		if (this.layer != other.layer) return this.layer - other.layer;
-		else return this.node - other.node;
+		if (layer() != other.layer()) return layer() - other.layer();
+		else return node() - other.node();
 	}
+
+
 
 }

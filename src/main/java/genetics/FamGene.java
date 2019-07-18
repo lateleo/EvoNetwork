@@ -1,24 +1,40 @@
 package genetics;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import utils.RNG;
 
 public class FamGene extends Gene {
 	double xprLevel, weight;
-	long signFilter;
+	int signFilter;
 	
 	Mutation xprMutation = (gene) -> ((FamGene) gene).xprLevel += RNG.getShiftDouble();
 	Mutation weightMutation = (gene) -> ((FamGene) gene).weight += RNG.getShiftDouble();
 	Mutation filterMutation = (gene) -> {
 		FamGene mutant = (FamGene) gene;
-		mutant.signFilter = mutant.signFilter ^ (long) Math.pow(2, RNG.getLongBit());
+		mutant.signFilter = mutant.signFilter ^ (int) Math.pow(2, RNG.getBit());
 	};
 	
 	
-	public FamGene(double xprLevel, double weight, long signFilter) {
+	public FamGene(double xprLevel, double weight, int signFilter) {
 		this.xprLevel = xprLevel;
 		this.weight = weight;
 		this.signFilter = signFilter;
+	}
+	
+	public static ArrayList<Gene> generate(int fams, int diploidNum, int signBits) {
+		ArrayList<Gene> genes = new ArrayList<>();
+		int geneNum = fams*diploidNum;
+		double xprShift = 1;
+		while (genes.size() < geneNum) {
+			int[] bits = new int[signBits];
+			for (int i = 0; i < bits.length; i++) bits[i] = RNG.getBit();
+			int sign = Arrays.stream(bits).sum();
+			genes.add(new FamGene(RNG.getGauss() + xprShift, RNG.getGauss(), sign));
+		}
+		return genes;
 	}
 
 	@Override

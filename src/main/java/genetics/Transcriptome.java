@@ -2,15 +2,19 @@ package genetics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
+import java.util.TreeSet;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import org.apache.commons.math3.util.Pair;
 
 import ecology.Species;
 import utils.ConnTuple;
@@ -22,11 +26,10 @@ public class Transcriptome {
 	private Map<Integer,Map<Integer,Double>> laysAndNodes = new TreeMap<>();
 	private Map<ConnTuple,Double> connWeights = new Hashtable<>();
 	
-	
 	/*
 	 * IMPORTANT: This constructor should *only* be called by the Genome.transcribe() method.
 	 * This will ensure that all the various Maps and Lists that are created in the process below
-	 * are discarded when garbage collection comes around, and only the 
+	 * are discarded when garbage collection comes around, and only the instance fields stick around.
 	 */
 	Transcriptome(Genome genome) {
 		List<LayerGene> layGenes = new ArrayList<LayerGene>();
@@ -66,8 +69,13 @@ public class Transcriptome {
 		TreeMap<Integer,List<Double>> layerMap = new TreeMap<Integer,List<Double>>();
 		for (LayerGene gene : layGenes) {
 			int layNum = (int) gene.layerNum;
-			if (layerMap.containsKey(layNum)) layerMap.get(layNum).add(gene.xprLevel);
-			else layerMap.put(layNum, Arrays.asList(gene.xprLevel));
+			if (layerMap.containsKey(layNum)) {
+				List<Double> list = layerMap.get(layNum);
+				list.add(gene.xprLevel);
+			}
+			else {
+				layerMap.put(layNum, new ArrayList<>(Arrays.asList(gene.xprLevel)));
+			}
 		}
 		layerMap.entrySet().removeIf((entry) -> entry.getValue().stream().mapToDouble((d) -> d).sum() < 0);
 		layerMap.put(-1, null);
@@ -119,7 +127,7 @@ public class Transcriptome {
 			if (!validTuple(tuple)) continue;
 			Triplet triplet = new Triplet(gene);
 			if (tripletMap.containsKey(tuple)) tripletMap.get(tuple).add(triplet);
-			else tripletMap.put(tuple, Arrays.asList(triplet));
+			else tripletMap.put(tuple, new ArrayList<>(Arrays.asList(triplet)));
 		}
 		Predicate<Map.Entry<ConnTuple, List<Triplet>>> filter = (entry) -> {
 			boolean valid = entry.getValue().stream().mapToDouble((trip) -> trip.xprLevel).sum() > 0;
@@ -154,52 +162,66 @@ public class Transcriptome {
 
 //	Orphan Stuff
 	private void removeOrphans(NavigableSet<ConnTuple> tuples, TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap) {
-		Predicate<Integer> layFilter = (layNum) -> {
-			TreeMap<Integer,TupleSet> layer = tupleMap.get(layNum);
-			Predicate<Map.Entry<Integer, TupleSet>> nodeFilter = (nodeEntry)-> {
-				int nodeNum = nodeEntry.getKey();
-				TupleSet nodeTuples = nodeEntry.getValue();
-				boolean orphanNode = nodeTuples.isOrphan(tuples);
-				if (orphanNode) laysAndNodes.get(layNum).remove(nodeNum);
-				return orphanNode;
-			};
-			layer.entrySet().removeIf(nodeFilter);
-			boolean orphanLayer = layer.isEmpty();
-			if (orphanLayer) laysAndNodes.remove(layNum);
-			return orphanLayer;
-		};
-		tupleMap.navigableKeySet().removeIf(layFilter);
-		tupleMap.descendingKeySet().removeIf(layFilter);
+		tupleMap.entrySet().removeIf(entry -> {
+			int layNum = entry.getKey();
+			if (layNum == -1) return false;
+			return isLayerOrphan(tuples, layNum, tupleMap.get(layNum), true);
+		});
+		tupleMap.descendingMap().entrySet().removeIf(entry -> {
+			int layNum = entry.getKey();
+			if (layNum == -1) return false;
+			return isLayerOrphan(tuples, layNum, tupleMap.get(layNum), false);
+		});
+		for (TupleSet set : tupleMap.get(-1).values()) set.clean(tuples);
+	}
+	
+	private boolean isLayerOrphan(NavigableSet<ConnTuple> tuples, int layNum, TreeMap<Integer,TupleSet> tupleMap, boolean direction) {
+		tupleMap.entrySet().removeIf((entry) -> {
+			TupleSet tupleSet = entry.getValue();
+			boolean isNodeOrphan = isNodeOrphan(tuples, tupleSet, direction);
+			if (isNodeOrphan){
+				Set<ConnTuple> otherSet = (direction)? tupleSet.downConns : tupleSet.upConns;
+				tuples.removeIf(tuple -> otherSet.contains(tuple));
+			}
+			return isNodeOrphan;
+		});
+		return tupleMap.isEmpty();
+	}
+	
+	private boolean isNodeOrphan(NavigableSet<ConnTuple> tuples, TupleSet tupleSet, boolean direction) {
+		tupleSet.clean(tuples);
+		Set<ConnTuple> set = (direction)? tupleSet.upConns : tupleSet.downConns;
+		return set.isEmpty();
 	}
 	
 //	FamGene Stuff
 	private void parseFamGenes(List<FamGene> famGenes, Map<ConnTuple,List<Triplet>> tripletMap) {
-		Map<Long,PheneDummy> pheneMap = fillFams(famGenes);
-		Map<Long,Double> famWeights = filterFams(pheneMap);
+		Map<Integer,PheneDummy> pheneMap = fillFams(famGenes);
+		Map<Integer,Double> famWeights = filterFams(pheneMap);
 		List<Triplet> tripletList = new ArrayList<Triplet>();
 		tripletMap.values().forEach((list)-> tripletList.addAll(list));
 		applyFamWeights(famWeights, tripletList);
 		combineTriplets(tripletMap);
 	}
 	
-	private Map<Long,PheneDummy> fillFams(List<FamGene> famGenes) {
-		Map<Long,PheneDummy> pheneMap = new Hashtable<Long,PheneDummy>();
+	private Map<Integer,PheneDummy> fillFams(List<FamGene> famGenes) {
+		Map<Integer,PheneDummy> pheneMap = new Hashtable<Integer,PheneDummy>();
 		for (FamGene gene : famGenes) {
-			long sign = gene.signFilter;
+			int sign = gene.signFilter;
 			if (!pheneMap.containsKey(sign)) pheneMap.put(sign, new PheneDummy());
 			pheneMap.get(sign).addGene(gene);
 		}
 		return pheneMap;
 	}
 	
-	private Map<Long,Double> filterFams(Map<Long,PheneDummy> pheneMap) {
-		Map<Long,Double> famWeights = new Hashtable<Long,Double>();
+	private Map<Integer,Double> filterFams(Map<Integer,PheneDummy> pheneMap) {
+		Map<Integer,Double> famWeights = new Hashtable<Integer,Double>();
 		pheneMap.entrySet().removeIf((entry)-> entry.getValue().getXprSum() < 0);
 		pheneMap.forEach((sign, dummy) -> famWeights.put(sign, dummy.getWeightedAvg()));
 		return famWeights;
 	}
 	
-	private void applyFamWeights(Map<Long,Double> famWeights, List<Triplet> tripletList) {
+	private void applyFamWeights(Map<Integer,Double> famWeights, List<Triplet> tripletList) {
 		famWeights.forEach((signFilter, weight) -> {
 			List<Triplet> matches = new ArrayList<Triplet>(tripletList);
 			matches.removeIf((triplet) -> triplet.match(signFilter));
@@ -220,34 +242,31 @@ public class Transcriptome {
 //	Used briefly in parsing NodeGenes.
 	private class PheneDummy {
 		List<Double> xprVals = new ArrayList<Double>();
-		List<double[]> valPairs = new ArrayList<double[]>();
-		Double xprSum = null;
+		List<Pair<Double, Double>> valPairs = new ArrayList<Pair<Double,Double>>();
 		
 		void addGene(NodeGene gene) {
 			xprVals.add(gene.xprLevel);
-			valPairs.add(new double[]{gene.xprLevel, gene.bias});
+			valPairs.add(new Pair<Double,Double>(gene.xprLevel, gene.bias));
 		}
 		
 		void addGene(FamGene gene) {
 			xprVals.add(gene.xprLevel);
-			valPairs.add(new double[]{gene.xprLevel, gene.weight});
+			valPairs.add(new Pair<Double,Double>(gene.xprLevel, gene.weight));
 		}
 		
 		double getXprSum() {
-			if (xprSum.equals(null)) xprSum = xprVals.stream().mapToDouble((d) -> d).sum();
-			return xprSum;
+			return xprVals.stream().mapToDouble((d) -> d).sum();
 		}
 		
 		double getWeightedAvg() {
-			return valPairs.stream().mapToDouble((a) -> a[0]*a[1]).sum()/getXprSum();
+			return valPairs.stream().mapToDouble((pair) -> pair.getFirst()*pair.getSecond()).sum()/getXprSum();
 		}
 	}
 	
 //	Used in ConnGene and FamGene parsing, eventually replaced by single weight value
 	private class Triplet {
-		long sign;
+		int sign;
 		double weight, xprLevel;
-		Double finalWeight = null;
 		
 		Triplet(ConnGene gene) {
 			this.sign = gene.signature;
@@ -260,19 +279,18 @@ public class Transcriptome {
 		}
 		
 		double getFinalWeight() {
-			finalWeight = weight*xprLevel;
-			return finalWeight;
+			return weight*xprLevel;
 		}
 		
-		boolean match(long signFilter) {
+		boolean match(int signFilter) {
 			return (sign & signFilter) > 0L;
 		}
 	}
 
 //	Used for Orphan removal, but created/added to in earlier steps for efficiency
 	private class TupleSet {
-		Set<ConnTuple> upConns;
-		Set<ConnTuple> downConns;
+		Set<ConnTuple> upConns = new HashSet<>();
+		Set<ConnTuple> downConns = new HashSet<>();
 		
 		void addUp(ConnTuple tuple) {
 			upConns.add(tuple);
@@ -282,15 +300,8 @@ public class Transcriptome {
 			upConns.add(tuple);
 		}
 		
-		boolean isOrphan(Set<ConnTuple> tuples) {
-			upConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.oLay() != -1);
-			downConns.removeIf((tuple)-> !tuples.contains(tuple) && tuple.iLay() != 0);
-			boolean orphan = upConns.isEmpty() || downConns.isEmpty();
-			if (orphan) tuples.removeIf((tuple) -> upConns.contains(tuple) || downConns.contains(tuple));
-			return orphan;
+		void clean(Set<ConnTuple> tuples) {
+			upConns.removeIf(tuple -> !tuples.contains(tuple));
 		}
 	}
-	
-
-	
 }

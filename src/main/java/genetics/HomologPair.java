@@ -7,7 +7,7 @@ import ecology.Species;
 import utils.RNG;
 
 public class HomologPair {
-	private static double slipChance = Species.slipChance;
+	private static double slipFactor = Species.slipFactor;
 	int chromNum;
 	Chromosome a;
 	Chromosome b;
@@ -16,6 +16,7 @@ public class HomologPair {
 		this.a = a;
 		this.b = b;
 		this.chromNum = a.chromNum();
+
 	}
 	
 	public HomologPair copy() {
@@ -33,15 +34,16 @@ public class HomologPair {
 		if (randIndex < 0) {
 			offsetA += (a.getHead()>minHead)? 0 - RNG.getIntMax(1+a.getHead()-minHead) : 0;
 			offsetB += (b.getHead()>minHead)? 0 - RNG.getIntMax(1+b.getHead()-minHead) : 0;
-			slip = (int) RNG.getBoundGauss(0-newChrom.getHead()-randIndex, 0-randIndex, slipChance);
+			slip = (int) RNG.getBoundGauss(0-newChrom.getHead()-randIndex, 0-randIndex, slipFactor);
 		} else {
 			offsetA += (a.getTail()>minTail)? RNG.getIntMax(1+a.getTail()-minTail) : 0;
 			offsetB += (b.getTail()>minTail)? RNG.getIntMax(1+b.getTail()-minTail) : 0;
-			slip = (int) RNG.getBoundGauss(0-randIndex, newChrom.getTail()-randIndex, slipChance);
+			slip = (int) RNG.getBoundGauss(0-randIndex, newChrom.getTail()-randIndex, slipFactor);
 		}
 		List<Gene> subSequence = (whichChrom)? b.subSequence(offsetB) : a.subSequence(offsetA);
 		newChrom.recombine(((whichChrom)?offsetA:offsetB) + slip, subSequence);
-		return newChrom.mutateAll();
+		newChrom = newChrom.mutateAll();
+		return newChrom;
 	}
 	
 	List<Gene> getGenes() {

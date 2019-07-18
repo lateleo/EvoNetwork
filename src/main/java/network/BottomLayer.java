@@ -3,7 +3,7 @@ package network;
 import data.MnistImage;
 import ecology.Species;
 
-public class BottomLayer extends Layer {
+public class BottomLayer extends AbstractLayer {
 	private static MnistImage[] images = Species.images;
 	private static int imageCount = images.length;
 	private static int nodeNum = Species.bottomNodes;
@@ -19,15 +19,16 @@ public class BottomLayer extends Layer {
 
 	@Override
 	public void run() {
+		currentImage = images[currentIndex];
 		nodes.values().forEach(node -> node.run());
 		currentIndex++;
 	}
 	
-	boolean complete() {
+	boolean allImagesComplete() {
 		return currentIndex == imageCount;
 	}
 	
-	private class BottomNode extends Node {
+	private class BottomNode extends AbstractNode {
 		private BottomLayer layer;
 		private int nodeNum;
 
