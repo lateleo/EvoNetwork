@@ -9,16 +9,19 @@ import utils.RNG;
 
 public class NodeGene extends Gene {
 	private static int topNodes = Species.topNodes;
+	private static double mMag = Species.mutationMagnitude;
 	double xprLevel, layerNum, nodeNum, bias;
-	Mutation xprMutation = (mutant) -> ((NodeGene) mutant).xprLevel += RNG.getShiftDouble();
+	Mutation xprMutation = (mutant) -> ((NodeGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
 	Mutation layNumMutation = (gene) -> {
 		NodeGene mutant = (NodeGene) gene;
-		mutant.layerNum = Math.max(-1.0, mutant.layerNum + RNG.getShiftDouble());
+		mutant.layerNum = Math.max(-1.0, mutant.layerNum + RNG.getShiftDouble()*mMag);
 	};
-	Mutation NodeNumMutation = (gene) -> {
+	Mutation nodeNumMutation = (gene) -> {
 		NodeGene mutant = (NodeGene) gene;
-		mutant.nodeNum = Math.max(0.0, mutant.nodeNum + RNG.getShiftDouble());
+		mutant.nodeNum = Math.max(0.0, mutant.nodeNum + RNG.getShiftDouble()*mMag);
 	};
+	Mutation biasMutation = (mutant) -> ((NodeGene) mutant).bias += RNG.getGauss()*mMag;
+	 
 	
 	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias) {
 		this.xprLevel = xprLevel;
@@ -29,7 +32,7 @@ public class NodeGene extends Gene {
 	
 	public static ArrayList<Gene> generate(int layers, int nodes, int diploidNum) {
 		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = 3*layers*nodes*diploidNum;
+		int geneNum = layers*nodes*diploidNum/2;
 		double laySigma = layers/2.5;
 		double nodeSigma = nodes/2.0;
 		double xprShift = 2/diploidNum;
@@ -50,8 +53,8 @@ public class NodeGene extends Gene {
 	}
 
 	@Override
-	public Gene mutate() {
-		return mutate(Arrays.asList(xprMutation, layNumMutation, NodeNumMutation));
+	public Gene mutate(double rand) {
+		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, biasMutation}, rand);
 	}
 
 }

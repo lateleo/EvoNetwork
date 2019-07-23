@@ -5,14 +5,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ecology.Species;
 import utils.RNG;
 
 public class LayerGene extends Gene {
+	private static double mMag = Species.mutationMagnitude;
 	double xprLevel, layerNum;
-	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble();
+	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
 	Mutation layNumMutation = (gene) -> {
 		LayerGene mutant = (LayerGene) gene;
-		mutant.layerNum = Math.max(1.0, mutant.layerNum + RNG.getShiftDouble());
+		mutant.layerNum = Math.max(1.0, mutant.layerNum + RNG.getShiftDouble()*mMag);
 	};
 	
 	public LayerGene(double xprLevel, double layerNum) {
@@ -22,7 +24,7 @@ public class LayerGene extends Gene {
 	
 	public static ArrayList<Gene> generate(int layers, int diploidNum){
 		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = 2*layers*diploidNum;
+		int geneNum = layers*diploidNum/2;
 		double sigma = layers/2.0;
 		double xprShift = 2/diploidNum;
 		while (genes.size() < 4*geneNum) {
@@ -38,8 +40,8 @@ public class LayerGene extends Gene {
 	}
 
 	@Override
-	public Gene mutate() {
-		return mutate(Arrays.asList(xprMutation, layNumMutation));
+	public Gene mutate(double rand) {
+		return mutate(new Mutation[] {xprMutation, layNumMutation}, rand);
 	}
 	
 	public String toString() {

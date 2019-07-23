@@ -15,15 +15,12 @@ public abstract class Gene {
 
 	protected abstract Gene clone();
 
-	public abstract Gene mutate();
-	
-	protected Gene mutate(List<Mutation> mutations) {
-		double rand = RNG.getDouble();
-		if (rand > mutationRate) return this;
-		double bigRand = rand*invMutationRate;
-		int index = (int) bigRand*mutations.size();
+	public abstract Gene mutate(double rand);
+		
+	protected Gene mutate(Mutation[] mutations, double rand) {
+		int index = (int) rand*mutations.length;
 		Gene mutant = clone();
-		mutations.get(index).getMutant(mutant);
+		mutations[index].getMutant(mutant);
 		return mutant;
 	}
 	

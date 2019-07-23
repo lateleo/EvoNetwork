@@ -26,10 +26,10 @@ public class Genome extends ArrayList<HomologPair> {
 	}
 
 	
-	public Map<Integer,Chromosome> getHaploidSet() {
+	public Map<Integer,Chromosome> getHaploidSet(boolean forcedMutation) {
 		Map<Integer,Chromosome> haploidSet = new Hashtable<Integer,Chromosome>();
 		for (HomologPair pair : this) {
-			haploidSet.put(pair.chromNum, pair.getRecombinant());
+			haploidSet.put(pair.chromNum, pair.getRecombinant(forcedMutation));
 		}
 		return haploidSet;
 	}

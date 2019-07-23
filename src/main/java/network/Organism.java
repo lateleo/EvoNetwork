@@ -17,8 +17,9 @@ public class Organism {
 		size = genome.size();
 	}
 	
-	public Organism(Organism a, Organism b) {
-		this.genome = new Genome(a.genome.getHaploidSet(), b.genome.getHaploidSet());
+	public Organism(Organism a, Organism b, boolean forcedMutation) {
+		this.genome = new Genome(a.genome.getHaploidSet(forcedMutation), b.genome.getHaploidSet(forcedMutation));
+		size = genome.size();
 	}
 	
 	public double getFitness() {

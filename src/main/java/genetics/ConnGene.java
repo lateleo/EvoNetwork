@@ -10,21 +10,22 @@ import utils.RNG;
 public class ConnGene extends Gene {
 	private static int bottomNodes = Species.bottomNodes;
 	private static int topNodes = Species.topNodes;
+	private static double mMag = Species.mutationMagnitude;
 	public double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
 	int signature;
 	
-	Mutation xprMutation = (gene) -> ((ConnGene) gene).xprLevel += RNG.getShiftDouble();
+	Mutation xprMutation = (gene) -> ((ConnGene) gene).xprLevel += RNG.getShiftDouble()*mMag;
 	Mutation layNumMutation = (gene) -> {
 		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inLayNum = Math.max(0.0, mutant.inLayNum + RNG.getShiftDouble());
-		else mutant.outLayNum = Math.max(-1.0, mutant.outLayNum + RNG.getShiftDouble());
+		if (RNG.getBoolean()) mutant.inLayNum = Math.max(0.0, mutant.inLayNum + RNG.getShiftDouble()*mMag);
+		else mutant.outLayNum = Math.max(-1.0, mutant.outLayNum + RNG.getShiftDouble()*mMag);
 	};
 	Mutation nodeNumMutation = (gene) -> {
 		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inNodeNum = Math.max(0.0, mutant.inNodeNum + RNG.getShiftDouble());
-		else mutant.outNodeNum = Math.max(0.0, mutant.outNodeNum + RNG.getShiftDouble());		
+		if (RNG.getBoolean()) mutant.inNodeNum = Math.max(0.0, mutant.inNodeNum + RNG.getShiftDouble()*mMag);
+		else mutant.outNodeNum = Math.max(0.0, mutant.outNodeNum + RNG.getShiftDouble()*mMag);		
 	};
-	Mutation weightMutation = (gene) -> ((ConnGene) gene).weight += RNG.getShiftDouble();
+	Mutation weightMutation = (gene) -> ((ConnGene) gene).weight *= 1 + RNG.getGauss()*mMag;
 	Mutation signMutation = (gene) -> {
 		ConnGene mutant = (ConnGene) gene;
 		mutant.signature = mutant.signature ^ (int) Math.pow(2, RNG.getBit());
@@ -43,7 +44,7 @@ public class ConnGene extends Gene {
 	
 	public static ArrayList<Gene> generate(int layers, int nodes, int conns, int diploidNum, int signBits) {
 		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = layers*nodes*conns;
+		int geneNum = conns;
 		double laySigma = layers/2.5;
 		double nodeSigma = nodes/2.0;
 		double xprShift = 1/diploidNum;
@@ -89,8 +90,8 @@ public class ConnGene extends Gene {
 	}
 
 	@Override
-	public Gene mutate() {
-		return mutate(Arrays.asList(xprMutation, layNumMutation, nodeNumMutation, weightMutation, signMutation));
+	public Gene mutate(double rand) {
+		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, weightMutation}, rand);
 	}
 
 }

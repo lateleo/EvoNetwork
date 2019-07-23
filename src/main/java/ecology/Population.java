@@ -3,6 +3,7 @@ package ecology;
 import java.util.ArrayList;
 import java.util.List;
 
+import network.BottomLayer;
 import network.Organism;
 import utils.RNG;
 import utils.Stats;
@@ -10,94 +11,107 @@ import utils.Stats;
 public class Population {
 	private static int populationSize = Species.populationSize;
 	private static int simulatedGenerations = Species.simulatedGenerations;
-	
+
 	List<Organism> adults = new ArrayList<Organism>();
 	List<Organism> youth = new ArrayList<Organism>();
-	
+
 	public Population(List<Organism> orgs) {
 		adults = orgs;
 	}
-	
+
 	public void simulateGenerations() {
 		for (int gen = 0; gen < simulatedGenerations; gen++) {
-			while (adults.size() > populationSize/2) {
+//			System.out.println("Gen " + gen + "...");
+			while (adults.size() > populationSize / 2) {
 				adults.remove(RNG.getIntMax(adults.size()));
 			}
-			while (adults.size() + youth.size() < populationSize) {
-				int a = RNG.getIntMax(adults.size());
-				int b;
-				do {
-					b = RNG.getIntMax(adults.size());
-				} while (b == a);
-				youth.add(new Organism(adults.get(a), adults.get(b)));
-			}
+			repopulate(true);
 			adults.addAll(youth);
 			youth.clear();
 		}
 		youth.addAll(adults);
 		adults.clear();
 	}
-	
+
 	public void iterate(double target) {
 		int gen = 1;
 		double meanAccuracy = 0.0;
 		while (meanAccuracy < target) {
 			runGeneration();
-			adults.addAll(youth);
-			youth.clear();
-			adults.forEach(org -> System.out.println(org.getNetwork().getAccuracy()));
-			System.out.println("Gen " + gen + ", Mean: " + meanAccuracy);
-			if (meanAccuracy < target) getNextGeneration();
+			meanAccuracy = getMeanAccuracy();
+
+//			System.out.println("Gen " + gen + ": " + meanAccuracy);
+			getNextGeneration();
 			gen++;
 		}
 	}
 	
+	private void buildNetworks() {
+//		System.out.println("Building Networks...");
+		youth.forEach(org -> org.buildNetwork());
+	}
+	
+	private double getMeanAccuracy() {
+		double meanAccuracy = 0.0;
+		for (Organism org : adults) {
+			meanAccuracy += org.getNetwork().getAccuracy();
+			
+//			System.out.println(org.size() + ", " + org.getNetwork().getAccuracy());
+		}
+		meanAccuracy /= populationSize;
+		System.out.println(meanAccuracy);
+		return meanAccuracy;
+	}
+
+	private void runGeneration() {
+		buildNetworks();
+		adults.addAll(youth);
+		youth.clear();
+		BottomLayer.nextEpoch();
+//		System.out.println("Running Epoch...");
+		adults.forEach(org -> org.getNetwork().run());
+	}
+
 	private void getNextGeneration() {
 		updateFitness();
 		sortByFitness();
 		filter();
-		repopulate();
+		repopulate(false);
 	}
-	
-	private void runGeneration() {
-		youth.forEach(org -> org.buildNetwork());
-		youth.forEach(org -> org.getNetwork().run());
-	}
-	
+
 	private void updateFitness() {
 		double mean = adults.stream().mapToInt(a -> a.size()).average().getAsDouble();
 		adults.forEach(a -> a.setFitness(mean));
 	}
-	
+
 	private void sortByFitness() {
-		adults.sort((a,b)-> {
+		adults.sort((a, b) -> {
 			double delta = b.getFitness() - a.getFitness();
-			return (int)(Math.signum(delta)*Math.ceil(Math.abs(delta)));
+			return (int) (Math.signum(delta) * Math.ceil(Math.abs(delta)));
 		});
 	}
-	
+
 	private void filter() {
-		List<Organism> survivors = new ArrayList<Organism>();
-		int size = adults.size();
-		int i = 0;
-		for (Organism adult : adults) {
-			if (RNG.getIntMax(size) >= i) survivors.add(adult);
-			i++;
+		List<Organism> survivors = new ArrayList<Organism>(adults);
+		while (survivors.size() > adults.size()/2) {
+			int a = RNG.getIntMax(survivors.size());
+			int b = RNG.getIntMax(survivors.size());
+			if (b < a) survivors.remove(a);
 		}
-		System.out.println(adults.size() - survivors.size() + " Organisms removed.");
 		adults.retainAll(survivors);
 	}
 
-	private void repopulate() {
+	private void repopulate(boolean forcedMutation) {
 		while (adults.size() + youth.size() < populationSize) {
-			int a = RNG.getIntLowBias(adults.size());
+			int a = RNG.getIntMax(adults.size());
 			int b;
 			do {
-				b = RNG.getIntLowBias(adults.size());
+				b = RNG.getIntMax(adults.size());
 			} while (b == a);
-			youth.add(new Organism(adults.get(a), adults.get(b)));
+			Organism newborn = new Organism(adults.get(a), adults.get(b), forcedMutation);
+//			System.out.println(newborn.size());
+			youth.add(newborn);
 		}
 	}
-
 
 }

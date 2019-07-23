@@ -20,6 +20,10 @@ public class RNG {
 		return ThreadLocalRandom.current().nextDouble(0.0, Math.nextUp(1.0));
 	}
 	
+	public static double getExclusiveDouble() {
+		return ThreadLocalRandom.current().nextDouble();
+	}
+	
 	public static double getPsuedoGauss(double bound) {
 		return (getShiftDouble()+getShiftDouble()+getShiftDouble()+getShiftDouble())*bound/4.0;
 	}

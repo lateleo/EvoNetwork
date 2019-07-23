@@ -30,30 +30,41 @@ import utils.RNG;
  */
 public abstract class Species {
 	public static MnistDataReader mnistReader;
-	public static MnistImage[] images;
+	public static MnistImage[][] images;
 	public static int bottomNodes;
 	public static int topNodes;
 
 	public static double mutationRate;
+	public static double mutationMagnitude;
 	public static double slipFactor;
 
 	public static int populationSize;
 	public static int simulatedGenerations;
 
-	public static void initialize(String dataset) {
+	public static void initialize(String dataset, int epochs) {
 		mnistReader = new MnistDataReader(dataset);
 		try {
-			images = mnistReader.readTrainingData();
+			MnistImage[] allImages = mnistReader.readTrainingData();
+			int imgCount = allImages.length;
+			int epochSize = imgCount/epochs;
+			MnistImage[][] sortedImages = new MnistImage[epochs][epochSize];
+			for (int i = 0; i < imgCount; i++) {
+				int a = i / epochSize;
+				int b = i % epochSize;
+				sortedImages[a][b] = allImages[i];
+			}
+			images = sortedImages;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public static Population createPopulation(double mRate, double slip, int diploidNum, int layers, int nodes,
+	public static Population createPopulation(double mRate, double mMag, double slip, int diploidNum, int layers, int nodes,
 			int conns, int signBits, int fams, int popSize, int simGens) {
 
 		mutationRate = mRate;
+		mutationMagnitude = mMag;
 		slipFactor = slip;
 		populationSize = popSize;
 		simulatedGenerations = simGens;

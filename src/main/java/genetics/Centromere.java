@@ -17,7 +17,7 @@ public class Centromere extends Gene {
 	}
 
 	@Override
-	public Gene mutate() {
+	public Gene mutate(double rand) {
 		return this;
 	}
 
