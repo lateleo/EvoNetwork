@@ -30,5 +30,10 @@ public class TopLayer extends Layer {
 		double sum = nodes.values().stream().mapToDouble(d->d.output).sum();
 		nodes.forEach((nodeNum,node)-> outputs[nodeNum] = node.output/sum);
 	}
+	
+	@Override
+	public void backProp() {
+		
+	}
 
 }

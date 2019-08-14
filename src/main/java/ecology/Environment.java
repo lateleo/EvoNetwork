@@ -16,11 +16,11 @@ public class Environment {
 		int fams = 0;
 		int popSize = 10;
 		int simGens = 20;
-		int epochs = 6;
+		int batches = 600;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();
-		Species.initialize("fashion", epochs);
+		Species.initialize("original", batches);
 		Population pop = Species.createPopulation(mRate, mMag, slip, diploidNum, layers, nodes, conns, signBits, fams, popSize, simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();
@@ -38,8 +38,9 @@ public class Environment {
 			hours++;
 			minutes -= 60;
 		}
+		System.out.println("Training Done: " + hours + "h" + minutes + "m" + seconds + "s");
+		pop.testGeneration();
 		System.out.println("Done.");
-		System.out.println(hours + "h" + minutes + "m" + seconds + "s");
 	}
 
 }

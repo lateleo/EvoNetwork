@@ -20,6 +20,10 @@ public class Node extends AbstractNode {
 		output = Math.max(0.0, output + bias);
 	}
 	
+	public void backProp() {
+		
+	}
+	
 	
 	
 }

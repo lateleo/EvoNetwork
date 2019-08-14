@@ -31,6 +31,7 @@ import utils.RNG;
 public abstract class Species {
 	public static MnistDataReader mnistReader;
 	public static MnistImage[][] images;
+	public static MnistImage[] testImages;
 	public static int bottomNodes;
 	public static int topNodes;
 
@@ -41,16 +42,17 @@ public abstract class Species {
 	public static int populationSize;
 	public static int simulatedGenerations;
 
-	public static void initialize(String dataset, int epochs) {
+	public static void initialize(String dataset, int batches) {
 		mnistReader = new MnistDataReader(dataset);
 		try {
+			testImages = mnistReader.readTestingData();
 			MnistImage[] allImages = mnistReader.readTrainingData();
 			int imgCount = allImages.length;
-			int epochSize = imgCount/epochs;
-			MnistImage[][] sortedImages = new MnistImage[epochs][epochSize];
+			int batchSize = imgCount/batches;
+			MnistImage[][] sortedImages = new MnistImage[batches][batchSize];
 			for (int i = 0; i < imgCount; i++) {
-				int a = i / epochSize;
-				int b = i % epochSize;
+				int a = i / batchSize;
+				int b = i % batchSize;
 				sortedImages[a][b] = allImages[i];
 			}
 			images = sortedImages;

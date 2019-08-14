@@ -41,9 +41,14 @@ public class Layer extends AbstractLayer {
 	}
 	
 
-	
+	@Override
 	public void run() {
 		normalize();
 		nodes.values().forEach(node -> node.run());
+	}
+	
+	@Override
+	public void backProp() {
+		
 	}
 }

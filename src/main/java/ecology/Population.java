@@ -41,9 +41,17 @@ public class Population {
 			meanAccuracy = getMeanAccuracy();
 
 //			System.out.println("Gen " + gen + ": " + meanAccuracy);
-			getNextGeneration();
-			gen++;
+			if (meanAccuracy < target) {
+				getNextGeneration();
+				gen++;				
+			}
 		}
+	}
+	
+	public void testGeneration() {
+		BottomLayer.testBatch();
+		adults.forEach(org -> org.getNetwork().run());
+		getMeanAccuracy();
 	}
 	
 	private void buildNetworks() {
@@ -67,7 +75,7 @@ public class Population {
 		buildNetworks();
 		adults.addAll(youth);
 		youth.clear();
-		BottomLayer.nextEpoch();
+		BottomLayer.nextBatch();
 //		System.out.println("Running Epoch...");
 		adults.forEach(org -> org.getNetwork().run());
 	}

@@ -5,9 +5,10 @@ import ecology.Species;
 
 public class BottomLayer extends AbstractLayer {
 	private static MnistImage[][] images = Species.images;
-	private static int imageCount = images[0].length;
 	private static int nodeNum = Species.bottomNodes;
-	private static int currentEpoch = 0;
+	private static MnistImage[] currentImageSet = images[0];
+	private static int currentBatchNum = 0;
+	private static int imageCount = currentImageSet.length;
 	MnistImage currentImage;
 	private int currentIndex = 0;
 
@@ -18,22 +19,32 @@ public class BottomLayer extends AbstractLayer {
 		}
 	}
 	
-	public static void nextEpoch() {
-		currentEpoch = (currentEpoch + 1) % images.length;
+	public static void nextBatch() {
+		currentBatchNum = (currentBatchNum + 1) % images.length;
+		currentImageSet = images[currentBatchNum];
+	}
+	
+	public static void testBatch() {
+		currentImageSet = Species.testImages;
 	}
 
 	@Override
 	public void run() {
-		currentImage = images[currentEpoch][currentIndex];
+		currentImage = currentImageSet[currentIndex];
 		nodes.values().forEach(node -> node.run());
 		currentIndex++;
+	}
+	
+	@Override
+	public void backProp() {
+		
 	}
 	
 	boolean allImagesComplete() {
 		return currentIndex == imageCount;
 	}
 	
-	public void resetIndex() {
+	public void resetImageIndex() {
 		currentIndex = 0;
 	}
 	
