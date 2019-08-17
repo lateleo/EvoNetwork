@@ -22,11 +22,8 @@ public class Node extends AbstractNode {
 	}
 	
 	public void backProp(float learning_rate) {
-		//Step Function 
-		if (uppernodeoutput > 0) {
-			upperweights.forEach((key,value) -> if (uppernodeoutput > 0) { 
-					(derivative += value*uppernodederivative);
-					}
+		upperweights.forEach((key,value) -> if (uppernodeoutput > 0) {
+			derivative += value*uppernodederivative;
 			}
 		weights.forEach((key, value) -> value += learning_rate*output*derivative);
 		bias += learning_rate*derivative;
