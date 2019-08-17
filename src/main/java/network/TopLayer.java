@@ -32,8 +32,8 @@ public class TopLayer extends Layer {
 	}
 	
 	@Override
-	public void backProp() {
-		
+	public void backProp(float learning_rate) {
+		nodes.forEach((nodeNum,node) -> node.backProp(learning_rate));
 	}
 
 }

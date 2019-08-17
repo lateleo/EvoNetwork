@@ -42,9 +42,9 @@ public class NeuralNetwork extends TreeMap<Integer, AbstractLayer> implements Ru
 //		accuracy /= imageCount;
 	}
 	
-	public void backProp() {
+	public void backProp(float learning_rate) {
 		descendingKeySet().forEach((layNum) -> {
-			if (layNum != 0) get(layNum).backProp();
+			if (layNum != 0) get(layNum).backProp(learning_rate);
 		});
 	}
 	
