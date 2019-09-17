@@ -8,6 +8,11 @@ import java.util.List;
 import ecology.Species;
 import utils.RNG;
 
+/*
+ * This class represents genes that determine the presence/absence of additional layers in a network.
+ * 'xprLevel' is a value that roughly represents how strongly a gene is expressed,
+ * and 'layerNum' indicates which layer the gene encodes.
+ */
 public class LayerGene extends Gene {
 	private static double mMag = Species.mutationMagnitude;
 	double xprLevel, layerNum;
@@ -22,6 +27,9 @@ public class LayerGene extends Gene {
 		this.layerNum = layerNum;
 	}
 	
+	/*
+	 *Method used at the beginning of the simulation to generate a list of genes.
+	 */
 	public static ArrayList<Gene> generate(int layers, int diploidNum){
 		ArrayList<Gene> genes = new ArrayList<>();
 		int geneNum = layers*diploidNum/2;

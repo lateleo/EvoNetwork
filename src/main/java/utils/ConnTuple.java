@@ -6,6 +6,8 @@ import genetics.ConnGene;
 
 /*
  * This class is used exclusively as a Key object for the 'conns' map that is produced by the Transcriptome.
+ * It is essentially a Pair of NodeTuples, which are themselves Pairs of Integers, with shortcut methods for ease of use.
+ * ConnTuples as a whole represent the starting point and ending point for a given connection.
  */
 public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<ConnTuple> {
 	

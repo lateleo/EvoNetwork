@@ -7,7 +7,10 @@ import java.util.function.UnaryOperator;
 import ecology.Species;
 import utils.RNG;
 
-
+/*
+ * An extension of the built-in ArrayList class, explicitly only containing Gene objects, including it's own Centromere,
+ * that has additional Gene-specific functionality.
+ */
 public class Chromosome extends ArrayList<Gene> {
 	private static final long serialVersionUID = 2471841169414882405L; //This is just because ArrayLists are Serializable
 	private Centromere centromere;
@@ -19,6 +22,9 @@ public class Chromosome extends ArrayList<Gene> {
 		add(centromere);
 	}
 	
+	/*
+	 * Used in the public 'copy' method.
+	 */
 	private Chromosome(Chromosome original) {
 		centromere = original.centromere;
 		addAll(original);
@@ -28,10 +34,16 @@ public class Chromosome extends ArrayList<Gene> {
 		return new Chromosome(this);
 	}
 	
+	/*
+	 * Used during intial genome creation, to speed up diversification and variety within the genome.
+	 */
 	public Chromosome copyAndMutate() {
 		return new Chromosome(this).mutateAll(true).mutateAll(true);
 	}
 	
+	/*
+	 * Used during initial genome creation, to create a full haploid set of initially empty (except for centromeres) chromosomes.
+	 */
 	public static Chromosome[] generate(int diploidNum) {
 		Chromosome[] chromosomes = new Chromosome[diploidNum];
 		for (int i = 0; i < diploidNum; i++) {
@@ -40,10 +52,16 @@ public class Chromosome extends ArrayList<Gene> {
 		return chromosomes;
 	}
 	
+	/*
+	 * Used in recombination to get the number of genes before the centromere.
+	 */
 	int getHead() {
 		return indexOf(centromere);
 	}
 	
+	/*
+	 * Used in recombination to get the number of genes after the centromere.
+	 */
 	int getTail() {
 		return size() - indexOf(centromere);
 	}
@@ -52,6 +70,9 @@ public class Chromosome extends ArrayList<Gene> {
 		return centromere.getChromosomeNum();
 	}
 	
+	/*
+	 * Used in recombination (and the above 'copyAndMutate' method) to mutate all genes contained in the chromosome.
+	 */
 	Chromosome mutateAll(boolean forced) {
 		UnaryOperator<Gene> mutator;
 		if (forced) {
@@ -67,7 +88,10 @@ public class Chromosome extends ArrayList<Gene> {
 		return this;
 	}
 
-	
+	/*
+	 * Replaces a particular subsequence of itself, determined by 'randOffset', with the provided 'subSequence'
+	 * from it's homolog.
+	 */
 	void recombine(int randOffset, List<Gene> subSequence) {
 		try {
 			if (randOffset < 0) {
@@ -87,6 +111,9 @@ public class Chromosome extends ArrayList<Gene> {
 
 	}
 	
+	/*
+	 * Used in recombination to give a subset of itself to it's homolog.
+	 */
 	List<Gene> subSequence(int randOffset) {
 		if (randOffset < 0) {
 			return subList(0, randOffset + getHead());
@@ -95,12 +122,18 @@ public class Chromosome extends ArrayList<Gene> {
 		}
 	}
 	
+	/*
+	 * Used in Transcription to get a list of all genes in the chromosome, except the centromere.
+	 */
 	List<Gene> getGenes() {
 		List<Gene> genes = new ArrayList<Gene>(this);
 		genes.remove(centromere);
 		return genes;
 	}
 
+	/*
+	 * Used during genome creation to randomly add genes to either the beginning or end of the ArrayList.
+	 */
 	public void append(Gene gene) {
 		if (RNG.getBoolean()) add(0,gene);
 		else add(gene);

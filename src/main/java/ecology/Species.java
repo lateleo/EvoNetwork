@@ -13,7 +13,6 @@ import data.MnistDataReader;
 import data.MnistImage;
 import genetics.Chromosome;
 import genetics.ConnGene;
-import genetics.FamGene;
 import genetics.Gene;
 import genetics.Genome;
 import genetics.HomologPair;
@@ -63,7 +62,7 @@ public abstract class Species {
 	}
 
 	public static Population createPopulation(double mRate, double mMag, double slip, int diploidNum, int layers, int nodes,
-			int conns, int signBits, int fams, int popSize, int simGens) {
+			int conns, int popSize, int simGens) {
 
 		mutationRate = mRate;
 		mutationMagnitude = mMag;
@@ -72,7 +71,7 @@ public abstract class Species {
 		simulatedGenerations = simGens;
 
 		System.out.println("Generating Genes...");
-		List<Gene> genes = generateGenes(diploidNum, layers, nodes, conns, signBits, fams);
+		List<Gene> genes = generateGenes(diploidNum, layers, nodes, conns);
 		System.out.println("Filling Chromosomes...");
 		Chromosome[] chromosomes = fillChromosomes(genes, diploidNum);
 		System.out.println("Generating Homologs...");
@@ -82,11 +81,10 @@ public abstract class Species {
 		return new Population(orgs);
 	}
 
-	public static List<Gene> generateGenes(int diploidNum, int layers, int nodes, int conns, int signBits, int fams) {
+	public static List<Gene> generateGenes(int diploidNum, int layers, int nodes, int conns) {
 		ArrayList<Gene> genes = LayerGene.generate(layers, diploidNum);
 		genes.addAll(NodeGene.generate(layers, nodes, diploidNum));
-		genes.addAll(ConnGene.generate(layers, nodes, conns, diploidNum, signBits));
-		genes.addAll(FamGene.generate(fams, diploidNum, signBits));
+		genes.addAll(ConnGene.generate(layers, nodes, conns, diploidNum));
 		Collections.shuffle(genes);
 		return genes;
 	}

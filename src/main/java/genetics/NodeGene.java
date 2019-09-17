@@ -7,6 +7,13 @@ import java.util.List;
 import ecology.Species;
 import utils.RNG;
 
+/*
+ * This class represents genes that determine the presence/absence and bias of nodes within a specific layer in a network.
+ * 'xprLevel' is a value that roughly represents how strongly a gene is expressed,
+ * 'layerNum' indicates the layer that the node is in,
+ * 'nodeNum' indicates the specific node within the layer,
+ * 'bias' indicates the node's individual bias.
+ */
 public class NodeGene extends Gene {
 	private static int topNodes = Species.topNodes;
 	private static double mMag = Species.mutationMagnitude;
@@ -30,6 +37,9 @@ public class NodeGene extends Gene {
 		this.bias = bias;
 	}
 	
+	/*
+	 *Method used at the beginning of the simulation to generate a list of genes.
+	 */
 	public static ArrayList<Gene> generate(int layers, int nodes, int diploidNum) {
 		ArrayList<Gene> genes = new ArrayList<>();
 		int geneNum = layers*nodes*diploidNum/2;

@@ -2,6 +2,9 @@ package utils;
 
 import org.apache.commons.math3.util.Pair;
 
+/*
+ * This class is used to represent "coordinates" of sorts for a given node.
+ */
 public class NodeTuple extends Pair<Integer, Integer> implements Comparable<NodeTuple>{
 
 	

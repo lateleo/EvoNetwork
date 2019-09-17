@@ -39,7 +39,7 @@ public class Organism {
 	}
 	
 	public void buildNetwork() {
-		Transcriptome xscript = genome.trasncribe();
+		Transcriptome xscript = genome.transcribe();
 		Map<Integer,Map<Integer,Double>> laysAndNodes = xscript.getLaysAndNodes();
 		Map<ConnTuple,Double> connWeights = xscript.getConnWeights();
 		network = new NeuralNetwork();
