@@ -15,11 +15,11 @@ public class Environment {
 		int conns = 800;
 		int popSize = 10;
 		int simGens = 20;
-		int batches = 1;
+		int batchSize = 6;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();
-		Species.initialize("original", batches);
+		Species.initialize("original", batchSize);
 		Population pop = Species.createPopulation(mRate, mMag, slip, lRate, diploidNum, layers, nodes, conns, popSize, simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();

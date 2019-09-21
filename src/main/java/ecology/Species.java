@@ -50,13 +50,13 @@ public abstract class Species {
 		else return int1 - int2;
 	};
 
-	public static void initialize(String dataset, int batches) {
+	public static void initialize(String dataset, int batchSize) {
 		mnistReader = new MnistDataReader(dataset);
 		try {
 			testImages = mnistReader.readTestingData();
 			MnistImage[] allImages = mnistReader.readTrainingData();
 			int imgCount = allImages.length;
-			int batchSize = imgCount/batches;
+			int batches = imgCount/batchSize;
 			MnistImage[][] sortedImages = new MnistImage[batches][batchSize];
 			for (int i = 0; i < imgCount; i++) {
 				int a = i / batchSize;

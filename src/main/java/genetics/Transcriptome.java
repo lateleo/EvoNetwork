@@ -38,8 +38,8 @@ public class Transcriptome {
 	
 	private static Set<NodeTuple> bottomTuples = getBottomTuples();
 	
-	private Map<Integer,Map<Integer,Double>> laysAndNodes = new TreeMap<>(comparator);
-	private Map<ConnTuple,Double> connWeights = new TreeMap<>();
+	private TreeMap<Integer, TreeMap<Integer, Double>> laysAndNodes = new TreeMap<>(comparator);
+	private TreeMap<ConnTuple, Double> connWeights = new TreeMap<>();
 	
 	public static Set<NodeTuple> getBottomTuples() {
 		Set<NodeTuple> tuples = new TreeSet<>();
@@ -73,14 +73,14 @@ public class Transcriptome {
 	/*
 	 * Public getter for the 'laysAndNodes' map
 	 */
-	public Map<Integer, Map<Integer, Double>> getLaysAndNodes() {
+	public TreeMap<Integer, TreeMap<Integer, Double>> getLaysAndNodes() {
 		return laysAndNodes;
 	}
 
 	/*
 	 * Public getter for the 'connWeights' map
 	 */
-	public Map<ConnTuple, Double> getConnWeights() {
+	public TreeMap<ConnTuple, Double> getConnWeights() {
 		return connWeights;
 	}
 	

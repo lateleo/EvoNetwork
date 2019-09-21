@@ -1,6 +1,8 @@
 package network;
 
 import java.util.Map;
+import java.util.TreeMap;
+
 import genetics.Genome;
 import genetics.Transcriptome;
 import utils.CMUtils;
@@ -40,8 +42,8 @@ public class Organism {
 	
 	public void buildNetwork() {
 		Transcriptome xscript = genome.transcribe();
-		Map<Integer,Map<Integer,Double>> laysAndNodes = xscript.getLaysAndNodes();
-		Map<ConnTuple,Double> connWeights = xscript.getConnWeights();
+		TreeMap<Integer,TreeMap<Integer,Double>> laysAndNodes = xscript.getLaysAndNodes();
+		TreeMap<ConnTuple,Double> connWeights = xscript.getConnWeights();
 		network = new NeuralNetwork();
 		network.setBottom(new BottomLayer());
 		laysAndNodes.forEach((layNum, nodeMap) -> {
