@@ -15,7 +15,7 @@ public class Environment {
 		int conns = 800;
 		int popSize = 10;
 		int simGens = 20;
-		int batches = 600;
+		int batches = 1;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();

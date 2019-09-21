@@ -21,7 +21,7 @@ public class Population {
 
 	public void simulateGenerations() {
 		for (int gen = 0; gen < simulatedGenerations; gen++) {
-//			System.out.println("Gen " + gen + "...");
+			System.out.println("Gen " + gen + "...");
 			while (adults.size() > populationSize / 2) {
 				adults.remove(RNG.getIntMax(adults.size()));
 			}
@@ -40,7 +40,7 @@ public class Population {
 			runGeneration();
 			meanAccuracy = getMeanAccuracy();
 
-//			System.out.println("Gen " + gen + ": " + meanAccuracy);
+			System.out.println("Gen " + gen + ": " + meanAccuracy);
 			if (meanAccuracy < target) {
 				getNextGeneration();
 				gen++;				
@@ -55,7 +55,7 @@ public class Population {
 	}
 	
 	private void buildNetworks() {
-//		System.out.println("Building Networks...");
+		System.out.println("Building Networks...");
 		youth.forEach(org -> org.buildNetwork());
 	}
 	
@@ -64,7 +64,7 @@ public class Population {
 		for (Organism org : adults) {
 			meanAccuracy += org.getNetwork().getAccuracy();
 			
-//			System.out.println(org.size() + ", " + org.getNetwork().getAccuracy());
+			System.out.println(org.size() + ", " + org.getNetwork().getAccuracy());
 		}
 		meanAccuracy /= populationSize;
 		System.out.println(meanAccuracy);
@@ -76,7 +76,7 @@ public class Population {
 		adults.addAll(youth);
 		youth.clear();
 		BottomLayer.nextBatch();
-//		System.out.println("Running Epoch...");
+//		System.out.println("Running Batch...");
 		adults.forEach(org -> org.getNetwork().run());
 	}
 

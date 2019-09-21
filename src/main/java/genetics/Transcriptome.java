@@ -141,7 +141,7 @@ public class Transcriptome {
 				if (layNum != -1) biasMap.put(nodeNum, phene.getWeightedAvg());
 				nodeConnSets.put(nodeNum, new ConnSetPair());
 			});
-			for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) biasMap.put(nodeNum, 0.0);
+			if (layNum == -1) for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) biasMap.put(nodeNum, 0.0);
 			laysAndNodes.put(layNum, biasMap);
 			tupleSetMap.put(layNum,  nodeConnSets);
 		});
@@ -171,7 +171,11 @@ public class Transcriptome {
 			ConnTuple tuple = entry.getKey();
 			if (valid) {
 				if (tuple.iLay() != 0) tupleMap.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
-				if (tuple.oLay() != -1) tupleMap.get(tuple.oLay()).get(tuple.oNode()).addDown(tuple);
+				if (tuple.oLay() != -1) {
+					TreeMap<Integer,ConnSetPair> lay = tupleMap.get(tuple.oLay());
+					ConnSetPair pair = lay.get(tuple.oNode());
+					pair.addDown(tuple);
+				}
 				connWeights.put(tuple, entry.getValue().getWeightedAvg());
 			}
 		}
@@ -197,7 +201,7 @@ public class Transcriptome {
 	 * checks to make sure a given tuple is valid (IE, the connection doesn't point backwards, and both input and output nodes exist)
 	 */
 	private boolean isConnTupleValid(ConnTuple tuple, TreeSet<NodeTuple> nodeTupleSet) {
-		if (comparator.compare(tuple.oLay(), tuple.iLay()) > 0) return false;
+		if (comparator.compare(tuple.oLay(), tuple.iLay()) <= 0) return false;
 		if (nodeTupleSet.contains(tuple.getFirst()) && nodeTupleSet.contains(tuple.getSecond())) return true;
 		return false;
 	}

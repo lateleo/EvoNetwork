@@ -9,5 +9,5 @@ public abstract class AbstractNode implements Runnable {
 	
 	public abstract void run();
 	
-	public abstract void backProp();
+//	public abstract void backProp();
 }

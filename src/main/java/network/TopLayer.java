@@ -16,12 +16,12 @@ public class TopLayer extends Layer {
 		super(nodeBiases, inputConnWeights, network);
 	}
 	
-	protected void fillNodes(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights) {
-		nodeBiases.forEach((nodeNum, bias) -> {
-			Map<NodeTuple,Double> weights = CMUtils.getConnsForNode(inputConnWeights, nodeNum);
-			nodes.put(nodeNum, new TopNode(this, bias, weights));
-		});
-	}
+//	protected void fillNodes(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights) {
+//		nodeBiases.forEach((nodeNum, bias) -> {
+//			Map<NodeTuple,Double> weights = CMUtils.getConnsForNode(inputConnWeights, nodeNum);
+//			nodes.put(nodeNum, new TopNode(this, bias, weights));
+//		});
+//	}
 	
 	@Override
 	public void run() {
@@ -30,23 +30,23 @@ public class TopLayer extends Layer {
 		nodes.forEach((nodeNum,node)-> outputs[nodeNum] = node.output/sum);
 	}
 	
-	@Override
-	public void backProp() {
-		nodes.forEach((nodeNum,node) -> node.backProp());
-	}
+//	@Override
+//	public void backProp() {
+//		nodes.forEach((nodeNum,node) -> node.backProp());
+//	}
 	
-	private class TopNode extends Node {
-		double error;
-
-		TopNode(Layer layer, double bias, Map<NodeTuple, Double> weights) {
-			super(layer, bias, weights);
-		}
-		
-		@Override
-		public void backProp() {
-			derivative = 2*error;
-		}
-		
-	}
+//	private class TopNode extends Node {
+//		double error;
+//
+//		TopNode(Layer layer, double bias, Map<NodeTuple, Double> weights) {
+//			super(layer, bias, weights);
+//		}
+//		
+////		@Override
+////		public void backProp() {
+////			derivative = 2*error;
+////		}
+//		
+//	}
 
 }

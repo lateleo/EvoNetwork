@@ -13,7 +13,7 @@ public abstract class AbstractLayer implements Runnable {
 	@Override
 	public abstract void run();
 	
-	public abstract void backProp();
+//	public abstract void backProp();
 
 
 }

@@ -48,7 +48,8 @@ public class Layer extends AbstractLayer {
 		nodes.values().forEach(node -> node.run());
 	}
 	
-	public void backProp() {
-		nodes.forEach((nodeNum,node) -> node.backProp());
-	}
+//	public void backProp() {
+//		nodes.forEach((nodeNum,node) -> node.backProp());
+//	}
+	
 }

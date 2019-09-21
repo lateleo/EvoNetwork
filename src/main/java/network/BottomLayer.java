@@ -35,10 +35,10 @@ public class BottomLayer extends AbstractLayer {
 		currentIndex++;
 	}
 	
-	@Override
-	public void backProp() {
-		// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
-	}
+//	@Override
+//	public void backProp() {
+//		// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
+//	}
 	
 	boolean allImagesComplete() {
 		return currentIndex == imageCount;
@@ -61,10 +61,10 @@ public class BottomLayer extends AbstractLayer {
 			output = layer.currentImage.getValue(nodeNum);
 		}
 
-		@Override
-		public void backProp() {
-			// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
-		}
+//		@Override
+//		public void backProp() {
+//			// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
+//		}
 		
 		
 	}

@@ -35,7 +35,17 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
+		Comparator<Integer> comp = Species.comparator;
 		
+		System.out.println(comp.compare(1, 1));
+		System.out.println(comp.compare(1, 0));
+		System.out.println(comp.compare(1, -1));
+		System.out.println(comp.compare(0, 1));
+		System.out.println(comp.compare(0, 0));
+		System.out.println(comp.compare(0, -1));
+		System.out.println(comp.compare(-1, 1));
+		System.out.println(comp.compare(-1, 0));
+		System.out.println(comp.compare(-1, -1));
 		
 
 		
