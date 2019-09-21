@@ -24,6 +24,8 @@ import data.MnistImage;
 import ecology.Species;
 import genetics.Gene;
 import network.BottomLayer;
+import network.Layer;
+import network.NeuralNetwork;
 
 /*
  * This class is used solely as a sandbox to test the functionality of various parts of the application.

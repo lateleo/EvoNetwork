@@ -2,6 +2,7 @@ package network;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.TreeMap;
 
 import utils.CMUtils;
 import utils.ConnTuple;
@@ -47,8 +48,7 @@ public class Layer extends AbstractLayer {
 		nodes.values().forEach(node -> node.run());
 	}
 	
-	@Override
-	public void backProp(float learning_rate) {
-		nodes.forEach((nodeNum,node) -> node.backProp(learning_rate));
+	public void backProp() {
+		nodes.forEach((nodeNum,node) -> node.backProp());
 	}
 }

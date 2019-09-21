@@ -4,7 +4,9 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import ecology.Species;
+import utils.CMUtils;
 import utils.ConnTuple;
+import utils.NodeTuple;
 
 public class TopLayer extends Layer {
 	private static int nodeCount = Species.topNodes;
@@ -15,13 +17,10 @@ public class TopLayer extends Layer {
 	}
 	
 	protected void fillNodes(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights) {
-		if (nodeBiases == null) nodeBiases = new Hashtable<>();
-		for (int i = 0; i < nodeCount; i++) {
-			if (!nodeBiases.containsKey(i)) {
-				nodeBiases.put(i, 0.0);
-			}
-		}
-		super.fillNodes(nodeBiases, inputConnWeights);
+		nodeBiases.forEach((nodeNum, bias) -> {
+			Map<NodeTuple,Double> weights = CMUtils.getConnsForNode(inputConnWeights, nodeNum);
+			nodes.put(nodeNum, new TopNode(this, bias, weights));
+		});
 	}
 	
 	@Override
@@ -32,8 +31,22 @@ public class TopLayer extends Layer {
 	}
 	
 	@Override
-	public void backProp(float learning_rate) {
-		nodes.forEach((nodeNum,node) -> node.backProp(learning_rate));
+	public void backProp() {
+		nodes.forEach((nodeNum,node) -> node.backProp());
+	}
+	
+	private class TopNode extends Node {
+		double error;
+
+		TopNode(Layer layer, double bias, Map<NodeTuple, Double> weights) {
+			super(layer, bias, weights);
+		}
+		
+		@Override
+		public void backProp() {
+			derivative = 2*error;
+		}
+		
 	}
 
 }

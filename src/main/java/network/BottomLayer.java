@@ -37,7 +37,7 @@ public class BottomLayer extends AbstractLayer {
 	
 	@Override
 	public void backProp() {
-		
+		// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
 	}
 	
 	boolean allImagesComplete() {
@@ -60,5 +60,12 @@ public class BottomLayer extends AbstractLayer {
 		public void run() {
 			output = layer.currentImage.getValue(nodeNum);
 		}
+
+		@Override
+		public void backProp() {
+			// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
+		}
+		
+		
 	}
 }

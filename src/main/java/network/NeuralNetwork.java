@@ -11,15 +11,9 @@ public class NeuralNetwork extends TreeMap<Integer, AbstractLayer> implements Ru
 	private BottomLayer bottom;
 	private TopLayer top;
 	private double accuracy = 0.0;
-	private static Comparator<Integer> comparator = (int1, int2) -> {
-		if (int1 == int2) return 0;
-		if (int1 == -1) return 1;
-		if (int2 == -1) return -1;
-		else return int1 - int2;
-	};
 	
-	NeuralNetwork() {
-		super(comparator);
+	public NeuralNetwork() {
+		super(Species.comparator);
 	}
 
 	@Override
@@ -42,9 +36,9 @@ public class NeuralNetwork extends TreeMap<Integer, AbstractLayer> implements Ru
 //		accuracy /= imageCount;
 	}
 	
-	public void backProp(float learning_rate) {
+	public void backProp() {
 		descendingKeySet().forEach((layNum) -> {
-			if (layNum != 0) get(layNum).backProp(learning_rate);
+			if (layNum != 0) get(layNum).backProp();
 		});
 	}
 	

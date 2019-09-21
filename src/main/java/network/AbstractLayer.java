@@ -15,4 +15,5 @@ public abstract class AbstractLayer implements Runnable {
 	
 	public abstract void backProp();
 
+
 }

@@ -2,37 +2,39 @@ package network;
 
 import java.util.Map;
 
+import ecology.Species;
 import utils.NodeTuple;
 
 public class Node extends AbstractNode {
+	private double learningRate = Species.learningRate;
 	private double bias;
-	private double derivative;
+	protected double derivative;
 	Map<NodeTuple, Double> norms;
-	Map<NodeTuple, Double> weights;
+	Map<NodeTuple, Double> lowerWeights;
+	Map<NodeTuple, Double> upperWeights;
 	
 	Node(Layer layer, double bias, Map<NodeTuple, Double> weights){
 		this.norms = layer.normInputs;
 		this.bias = bias;
-		this.weights = weights;
+		this.lowerWeights = weights;
 	}
 
 	public void run() {
-		weights.forEach((key, value) -> output += value*norms.get(key));
+		lowerWeights.forEach((key, value) -> output += value*norms.get(key));
 		output = Math.max(0.0, output + bias);
 	}
 	
-	public void backProp(float learning_rate) {
-		upperweights.forEach((key,value) -> if (uppernodeoutput > 0) {
-			derivative += value*uppernodederivative;
-			}
-		weights.forEach((key, value) -> value += learning_rate*output*derivative);
-		bias += learning_rate*derivative;
-			}	
+	public void backProp() {
+//		upperWeights.forEach((key,value) -> {
+//			if (upperNode.output > 0) {
+//			derivative += value*upperNode.derivative;
+//			}
+//		});
+		lowerWeights.forEach((key, value) -> value += learningRate*output*derivative);
+		bias += learningRate*derivative;
 	}
-	// Backprop for Top Layer Nodes
-	public void topBackProp(double error) {
-		derivative = 2*error;
-	}
+	
+
 	
 
 	

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +38,17 @@ public abstract class Species {
 	public static double mutationRate;
 	public static double mutationMagnitude;
 	public static double slipFactor;
+	public static double learningRate;
 
 	public static int populationSize;
 	public static int simulatedGenerations;
+	
+	public static Comparator<Integer> comparator = (int1, int2) -> {
+		if (int1 == int2) return 0;
+		if (int1 == -1) return 1;
+		if (int2 == -1) return -1;
+		else return int1 - int2;
+	};
 
 	public static void initialize(String dataset, int batches) {
 		mnistReader = new MnistDataReader(dataset);
@@ -61,12 +70,13 @@ public abstract class Species {
 
 	}
 
-	public static Population createPopulation(double mRate, double mMag, double slip, int diploidNum, int layers, int nodes,
+	public static Population createPopulation(double mRate, double mMag, double slip, double lRate, int diploidNum, int layers, int nodes,
 			int conns, int popSize, int simGens) {
 
 		mutationRate = mRate;
 		mutationMagnitude = mMag;
 		slipFactor = slip;
+		learningRate = lRate;
 		populationSize = popSize;
 		simulatedGenerations = simGens;
 
