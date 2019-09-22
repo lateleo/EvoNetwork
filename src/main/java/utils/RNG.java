@@ -56,6 +56,22 @@ public class RNG {
 		return getMinGauss(min, sigma, 0.0);
 	}
 	
+	public static double getMaxGauss(double max, double sigma, double mean) {
+		return getBoundGauss(Double.NEGATIVE_INFINITY, max, sigma, mean);
+	}
+	
+	public static double getMaxGauss(double max, double sigma) {
+		return getMaxGauss(max, sigma, 0.0);
+	}
+	
+	public static double getHalfGauss(double sigma) {
+		return Math.abs(getGauss(sigma, 0.0));
+	}
+	
+	public static double getHalfGauss() {
+		return getHalfGauss(1);
+	}
+	
 	public static int getBit() {
 		return ThreadLocalRandom.current().nextInt(32);
 	}

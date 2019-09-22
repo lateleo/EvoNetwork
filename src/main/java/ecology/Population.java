@@ -16,7 +16,7 @@ public class Population {
 	List<Organism> youth = new ArrayList<Organism>();
 
 	public Population(List<Organism> orgs) {
-		adults = orgs;
+		youth = orgs;
 	}
 
 	public void simulateGenerations() {
@@ -54,12 +54,12 @@ public class Population {
 		getMeanAccuracy();
 	}
 	
-	private void buildNetworks() {
+	public void buildNetworks() {
 		System.out.println("Building Networks...");
 		youth.forEach(org -> org.buildNetwork());
 	}
 	
-	private double getMeanAccuracy() {
+	public double getMeanAccuracy() {
 		double meanAccuracy = 0.0;
 		for (Organism org : adults) {
 			meanAccuracy += org.getNetwork().getAccuracy();
@@ -71,7 +71,7 @@ public class Population {
 		return meanAccuracy;
 	}
 
-	private void runGeneration() {
+	public void runGeneration() {
 		buildNetworks();
 		adults.addAll(youth);
 		youth.clear();
@@ -80,26 +80,26 @@ public class Population {
 		adults.forEach(org -> org.getNetwork().run());
 	}
 
-	private void getNextGeneration() {
+	public void getNextGeneration() {
 		updateFitness();
 		sortByFitness();
 		filter();
 		repopulate(false);
 	}
 
-	private void updateFitness() {
+	public void updateFitness() {
 		double mean = adults.stream().mapToInt(a -> a.size()).average().getAsDouble();
 		adults.forEach(a -> a.setFitness(mean));
 	}
 
-	private void sortByFitness() {
+	public void sortByFitness() {
 		adults.sort((a, b) -> {
 			double delta = b.getFitness() - a.getFitness();
 			return (int) (Math.signum(delta) * Math.ceil(Math.abs(delta)));
 		});
 	}
 
-	private void filter() {
+	public void filter() {
 		List<Organism> survivors = new ArrayList<Organism>(adults);
 		while (survivors.size() > adults.size()/2) {
 			int a = RNG.getIntMax(survivors.size());
@@ -109,7 +109,7 @@ public class Population {
 		adults.retainAll(survivors);
 	}
 
-	private void repopulate(boolean forcedMutation) {
+	public void repopulate(boolean forcedMutation) {
 		while (adults.size() + youth.size() < populationSize) {
 			int a = RNG.getIntMax(adults.size());
 			int b;

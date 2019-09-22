@@ -26,10 +26,14 @@ public class NeuralNetwork extends TreeMap<Integer, AbstractLayer> implements Ru
 			double[] outputs = top.outputs;
 			outputs[label] = 1 - outputs[label];
 			for (int i = 0; i < outputs.length; i++) outputs[i] *= outputs[i];
+			
+
+			
 			accuracy += Arrays.stream(outputs).sum();
 			
 //			accuracy += top.outputs[label];
 		}
+		System.out.println("Accuracy: " + accuracy);
 		accuracy /= 2.0*imageCount;
 		bottom.resetImageIndex();
 		

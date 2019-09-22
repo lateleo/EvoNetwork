@@ -15,7 +15,7 @@ import utils.RNG;
  */
 public class LayerGene extends Gene {
 	private static double mMag = Species.mutationMagnitude;
-	double xprLevel, layerNum;
+	public double xprLevel, layerNum;
 	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
 	Mutation layNumMutation = (gene) -> {
 		LayerGene mutant = (LayerGene) gene;
@@ -27,20 +27,12 @@ public class LayerGene extends Gene {
 		this.layerNum = layerNum;
 	}
 	
-	/*
-	 *Method used at the beginning of the simulation to generate a list of genes.
-	 */
-	public static ArrayList<Gene> generate(int layers, int diploidNum){
-		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = layers*diploidNum/2;
-		double sigma = layers/2.0;
-		double xprShift = 2/diploidNum;
-		while (genes.size() < 4*geneNum) {
-			double layNum = RNG.getMinGauss(1.0, sigma, 1+sigma);
-			genes.add(new LayerGene(RNG.getGauss(0.5,xprShift), layNum));
-		}
-		return genes;
-	};
+	public LayerGene(boolean positive, int layerNum) {
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+	}
+	
+
 
 	@Override
 	protected Gene clone() {

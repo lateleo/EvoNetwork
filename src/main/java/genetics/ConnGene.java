@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import ecology.Species;
+import utils.ConnTuple;
 import utils.RNG;
 
 /*
@@ -44,37 +45,16 @@ public class ConnGene extends Gene {
 		this.weight = weight;
 	}
 	
-	/*
-	 *Method used at the beginning of the simulation to generate a list of genes.
-	 */
-	public static ArrayList<Gene> generate(int layers, int nodes, int conns, int diploidNum) {
-		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = conns;
-		double laySigma = layers/2.5;
-		double nodeSigma = nodes/2.0;
-		double xprShift = 1/diploidNum;
-		for (int i = 0; i<bottomNodes; i++) {
-			double oLay = RNG.getMinGauss(-1.0, 1+laySigma, 2+laySigma);
-			double oNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), 0.5, i+0.5, oLay, oNode, RNG.getGauss()));			
-		}
-		for (int i = 0; i<topNodes; i++) {
-			double iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			double iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, -0.5, i+0.5, RNG.getGauss()));
-			iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, -0.5, i+0.5, RNG.getGauss()));	
-		}
-		while (genes.size() < 2*geneNum) {
-			double iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			double iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			double oLay = RNG.getMinGauss(-1.0, 1+laySigma, 2+laySigma);
-			double oNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, oLay, oNode, RNG.getGauss()));
-		}
-		return genes;	
+	public ConnGene(boolean positive, ConnTuple tuple) {
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
+		this.inLayNum = tuple.iLay() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.inNodeNum = tuple.iNode() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.outLayNum = tuple.oLay() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.outNodeNum = tuple.oNode() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.weight = RNG.getGauss();
 	}
+	
+
 
 	@Override
 	protected Gene clone() {

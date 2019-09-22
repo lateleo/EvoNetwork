@@ -54,6 +54,7 @@ public class Organism {
 			}
 		});
 		Map<ConnTuple,Double> topConns = CMUtils.getConnsForLayer(connWeights, -1);
+		System.out.println("Top Conns: " + topConns.size());
 		network.setTop(new TopLayer(laysAndNodes.get(-1), topConns, network));
 	}
 	

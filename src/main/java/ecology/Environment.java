@@ -9,7 +9,7 @@ public class Environment {
 		double mMag = 1.25;
 		double slip = 2;
 		double lRate = 0.01;
-		int diploidNum = 10;
+		int haploidNum = 10;
 		int layers = 3;
 		int nodes = 25;
 		int conns = 800;
@@ -20,7 +20,7 @@ public class Environment {
 		
 		long startTime = System.nanoTime();
 		Species.initialize("original", batchSize);
-		Population pop = Species.createPopulation(mRate, mMag, slip, lRate, diploidNum, layers, nodes, conns, popSize, simGens);
+		Population pop = Species.createPopulation(mRate, mMag, slip, lRate, haploidNum, layers, nodes, conns, popSize, simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();
 		pop.iterate(targetAccuracy);

@@ -20,6 +20,10 @@ public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<
 				new NodeTuple((int) Math.floor(gene.outLayNum), (int) gene.outNodeNum));
 	}
 	
+	public ConnTuple(int iLay, int iNode, int oLay, int oNode) {
+		super(new NodeTuple(iLay, iNode), new NodeTuple(oLay, oNode));
+	}
+	
 	public int iLay() {
 		return getKey().layer();
 	}

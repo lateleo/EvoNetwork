@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import data.MnistDataReader;
 import data.MnistImage;
+import ecology.Population;
 import ecology.Species;
 import genetics.Gene;
 import network.BottomLayer;
@@ -35,41 +36,29 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
-		Comparator<Integer> comp = Species.comparator;
+		System.out.println("Start");
 		
-		System.out.println(comp.compare(1, 1));
-		System.out.println(comp.compare(1, 0));
-		System.out.println(comp.compare(1, -1));
-		System.out.println(comp.compare(0, 1));
-		System.out.println(comp.compare(0, 0));
-		System.out.println(comp.compare(0, -1));
-		System.out.println(comp.compare(-1, 1));
-		System.out.println(comp.compare(-1, 0));
-		System.out.println(comp.compare(-1, -1));
+		double mRate = 0.05;
+		double mMag = 1.25;
+		double slip = 2;
+		double lRate = 0.01;
+		int haploidNum = 10;
+		int layers = 2;
+		int nodes = 25;
+		int conns = 200;
+		int popSize = 1;
+		int simGens = 20;
+		int batchSize = 100;
+		double targetAccuracy = 0.9;
 		
+		Species.initialize("original", batchSize);
+		Population pop = Species.createPopulation(mRate, mMag, slip, lRate, haploidNum, layers, nodes, conns, popSize, simGens);
 
+		pop.runGeneration();
+		pop.getMeanAccuracy();
 		
 	}
 
-//	private static void mnistMatrixDemo() throws IOException {
-//		MnistDataReader reader = new MnistDataReader("original");
-//		MnistImage[] mnistMatrix = reader.readTrainingData();
-//		printMnistMatrix(mnistMatrix[mnistMatrix.length - 1]);
-//		mnistMatrix = reader.readTestingData();
-//		printMnistMatrix(mnistMatrix[0]);
-//	}
-//	
-//	private static void printMnistMatrix(final MnistImage matrix) {
-//		DecimalFormat format = new DecimalFormat();
-//		format.setMaximumFractionDigits(0);
-//		format.setMinimumIntegerDigits(3);
-//		System.out.println("label: " + matrix.getLabel());
-//		for (int r = 0; r < 28; r++) {
-//			for (int c = 0; c < 28; c++) {
-//				System.out.print(format.format(matrix.getValue(r*28 + c)) + " ");
-//			}
-//			System.out.println();
-//		}
-//	}
+
 
 }
