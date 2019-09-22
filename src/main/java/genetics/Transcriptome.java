@@ -35,18 +35,17 @@ public class Transcriptome {
 		List<LayerGene> layGenes = new ArrayList<LayerGene>();
 		List<NodeGene> nodeGenes = new ArrayList<NodeGene>();
 		List<ConnGene> connGenes = new ArrayList<ConnGene>();
-		List<FamGene> famGenes = new ArrayList<FamGene>();
 		for (Gene gene : poolAllGenes(genome)) {
 			if (gene.getClass().equals(LayerGene.class)) layGenes.add((LayerGene) gene);
 			else if (gene.getClass().equals(NodeGene.class)) nodeGenes.add((NodeGene) gene);
 			else if (gene.getClass().equals(ConnGene.class)) connGenes.add((ConnGene) gene);
-			else if (gene.getClass().equals(FamGene.class)) famGenes.add((FamGene) gene);
 		}
 		Set<Integer> layerSet = parseLayGenes(layGenes);
 		TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap = parseNodeGenes(nodeGenes, layerSet);
 		TreeMap<ConnTuple,List<Triplet>> tripletMap = parseConnGenes(connGenes, tupleMap);
 		removeOrphans(tripletMap.navigableKeySet(), tupleMap);
-		parseFamGenes(famGenes, tripletMap);
+		combineTriplets(tripletMap);
+
 	}
 	
 	public Map<Integer, Map<Integer, Double>> getLaysAndNodes() {
@@ -194,25 +193,8 @@ public class Transcriptome {
 		return set.isEmpty();
 	}
 	
-//	FamGene Stuff
-	private void parseFamGenes(List<FamGene> famGenes, Map<ConnTuple,List<Triplet>> tripletMap) {
-		Map<Integer,PheneDummy> pheneMap = fillFams(famGenes);
-		Map<Integer,Double> famWeights = filterFams(pheneMap);
-		List<Triplet> tripletList = new ArrayList<Triplet>();
-		tripletMap.values().forEach((list)-> tripletList.addAll(list));
-		applyFamWeights(famWeights, tripletList);
-		combineTriplets(tripletMap);
-	}
-	
-	private Map<Integer,PheneDummy> fillFams(List<FamGene> famGenes) {
-		Map<Integer,PheneDummy> pheneMap = new Hashtable<Integer,PheneDummy>();
-		for (FamGene gene : famGenes) {
-			int sign = gene.signFilter;
-			if (!pheneMap.containsKey(sign)) pheneMap.put(sign, new PheneDummy());
-			pheneMap.get(sign).addGene(gene);
-		}
-		return pheneMap;
-	}
+
+
 	
 	private Map<Integer,Double> filterFams(Map<Integer,PheneDummy> pheneMap) {
 		Map<Integer,Double> famWeights = new Hashtable<Integer,Double>();
@@ -248,11 +230,7 @@ public class Transcriptome {
 			xprVals.add(gene.xprLevel);
 			valPairs.add(new Pair<Double,Double>(gene.xprLevel, gene.bias));
 		}
-		
-		void addGene(FamGene gene) {
-			xprVals.add(gene.xprLevel);
-			valPairs.add(new Pair<Double,Double>(gene.xprLevel, gene.weight));
-		}
+
 		
 		double getXprSum() {
 			return xprVals.stream().mapToDouble((d) -> d).sum();
@@ -269,7 +247,6 @@ public class Transcriptome {
 		double weight, xprLevel;
 		
 		Triplet(ConnGene gene) {
-			this.sign = gene.signature;
 			this.weight = gene.weight;
 			this.xprLevel = gene.xprLevel;
 		}

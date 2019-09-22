@@ -13,7 +13,6 @@ import data.MnistDataReader;
 import data.MnistImage;
 import genetics.Chromosome;
 import genetics.ConnGene;
-import genetics.FamGene;
 import genetics.Gene;
 import genetics.Genome;
 import genetics.HomologPair;
@@ -86,7 +85,6 @@ public abstract class Species {
 		ArrayList<Gene> genes = LayerGene.generate(layers, diploidNum);
 		genes.addAll(NodeGene.generate(layers, nodes, diploidNum));
 		genes.addAll(ConnGene.generate(layers, nodes, conns, diploidNum, signBits));
-		genes.addAll(FamGene.generate(fams, diploidNum, signBits));
 		Collections.shuffle(genes);
 		return genes;
 	}
