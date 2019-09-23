@@ -2,6 +2,7 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
@@ -90,6 +91,12 @@ public class RNG {
 		return Math.min(a, b);
 	}
 	
+	public static int getIntLowBias(int min, int max) {
+		int a = ThreadLocalRandom.current().nextInt(min, max);
+		int b = ThreadLocalRandom.current().nextInt(min, max);
+		return Math.min(a, b);
+	}
+	
 	
 	
 	public static boolean getBoolean() {
@@ -110,4 +117,11 @@ public class RNG {
 		}
 		
 	}
+	
+	public static <E> E sampleSet(Set<E> set) {
+		return new ArrayList<E>(set).get(getIntMax(set.size()));
+	}
+	
+	
+	
 }

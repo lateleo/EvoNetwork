@@ -44,5 +44,10 @@ public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<
 		if (!getKey().equals(other.getKey())) return getKey().compareTo(other.getKey());
 		else return getValue().compareTo(other.getValue());
 	}
+	
+	@Override
+	public String toString() {
+		return "[" + iLay() + ", " + iNode() + ", " + oLay() + ", " + oNode() + "]";
+	}
 
 }

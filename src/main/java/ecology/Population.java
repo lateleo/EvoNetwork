@@ -16,12 +16,12 @@ public class Population {
 	List<Organism> youth = new ArrayList<Organism>();
 
 	public Population(List<Organism> orgs) {
-		youth = orgs;
+		adults = orgs;
 	}
 
 	public void simulateGenerations() {
 		for (int gen = 0; gen < simulatedGenerations; gen++) {
-			System.out.println("Gen " + gen + "...");
+//			System.out.println("Gen " + gen + "...");
 			while (adults.size() > populationSize / 2) {
 				adults.remove(RNG.getIntMax(adults.size()));
 			}
@@ -45,7 +45,9 @@ public class Population {
 				getNextGeneration();
 				gen++;				
 			}
+
 		}
+
 	}
 	
 	public void testGeneration() {
@@ -55,19 +57,17 @@ public class Population {
 	}
 	
 	public void buildNetworks() {
-		System.out.println("Building Networks...");
+//		System.out.println("Building Networks...");
 		youth.forEach(org -> org.buildNetwork());
 	}
 	
 	public double getMeanAccuracy() {
 		double meanAccuracy = 0.0;
 		for (Organism org : adults) {
-			meanAccuracy += org.getNetwork().getAccuracy();
-			
-			System.out.println(org.size() + ", " + org.getNetwork().getAccuracy());
+			double accuracy = org.getNetwork().getAccuracy();
+			meanAccuracy += accuracy;
 		}
 		meanAccuracy /= populationSize;
-		System.out.println(meanAccuracy);
 		return meanAccuracy;
 	}
 

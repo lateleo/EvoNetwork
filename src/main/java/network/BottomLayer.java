@@ -3,19 +3,19 @@ package network;
 import data.MnistImage;
 import ecology.Species;
 
-public class BottomLayer extends AbstractLayer {
+public class BottomLayer extends Layer {
 	private static MnistImage[][] images = Species.images;
 	private static int nodeNum = Species.bottomNodes;
 	private static MnistImage[] currentImageSet = images[0];
 	private static int currentBatchNum = 0;
-	private static int imageCount = currentImageSet.length;
+	private static int imageCount = Species.batchSize;
 	MnistImage currentImage;
 	private int currentIndex = 0;
 
 	
 	BottomLayer() {
 		for (int i = 0; i < nodeNum; i++) {
-			nodes.put(i, new BottomNode(this,i));
+			nodes.put(i, new BottomNode(this, i));
 		}
 	}
 	
@@ -35,11 +35,6 @@ public class BottomLayer extends AbstractLayer {
 		currentIndex++;
 	}
 	
-//	@Override
-//	public void backProp() {
-//		// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
-//	}
-	
 	boolean allImagesComplete() {
 		return currentIndex == imageCount;
 	}
@@ -48,7 +43,7 @@ public class BottomLayer extends AbstractLayer {
 		currentIndex = 0;
 	}
 	
-	private class BottomNode extends AbstractNode {
+	private class BottomNode extends Node {
 		private BottomLayer layer;
 		private int nodeNum;
 
@@ -59,13 +54,7 @@ public class BottomLayer extends AbstractLayer {
 		
 		public void run() {
 			output = layer.currentImage.getValue(nodeNum);
-		}
-
-//		@Override
-//		public void backProp() {
-//			// Leave this empty, it just needs to exist for the NeuralNetwork's backProp method to work
-//		}
-		
+		}	
 		
 	}
 }

@@ -4,17 +4,17 @@ import java.util.Collection;
 
 import org.apache.commons.math3.stat.StatUtils;
 
-import network.AbstractNode;
+import network.Node;
 import network.Organism;
 
 public class Stats {
 	
-	public static double meanOutput(Collection<AbstractNode> vals) {
+	public static double meanOutput(Collection<Node> vals) {
 		double[] ary = vals.stream().mapToDouble(node -> node.getOutput()).toArray();
 		return StatUtils.mean(ary);
 	}
 	
-	public static double sigma(Collection<AbstractNode> vals) {
+	public static double sigma(Collection<Node> vals) {
 		double[] ary = vals.stream().mapToDouble(node -> node.getOutput()).toArray();
 		return Math.sqrt(StatUtils.populationVariance(ary));
 	}

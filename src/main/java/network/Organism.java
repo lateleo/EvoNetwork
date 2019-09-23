@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import genetics.Genome;
 import genetics.Transcriptome;
 import utils.CMUtils;
+import utils.ConnSetPair;
 import utils.ConnTuple;
 
 public class Organism {
@@ -42,20 +43,7 @@ public class Organism {
 	
 	public void buildNetwork() {
 		Transcriptome xscript = genome.transcribe();
-		TreeMap<Integer,TreeMap<Integer,Double>> laysAndNodes = xscript.getLaysAndNodes();
-		TreeMap<ConnTuple,Double> connWeights = xscript.getConnWeights();
-		network = new NeuralNetwork();
-		network.setBottom(new BottomLayer());
-		laysAndNodes.forEach((layNum, nodeMap) -> {
-			if (layNum != -1) {
-				Map<ConnTuple,Double> layConns = CMUtils.getConnsForLayer(connWeights, layNum);
-				Layer layer = new Layer(nodeMap, layConns, network);
-				network.put(layNum, layer);
-			}
-		});
-		Map<ConnTuple,Double> topConns = CMUtils.getConnsForLayer(connWeights, -1);
-		System.out.println("Top Conns: " + topConns.size());
-		network.setTop(new TopLayer(laysAndNodes.get(-1), topConns, network));
+		network = new NeuralNetwork(xscript);
 	}
 	
 

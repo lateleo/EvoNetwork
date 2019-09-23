@@ -44,6 +44,14 @@ public class NodeGene extends Gene {
 		this.bias = RNG.getGauss();
 	}
 	
+	public NodeGene(int layerNum, int nodeNum) {
+		this.xprLevel = RNG.getGauss();
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.bias = RNG.getGauss();
+	}
+	
+	
 	@Override
 	protected Gene clone() {
 		return new NodeGene(this.xprLevel, this.layerNum, this.nodeNum, this.bias);

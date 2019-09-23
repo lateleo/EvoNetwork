@@ -25,7 +25,7 @@ import ecology.Population;
 import ecology.Species;
 import genetics.Gene;
 import network.BottomLayer;
-import network.Layer;
+import network.MidLayer;
 import network.NeuralNetwork;
 
 /*
@@ -36,26 +36,10 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
-		System.out.println("Start");
 		
-		double mRate = 0.05;
-		double mMag = 1.25;
-		double slip = 2;
-		double lRate = 0.01;
-		int haploidNum = 10;
-		int layers = 2;
-		int nodes = 25;
-		int conns = 200;
-		int popSize = 1;
-		int simGens = 20;
-		int batchSize = 100;
-		double targetAccuracy = 0.9;
-		
-		Species.initialize("original", batchSize);
-		Population pop = Species.createPopulation(mRate, mMag, slip, lRate, haploidNum, layers, nodes, conns, popSize, simGens);
 
-		pop.runGeneration();
-		pop.getMeanAccuracy();
+		
+
 		
 	}
 

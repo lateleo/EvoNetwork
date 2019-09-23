@@ -32,6 +32,11 @@ public class LayerGene extends Gene {
 		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
 	}
 	
+	public LayerGene(int layerNum) {
+		this.xprLevel = RNG.getGauss();
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+	}
+	
 
 
 	@Override
