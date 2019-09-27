@@ -178,9 +178,16 @@ public class Transcriptome {
 				if (layNum != -1) biasMap.put(nodeNum, phene.getWeightedAvg());
 				nodeConnSets.put(nodeNum, new ConnSetPair());
 			});
-			if (layNum == -1) for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) biasMap.put(nodeNum, 0.0);
+			if (layNum == -1) {
+				for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) {
+					biasMap.put(nodeNum, 0.0);
+					if (!nodeConnSets.containsKey(nodeNum)) nodeConnSets.put(nodeNum, new ConnSetPair());
+				}
+			}
 			nodeBiasMap.put(layNum, biasMap);
 			tupleSetMap.put(layNum,  nodeConnSets);
+
+
 		});
 		return tupleSetMap;
 	}
@@ -208,9 +215,16 @@ public class Transcriptome {
 			boolean valid = entry.getValue().getXprSum() > 0;
 			ConnTuple tuple = entry.getKey();
 			if (valid) {
-				if (tuple.iLay() != 0) tupleSetMap.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
-				tupleSetMap.get(tuple.oLay()).get(tuple.oNode()).addDown(tuple);
-				connWeights.put(tuple, entry.getValue().getWeightedAvg());
+				try {
+					if (tuple.iLay() != 0) tupleSetMap.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
+					TreeMap<Integer,ConnSetPair> layerMap = tupleSetMap.get(tuple.oLay());
+					ConnSetPair pair = layerMap.get(tuple.oNode());
+					pair.addDown(tuple);
+					connWeights.put(tuple, entry.getValue().getWeightedAvg());
+				} catch (NullPointerException e) {
+					System.out.println(tuple);
+					e.printStackTrace();
+				}
 			}
 		}
 		return connWeights;

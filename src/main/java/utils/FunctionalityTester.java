@@ -37,9 +37,6 @@ public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
 		
-
-		
-
 		
 	}
 

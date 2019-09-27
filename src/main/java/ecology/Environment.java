@@ -13,14 +13,17 @@ public class Environment {
 		int layers = 3;
 		int nodes = 25;
 		int conns = 10;
+		int topRedundancy = 5;
+		int bottomRedundancy = 3;
 		int popSize = 20;
-		int simGens = 20;
-		int batchSize = 600;
+		int simGens = 40;
+		int batchSize = 500;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();
 		Species.initialize("original", batchSize);
-		Population pop = Species.createPopulation(mRate,  mMag,  slip,  lRate,  haploidNum,  layers,  nodes, conns,  popSize,  simGens);
+		Population pop = Species.createPopulation(mRate,  mMag,  slip,  lRate,  haploidNum,  layers,  nodes, conns,
+				topRedundancy, bottomRedundancy, popSize,  simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();
 		pop.iterate(targetAccuracy);

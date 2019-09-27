@@ -12,25 +12,26 @@ import utils.Stats;
 
 public class MidLayer extends UpperLayer {
 
-	
-	public MidLayer(Map<Integer,Double> biases, Map<Integer,ConnSetPair> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network) {
-		super(pairs, weights, network);
+	public MidLayer(Map<Integer, Double> biases, Map<Integer, ConnSetPair> pairs,
+			Map<ConnTuple, Double> weights, NeuralNetwork network, int layNum) {
+		
+		super(pairs, weights, network, layNum);
 		fillNodes(biases, weights, pairs);
 	}
 
-	
-	protected void fillNodes(Map<Integer,Double> biases, Map<ConnTuple,Double> weights, Map<Integer,ConnSetPair> pairs) {
+	protected void fillNodes(Map<Integer, Double> biases, Map<ConnTuple, Double> weights,
+			Map<Integer, ConnSetPair> pairs) {
 		biases.forEach((nodeNum, bias) -> {
-			Map<NodeTuple,Double> nodeWeights = getConnsForNode(weights, pairs.get(nodeNum));
-			nodes.put(nodeNum, new MidNode(this, bias, nodeWeights));
+			Map<NodeTuple, Double> nodeWeights = getConnsForNode(weights, pairs.get(nodeNum));
+			nodes.put(nodeNum, new MidNode(this, nodeNum, bias, nodeWeights));
 		});
 	}
-	
+
 	private class MidNode extends UpperNode {
 		private double bias;
-		
-		MidNode(MidLayer layer, double bias, Map<NodeTuple, Double> weights){
-			super(layer, weights);
+
+		MidNode(MidLayer layer, int nodeNum, double bias, Map<NodeTuple, Double> weights) {
+			super(layer, nodeNum, weights);
 			this.bias = bias;
 		}
 
@@ -39,13 +40,13 @@ public class MidLayer extends UpperLayer {
 			output = bias;
 			super.run();
 		}
-		
+
 		@Override
 		public void backProp() {
-			bias += learningRate*derivative;
+			bias += learningRate * derivative;
 			super.backProp();
 		}
-		
+
 	}
-	
+
 }

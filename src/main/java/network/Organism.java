@@ -3,6 +3,9 @@ package network;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+import ecology.Population;
 import genetics.Genome;
 import genetics.Transcriptome;
 import utils.CMUtils;
@@ -10,41 +13,66 @@ import utils.ConnSetPair;
 import utils.ConnTuple;
 
 public class Organism {
+	private double performance;
+	private double regressionPerf;
 	private double fitness;
+	public int age = 0;
 	private Genome genome;
-	private int size;
 	private NeuralNetwork network;
 	
 	public Organism(Genome genome) {
 		this.genome = genome;
-		size = genome.size();
 	}
 	
 	public Organism(Organism a, Organism b, boolean forcedMutation) {
 		this.genome = new Genome(a.genome.getHaploidSet(forcedMutation), b.genome.getHaploidSet(forcedMutation));
-		size = genome.size();
+	}
+	
+	public void updatePerfAndAge(double sizeRMS) {
+		age++;
+		performance = network.getAccuracy()*Math.sqrt(sizeRMS/network.size());
+		regressionPerf = 1/(1 - performance) - 1;
+	}
+	
+	public double getPerformance() {
+		return performance;
+	}
+	
+	public double getRegressionPerf() {
+		return regressionPerf;
+	}
+	
+	public void setFitness(SimpleRegression regression) {
+		fitness = regressionPerf - regression.predict(age);
 	}
 	
 	public double getFitness() {
 		return fitness;
 	}
-		
-	public void setFitness(double meanSize) {
-		fitness = network.getAccuracy()*meanSize/genome.size();
-	}
+	
 	
 	public NeuralNetwork getNetwork() {
 		return network;
 	}
 	
-	public int size() {
-		return size;
+	public Genome genome() {
+		return genome;
+	}
+	
+	public long genomeSize() {
+		return genome.size();
+	}
+	
+	public int networkSize() {
+		return network.size();
+	}
+	
+	public void run() {
+		network.run();
 	}
 	
 	public void buildNetwork() {
-		Transcriptome xscript = genome.transcribe();
-		network = new NeuralNetwork(xscript);
+		network = new NeuralNetwork(this);
 	}
-	
 
 }

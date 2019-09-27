@@ -12,33 +12,54 @@ import utils.NodeTuple;
 public class TopLayer extends UpperLayer {
 	private static int nodeCount = Species.topNodes;
 	double[] outputs = new double[nodeCount];
+	double loss;
 	
 	public TopLayer(Map<Integer,ConnSetPair> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network) {
-		super(pairs, weights, network);
+		super(pairs, weights, network, -1);
 		fillNodes(weights, pairs);
 	}
 	
 	protected void fillNodes(Map<ConnTuple,Double> weights, Map<Integer,ConnSetPair> pairs) {
 		pairs.forEach((nodeNum, pair) -> {
 			Map<NodeTuple,Double> nodeWeights = getConnsForNode(weights, pair);
-			nodes.put(nodeNum, new TopNode(this, nodeWeights));
+			nodes.put(nodeNum, new TopNode(this, nodeNum, nodeWeights));
 		});
 	}
 	
 	@Override
 	public void run() {
 		super.run();
-		double sum = Math.max(nodes.values().stream().mapToDouble(d->d.output).sum(), Double.MIN_VALUE);
-		nodes.forEach((nodeNum,node)-> {
-			outputs[nodeNum] = node.output/sum;
+		double sum = 0.0;
+		for (Node node : nodes.values()) sum += node.output;
+		sum = Math.max(sum, Double.MIN_NORMAL);
+		nanCheck(sum, "Top Layer SoftMax Sum: ");
+		for (Node node : nodes.values()) {
+			node.output /= sum;
+			nanCheck(node.output, "Top Node Post-SoftMax: ");
+		}
+		int label = network.currentImage.getLabel();
+		Node correct = nodes.get(label);
+		correct.output = 1 - correct.output;
+		for (Node node : nodes.values()) ((TopNode) node).updateError();;
+	}
+	
+	public void setLoss() {
+		nodes.forEach((nodeNum,node) -> {
+			loss += ((TopNode) node).error;
 		});
 	}
 	
 	private class TopNode extends UpperNode {
-		double error;
+		double error = 0.0;
+		
 
-		TopNode(TopLayer layer, Map<NodeTuple, Double> weights) {
-			super(layer, weights);
+		TopNode(TopLayer layer, int nodeNum, Map<NodeTuple, Double> weights) {
+			super(layer, nodeNum, weights);
+		}
+		
+		public void updateError() {
+			double sqrOut = output*output;
+			nanCheck(sqrOut, "Top Node Output Squared: ");
 		}
 		
 		@Override
@@ -51,6 +72,7 @@ public class TopLayer extends UpperLayer {
 		public void backProp() {
 			derivative = 2*error;
 			super.backProp();
+			error = 0;
 		}
 		
 	}

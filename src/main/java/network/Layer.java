@@ -5,12 +5,15 @@ import java.util.TreeMap;
 
 public abstract class Layer implements Runnable {
 	Map<Integer, Node> nodes = new TreeMap<>();
+	NeuralNetwork network;
 	
-	protected Node get(int nodeNum) {
-		return nodes.get(nodeNum);
+	Layer(NeuralNetwork network) {
+		this.network = network;
 	}
 
 	@Override
-	public abstract void run();
+	public void run() {
+		nodes.values().forEach(node -> node.run());
+	}
 
 }

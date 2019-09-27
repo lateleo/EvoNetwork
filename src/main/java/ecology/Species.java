@@ -45,7 +45,7 @@ public abstract class Species {
 	public static double slipFactor;
 	public static double learningRate;
 
-	public static int batchSize, haploidNum, layers, nodes, conns;
+	public static int batchSize, haploidNum, layers, nodes, conns, topRedundancy, bottomRedundancy;
 
 	public static int populationSize;
 	public static int simulatedGenerations;
@@ -83,7 +83,7 @@ public abstract class Species {
 	}
 
 	public static Population createPopulation(double mRate, double mMag, double slip, double lRate, int haploidNum,
-			int layers, int nodes, int conns, int popSize, int simGens) {
+			int layers, int nodes, int conns, int topRedundancy, int bottomRedundancy, int popSize, int simGens) {
 
 		Species.mutationRate = mRate;
 		Species.mutationMagnitude = mMag;
@@ -96,6 +96,8 @@ public abstract class Species {
 		Species.layers = layers;
 		Species.nodes = nodes;
 		Species.conns = conns;
+		Species.topRedundancy = topRedundancy;
+		Species.bottomRedundancy = bottomRedundancy;
 
 //		System.out.println("Generating Genes...");
 		List<Gene> genes = generateGenes();
@@ -105,7 +107,7 @@ public abstract class Species {
 		Map<Integer, List<HomologPair>> homologPairs = generateHomologs(chromosomes);
 //		System.out.println("Creating First Generation...");
 		List<Organism> orgs = getFirstGen(homologPairs);
-		return new Population(orgs);
+		return Population.setInstance(orgs);
 	}
 
 	public static List<Gene> generateGenes() {
@@ -129,7 +131,6 @@ public abstract class Species {
 		while (layNodeNums.size() < 2 * layers) {
 			int layNum = RNG.getIntRange(1, layers * 4);
 			if (!layNodeNums.containsKey(layNum)) {
-				layGenes.add(new LayerGene(layNodeNums.size() % 2 != 0, layNum));
 				layGenes.add(new LayerGene(layNodeNums.size() % 2 != 0, layNum));
 				layGenes.add(new LayerGene(layNodeNums.size() % 2 != 0, layNum));
 				layNodeNums.put(layNum, new TreeSet<>());
@@ -156,7 +157,6 @@ public abstract class Species {
 				if (!nodeSet.contains(nodeNum)) {
 					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
 					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
-					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
 					nodeSet.add(nodeNum);
 				}
 			}
@@ -166,8 +166,7 @@ public abstract class Species {
 			int nodeNum = RNG.getIntRange(0, nodes * 4);
 			Set<Integer> nodeSet = layNodeNums.get(layNum);
 			if (!nodeSet.contains(nodeNum)) {
-				nodeGenes.add(new NodeGene(true, layNum, nodeNum));
-				nodeGenes.add(new NodeGene(false, layNum, nodeNum));
+				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
 				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
 				nodeSet.add(nodeNum);
 				i++;
@@ -191,14 +190,12 @@ public abstract class Species {
 	/* Method used at the beginning of the simulation to generate a list of
 	*genes. */
 	public static ArrayList<ConnGene> generateConnGenes(Map<Integer, Set<Integer>> layNodeNums) {
-		int topRedundancy = 5;
-		int bottomRedundancy = 3;
 		ArrayList<ConnGene> connGenes = new ArrayList<>();
 		Set<ConnTuple> connTuples = new TreeSet<>();
 //		Top Nodes
-		connGenes.addAll(generateEndConns(layNodeNums, connTuples, topRedundancy, true));
+		connGenes.addAll(generateEndConns(layNodeNums, connTuples, true));
 //		Bottom Nodes
-		connGenes.addAll(generateEndConns(layNodeNums, connTuples, bottomRedundancy, false));
+		connGenes.addAll(generateEndConns(layNodeNums, connTuples, false));
 		Set<Integer> topNodeSet = new TreeSet<>();
 		for (int i = 0; i < topNodes; i++) {
 			topNodeSet.add(i);
@@ -240,16 +237,15 @@ public abstract class Species {
 		if (!tuples.contains(tuple)) {
 			genes.add(new ConnGene(i % 3 != 0, tuple));
 			genes.add(new ConnGene(i % 3 != 0, tuple));
-			genes.add(new ConnGene(i % 3 == 0, tuple));
 			tuples.add(tuple);
 			return true;
 		}
 		return false;
 	}
 
-	private static ArrayList<ConnGene> generateEndConns(Map<Integer, Set<Integer>> layNodeNums, Set<ConnTuple> tuples,
-			int redundancy, boolean top) {
+	private static ArrayList<ConnGene> generateEndConns(Map<Integer, Set<Integer>> layNodeNums, Set<ConnTuple> tuples, boolean top) {
 		ArrayList<ConnGene> connGenes = new ArrayList<>();
+		int redundancy = (top) ? topRedundancy : bottomRedundancy;
 		int nodeCount = (top) ? topNodes : bottomNodes;
 		for (int endNode = 0; endNode < nodeCount; endNode++) {
 			for (int i = 0; i < 1.5*redundancy;) {
@@ -261,9 +257,8 @@ public abstract class Species {
 				else
 					tuple = new ConnTuple(0, endNode, layNum, nodeNum);
 				if (!tuples.contains(tuple)) {
-					connGenes.add(new ConnGene(true, tuple));
-					connGenes.add(new ConnGene(true, tuple));
-					connGenes.add(new ConnGene(false, tuple));
+					connGenes.add(new ConnGene(i % 3 != 0, tuple));
+					connGenes.add(new ConnGene(i % 3 != 0, tuple));
 					tuples.add(tuple);
 					i++;
 				}
