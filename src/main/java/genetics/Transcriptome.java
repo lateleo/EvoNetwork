@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 import ecology.Species;
+import network.Conn;
 import utils.ConnTuple;
 
 /*
@@ -65,39 +66,7 @@ public class Transcriptome {
 		fillNodes(nodeGenes);
 		filterNodes();
 		parseConnGenes(connGenes);
-		
-//		System.out.println("Pre-Removal: ");
-//		tupleSetMap.forEach((layNum,nodeMap)->{
-//			int sum = 0;
-//			for (ConnSetPair pair : nodeMap.values()) {
-//				sum += pair.downConns.size();
-//			}
-//			System.out.print(layNum + "(" + sum + "): [");
-//			nodeMap.keySet().forEach(nodeNum -> {
-//				System.out.print(nodeNum + ", ");
-//			});
-//			System.out.println("]");
-//		});
-//		System.out.println("Total Conns: " + connWeights.size());
-//		System.out.println();
-		
 		removeOrphans(connWeights.navigableKeySet());
-		
-//		System.out.println("Post-Removal: ");
-//		tupleSetMap.forEach((layNum,nodeMap)->{
-//			int sum = 0;
-//			for (ConnSetPair pair : nodeMap.values()) {
-//				sum += pair.downConns.size();
-//			}
-//			System.out.print(layNum + "(" + sum + "): [");
-//			nodeMap.keySet().forEach(nodeNum -> {
-//				System.out.print(nodeNum + ", ");
-//			});
-//			System.out.println("]");
-//		});
-//		System.out.println("Total Conns: " + connWeights.size());
-//		System.out.println();
-
 	}
 	
 	/*
@@ -177,36 +146,30 @@ public class Transcriptome {
 			if (!connPhenes.containsKey(connTuple)) connPhenes.put(connTuple, new ConnPhene());
 			connPhenes.get(connTuple).addGene(gene);
 		}
-		for (Map.Entry<ConnTuple, ConnPhene> entry : connPhenes.entrySet()) {
-			boolean valid = entry.getValue().getXprSum() > 0;
-			if (valid) {
-				ConnTuple tuple = entry.getKey();
-				try {
-					if (tuple.iLay() != 0) laysAndNodes.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
-					TreeMap<Integer,NodePhene> pheneMap = laysAndNodes.get(tuple.oLay());
-					NodePhene nodePhene = pheneMap.get(tuple.oNode());
-					nodePhene.addDown(tuple);
-					connWeights.put(tuple, entry.getValue().getWeightedAvg());
-				} catch (NullPointerException e) {
-					System.out.println(tuple);
-					e.printStackTrace();
-				}
+		connPhenes.forEach((tuple,connPhene) -> {
+			if (connPhene.getXprSum() > 0) {
+				if (tuple.iLay() != 0) laysAndNodes.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
+				TreeMap<Integer,NodePhene> pheneMap = laysAndNodes.get(tuple.oLay());
+				NodePhene nodePhene = pheneMap.get(tuple.oNode());
+				nodePhene.addDown(tuple);
+				connWeights.put(tuple, connPhene.getWeightedAvg());
 			}
-		}
+		});
 	}
 	
-//	private void loadReasons() {
-//		validityMap.put("Top/Bottom in wrong position: ", new TreeSet<>());
-//		validityMap.put("Input Layer Matches Output: ", new TreeSet<>());
-//		validityMap.put("Bottom NodeNum > " + bottomNodes + ": \t", new TreeSet<>());
-//		validityMap.put("Top NodeNum > " + topNodes + ": \t", new TreeSet<>());
-//		validityMap.put("Tuple pointing downwards: ", new TreeSet<>());
-//		validityMap.put("Non-Existent Input Layer: ", new TreeSet<>());
-//		validityMap.put("Non-Existent Input Node: ", new TreeSet<>());
-//		validityMap.put("Non-Existent Output Layer: ", new TreeSet<>());
-//		validityMap.put("Non-Existent Output Node: ", new TreeSet<>());
-//		validityMap.put("Valid: \t\t\t", new TreeSet<>());
-//	}
+/*	private void loadReasons() {
+		validityMap.put("Top/Bottom in wrong position: ", new TreeSet<>());
+		validityMap.put("Input Layer Matches Output: ", new TreeSet<>());
+		validityMap.put("Bottom NodeNum > " + bottomNodes + ": \t", new TreeSet<>());
+		validityMap.put("Top NodeNum > " + topNodes + ": \t", new TreeSet<>());
+		validityMap.put("Tuple pointing downwards: ", new TreeSet<>());
+		validityMap.put("Non-Existent Input Layer: ", new TreeSet<>());
+		validityMap.put("Non-Existent Input Node: ", new TreeSet<>());
+		validityMap.put("Non-Existent Output Layer: ", new TreeSet<>());
+		validityMap.put("Non-Existent Output Node: ", new TreeSet<>());
+		validityMap.put("Valid: \t\t\t", new TreeSet<>());
+	}
+	*/
 	
 	/*
 	 * checks to make sure a given tuple is valid (IE, the connection doesn't point backwards, and both input and output nodes exist)

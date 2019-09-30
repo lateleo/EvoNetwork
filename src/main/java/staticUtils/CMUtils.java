@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import javax.xml.crypto.dsig.TransformException;
 
 import genetics.NodePhene;
+import network.Conn;
 import utils.ConnTuple;
 
 /*
@@ -74,18 +75,7 @@ public class CMUtils {
 		return newMap;
 	}
 	
-	/*
-	 * Returns a Map of ConnTuple/Doubles, representing all connections that the given layNum takes as inputs.
-	 */
-	public static Map<ConnTuple,Double> getConnsForLayer(Map<ConnTuple,Double> source, Collection<NodePhene> pairs) {
-		Map<ConnTuple,Double> weights = new TreeMap<>();
-		for (NodePhene pair : pairs) {
-			for (ConnTuple tuple : pair.downConns) {
-				weights.put(tuple, source.get(tuple));
-			}
-		}
-		return weights;
-	}
+
 	
 
 	

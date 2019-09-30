@@ -1,6 +1,7 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -38,17 +39,17 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
 		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
-		TreeMap<ConnTuple,Double> connWeights = xscript.getConnWeights();
+		TreeMap<ConnTuple,Conn> allConns = getConns(xscript.getConnWeights());
 		setBottom();
 		laysAndNodes.forEach((layNum, nodePhenes) -> {
 			if (layNum != -1) {
-				Map<ConnTuple,Double> weights = CMUtils.getConnsForLayer(connWeights, nodePhenes.values());
-				MidLayer layer = new MidLayer(nodePhenes, weights, this, layNum);
+				Map<ConnTuple,Conn> conns = getConnsForLayer(allConns, nodePhenes.values());
+				MidLayer layer = new MidLayer(nodePhenes, conns, this, layNum);
 				put(layNum, layer);
 			}
 		});
 		Map<Integer,NodePhene> pairs = laysAndNodes.get(-1);
-		Map<ConnTuple,Double> weights = CMUtils.getConnsForLayer(connWeights, pairs.values());
+		Map<ConnTuple,Conn> weights = getConnsForLayer(allConns, pairs.values());
 		TopLayer top = new TopLayer(pairs, weights, this);
 		setTop(top);
 		setSize();
@@ -108,6 +109,23 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 				((UpperLayer) layer).inputNodes.forEach((tuple,node) -> size += 3);
 			}
 		});
+	}
+	
+	private TreeMap<ConnTuple,Conn> getConns(TreeMap<ConnTuple,Double> weights) {
+		TreeMap<ConnTuple,Conn> conns = new TreeMap<>();
+		weights.forEach((tuple,weight) -> conns.put(tuple, new Conn(weight)));
+		return conns;
+	}
+	
+
+	private Map<ConnTuple,Conn> getConnsForLayer(Map<ConnTuple,Conn> source, Collection<NodePhene> nodePhenes) {
+		Map<ConnTuple,Conn> conns = new TreeMap<>();
+		for (NodePhene phene : nodePhenes) {
+			for (ConnTuple tuple : phene.downConns) {
+				conns.put(tuple, source.get(tuple));
+			}
+		}
+		return conns;
 	}
 	
 	public int size() {

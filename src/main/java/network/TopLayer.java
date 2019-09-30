@@ -12,18 +12,16 @@ public class TopLayer extends UpperLayer {
 	double[] outputs = new double[nodeCount];
 	double loss;
 	
-	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Double> weights, NeuralNetwork network) {
-		super(nodePhenes, weights, network, -1);
-		fillNodes(nodePhenes, weights);
+	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Conn> conns, NeuralNetwork network) {
+		super(nodePhenes, conns, network, -1);
 	}
 	
-	protected void fillNodes(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Double> weights) {
-		nodePhenes.forEach((nodeNum, phene) -> {
-			Map<NodeTuple,Double> nodeWeights = getConnsForNode(weights, phene);
-			nodes.put(nodeNum, new TopNode(this, nodeNum, nodeWeights));
-		});
+
+	@Override
+	protected UpperNode addNode(int nodeNum, NodePhene phene, Map<NodeTuple, Conn> nodeConns) {
+		return new TopNode(this, nodeNum, nodeConns);
 	}
-	
+
 	@Override
 	public void run() {
 		super.run();
@@ -51,8 +49,8 @@ public class TopLayer extends UpperLayer {
 		double error = 0.0;
 		
 
-		TopNode(TopLayer layer, int nodeNum, Map<NodeTuple, Double> weights) {
-			super(layer, nodeNum, weights);
+		TopNode(TopLayer layer, int nodeNum, Map<NodeTuple, Conn> conns) {
+			super(layer, nodeNum, conns);
 		}
 		
 		public void updateError() {
@@ -71,6 +69,12 @@ public class TopLayer extends UpperLayer {
 			derivative = 2*error;
 			super.backProp();
 			error = 0;
+		}
+
+		@Override
+		public void updateDerivative() {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}

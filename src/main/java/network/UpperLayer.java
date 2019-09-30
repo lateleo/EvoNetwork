@@ -14,29 +14,39 @@ public abstract class UpperLayer extends Layer {
 	Map<NodeTuple, Double> normInputs;
 	public int layNum;
 	
-	public UpperLayer(Map<Integer,NodePhene> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network, int layNum) {
+	public UpperLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Conn> conns, NeuralNetwork network, int layNum) {
 		super(network);
 		this.layNum = layNum;
 		inputNodes = new Hashtable<NodeTuple,Node>();
 		normInputs = new Hashtable<NodeTuple,Double>();
-		fillInputs(weights, network);
+		fillInputs(conns, network);
+		fillNodes(nodePhenes, conns);
 	}
 	
 	
-	protected void fillInputs(Map<ConnTuple,Double> weights, NeuralNetwork network) {
-		for (ConnTuple tuple : weights.keySet()) {
+	protected void fillInputs(Map<ConnTuple,Conn> conns, NeuralNetwork network) {
+		for (ConnTuple tuple : conns.keySet()) {
 			Node inNode = network.get(tuple.iLay()).nodes.get(tuple.iNode());
 			inputNodes.put(tuple.getKey(), inNode);
 		}
 	}
 	
+	protected void fillNodes(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Conn> conns) {
+		nodePhenes.forEach((nodeNum, phene) -> {
+			Map<NodeTuple, Conn> nodeConns = getConnsForNode(conns, phene);
+			nodes.put(nodeNum, addNode(nodeNum, phene, nodeConns));
+		});
+	}
 	
-	public Map<NodeTuple,Double> getConnsForNode(Map<ConnTuple,Double> source, NodePhene pair) {
-		Map<NodeTuple,Double> weights = new TreeMap<>();
+	protected abstract UpperNode addNode(int nodeNum, NodePhene phene, Map<NodeTuple, Conn> nodeConns);
+	
+	
+	public Map<NodeTuple,Conn> getConnsForNode(Map<ConnTuple,Conn> source, NodePhene pair) {
+		Map<NodeTuple,Conn> conns = new TreeMap<>();
 		for (ConnTuple cTuple : pair.downConns) {
-			weights.put(cTuple.getFirst(), source.get(cTuple));
+			conns.put(cTuple.getFirst(), source.get(cTuple));
 		}
-		return weights;
+		return conns;
 	}
 
 	protected void normalize() {
