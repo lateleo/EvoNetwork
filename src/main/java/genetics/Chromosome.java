@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import ecology.Species;
-import utils.RNG;
+import staticUtils.RNG;
 
 /*
  * An extension of the built-in ArrayList class, explicitly only containing Gene objects, including it's own Centromere,

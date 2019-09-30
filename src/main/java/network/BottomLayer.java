@@ -1,6 +1,5 @@
 package network;
 
-import data.MnistImage;
 import ecology.Species;
 
 public class BottomLayer extends Layer {

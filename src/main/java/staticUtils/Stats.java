@@ -1,4 +1,4 @@
-package utils;
+package staticUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import ecology.Species;
 import network.Node;
 import network.Organism;
 
@@ -27,8 +26,8 @@ public class Stats {
 		List<double[]> data = new ArrayList<double[]>();
 		for (Organism org : orgs) {
 			double[] pair = new double[2];
-			pair[0] = org.getAgeLog();
-			pair[1] = org.getPerformance();
+			pair[0] = org.getAge();
+			pair[1] = org.getRegressionPerf();
 			data.add(pair);
 		}
 		double[][] dataArray = data.toArray(new double[0][0]);

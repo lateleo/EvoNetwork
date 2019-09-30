@@ -1,11 +1,7 @@
 package genetics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import ecology.Species;
-import utils.RNG;
+import staticUtils.RNG;
 
 /*
  * This class represents genes that determine the presence/absence and bias of nodes within a specific layer in a network.
@@ -15,7 +11,6 @@ import utils.RNG;
  * 'bias' indicates the node's individual bias.
  */
 public class NodeGene extends Gene {
-	private static int topNodes = Species.topNodes;
 	private static double mMag = Species.mutationMagnitude;
 	public double xprLevel, layerNum, nodeNum, bias;
 	Mutation xprMutation = (mutant) -> ((NodeGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;

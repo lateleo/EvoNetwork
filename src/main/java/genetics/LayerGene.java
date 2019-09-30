@@ -1,12 +1,9 @@
 package genetics;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import ecology.Species;
-import utils.RNG;
+import staticUtils.RNG;
 
 /*
  * This class represents genes that determine the presence/absence of additional layers in a network.

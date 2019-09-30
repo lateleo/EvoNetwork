@@ -1,4 +1,4 @@
-package utils;
+package staticUtils;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -36,7 +36,11 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
+		Double test = null;
 		
+		
+		
+		System.out.println(test);
 		
 	}
 

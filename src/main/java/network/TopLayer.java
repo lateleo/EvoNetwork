@@ -1,11 +1,9 @@
 package network;
 
-import java.util.Hashtable;
 import java.util.Map;
 
 import ecology.Species;
-import utils.CMUtils;
-import utils.ConnSetPair;
+import genetics.NodePhene;
 import utils.ConnTuple;
 import utils.NodeTuple;
 
@@ -14,14 +12,14 @@ public class TopLayer extends UpperLayer {
 	double[] outputs = new double[nodeCount];
 	double loss;
 	
-	public TopLayer(Map<Integer,ConnSetPair> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network) {
-		super(pairs, weights, network, -1);
-		fillNodes(weights, pairs);
+	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Double> weights, NeuralNetwork network) {
+		super(nodePhenes, weights, network, -1);
+		fillNodes(nodePhenes, weights);
 	}
 	
-	protected void fillNodes(Map<ConnTuple,Double> weights, Map<Integer,ConnSetPair> pairs) {
-		pairs.forEach((nodeNum, pair) -> {
-			Map<NodeTuple,Double> nodeWeights = getConnsForNode(weights, pair);
+	protected void fillNodes(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Double> weights) {
+		nodePhenes.forEach((nodeNum, phene) -> {
+			Map<NodeTuple,Double> nodeWeights = getConnsForNode(weights, phene);
 			nodes.put(nodeNum, new TopNode(this, nodeNum, nodeWeights));
 		});
 	}

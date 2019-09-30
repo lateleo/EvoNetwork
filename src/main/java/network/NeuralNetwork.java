@@ -1,17 +1,15 @@
 package network;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
 import data.MnistImage;
 import ecology.Population;
 import ecology.Species;
+import genetics.NodePhene;
 import genetics.Transcriptome;
-import utils.CMUtils;
-import utils.ConnSetPair;
+import staticUtils.CMUtils;
 import utils.ConnTuple;
 
 public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
@@ -39,19 +37,17 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		super(Species.comparator);
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
-		TreeMap<Integer,TreeMap<Integer,Double>> nodeBiasMap = xscript.getNodeBiasMap();
-		TreeMap<Integer,TreeMap<Integer,ConnSetPair>> tupleSetMap = xscript.getTupleSetMap();
+		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
 		TreeMap<ConnTuple,Double> connWeights = xscript.getConnWeights();
 		setBottom();
-		nodeBiasMap.forEach((layNum, biases) -> {
+		laysAndNodes.forEach((layNum, nodePhenes) -> {
 			if (layNum != -1) {
-				Map<Integer,ConnSetPair> pairs = tupleSetMap.get(layNum);
-				Map<ConnTuple,Double> weights = CMUtils.getConnsForLayer(connWeights, pairs.values());
-				MidLayer layer = new MidLayer(biases, pairs, weights, this, layNum);
+				Map<ConnTuple,Double> weights = CMUtils.getConnsForLayer(connWeights, nodePhenes.values());
+				MidLayer layer = new MidLayer(nodePhenes, weights, this, layNum);
 				put(layNum, layer);
 			}
 		});
-		Map<Integer,ConnSetPair> pairs = tupleSetMap.get(-1);
+		Map<Integer,NodePhene> pairs = laysAndNodes.get(-1);
 		Map<ConnTuple,Double> weights = CMUtils.getConnsForLayer(connWeights, pairs.values());
 		TopLayer top = new TopLayer(pairs, weights, this);
 		setTop(top);

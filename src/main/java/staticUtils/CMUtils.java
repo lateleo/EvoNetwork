@@ -1,15 +1,17 @@
-package utils;
+package staticUtils;
 
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.xml.crypto.dsig.TransformException;
+
+import genetics.NodePhene;
+import utils.ConnTuple;
 
 /*
  * This class contains various static methods used for manipulating Collections and Maps.
@@ -75,9 +77,9 @@ public class CMUtils {
 	/*
 	 * Returns a Map of ConnTuple/Doubles, representing all connections that the given layNum takes as inputs.
 	 */
-	public static Map<ConnTuple,Double> getConnsForLayer(Map<ConnTuple,Double> source, Collection<ConnSetPair> pairs) {
+	public static Map<ConnTuple,Double> getConnsForLayer(Map<ConnTuple,Double> source, Collection<NodePhene> pairs) {
 		Map<ConnTuple,Double> weights = new TreeMap<>();
-		for (ConnSetPair pair : pairs) {
+		for (NodePhene pair : pairs) {
 			for (ConnTuple tuple : pair.downConns) {
 				weights.put(tuple, source.get(tuple));
 			}

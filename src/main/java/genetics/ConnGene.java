@@ -1,12 +1,8 @@
 package genetics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import ecology.Species;
+import staticUtils.RNG;
 import utils.ConnTuple;
-import utils.RNG;
 
 /*
  * This class represents genes that determine the presence/absence and weight of connections between nodes in a network.
@@ -16,8 +12,6 @@ import utils.RNG;
  * 'weight' indicates the connection's weight value.
  */
 public class ConnGene extends Gene {
-	private static int bottomNodes = Species.bottomNodes;
-	private static int topNodes = Species.topNodes;
 	private static double mMag = Species.mutationMagnitude;
 	public double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
 //	int signature;

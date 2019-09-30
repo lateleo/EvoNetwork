@@ -1,10 +1,5 @@
 package genetics;
 
-import java.util.List;
-
-import ecology.Species;
-import utils.RNG;
-
 /* 
  * Abstract parent class for all the different types of Genes.
  * Also contains code for the internal functional interface "Mutation".

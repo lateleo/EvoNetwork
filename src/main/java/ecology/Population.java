@@ -6,11 +6,10 @@ import java.util.List;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import network.BottomLayer;
 import network.NeuralNetwork;
 import network.Organism;
-import utils.RNG;
-import utils.Stats;
+import staticUtils.RNG;
+import staticUtils.Stats;
 
 public class Population {
 	private static int populationSize = Species.populationSize;

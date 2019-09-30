@@ -1,29 +1,22 @@
 package network;
 
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.TreeMap;
 
-import utils.CMUtils;
-import utils.ConnSetPair;
+import genetics.NodePhene;
 import utils.ConnTuple;
 import utils.NodeTuple;
-import utils.Stats;
 
 public class MidLayer extends UpperLayer {
 
-	public MidLayer(Map<Integer, Double> biases, Map<Integer, ConnSetPair> pairs,
-			Map<ConnTuple, Double> weights, NeuralNetwork network, int layNum) {
-		
-		super(pairs, weights, network, layNum);
-		fillNodes(biases, weights, pairs);
+	public MidLayer(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Double> weights, NeuralNetwork network, int layNum) {
+		super(nodePhenes, weights, network, layNum);
+		fillNodes(nodePhenes, weights);
 	}
 
-	protected void fillNodes(Map<Integer, Double> biases, Map<ConnTuple, Double> weights,
-			Map<Integer, ConnSetPair> pairs) {
-		biases.forEach((nodeNum, bias) -> {
-			Map<NodeTuple, Double> nodeWeights = getConnsForNode(weights, pairs.get(nodeNum));
-			nodes.put(nodeNum, new MidNode(this, nodeNum, bias, nodeWeights));
+	protected void fillNodes(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Double> weights) {
+		nodePhenes.forEach((nodeNum, phene) -> {
+			Map<NodeTuple, Double> nodeWeights = getConnsForNode(weights, phene);
+			nodes.put(nodeNum, new MidNode(this, nodeNum, phene.getBias(), nodeWeights));
 		});
 	}
 

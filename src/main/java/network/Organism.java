@@ -1,16 +1,10 @@
 package network;
 
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import ecology.Population;
 import genetics.Genome;
-import genetics.Transcriptome;
-import utils.CMUtils;
-import utils.ConnSetPair;
-import utils.ConnTuple;
+
 
 public class Organism {
 	private double performance;
@@ -40,6 +34,10 @@ public class Organism {
 	
 	public double getRegressionPerf() {
 		return regressionPerf;
+	}
+	
+	public int getAge() {
+		return age;
 	}
 	
 	public void setFitness(SimpleRegression regression) {

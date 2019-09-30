@@ -4,17 +4,17 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 
-import utils.ConnSetPair;
+import genetics.NodePhene;
+import staticUtils.Stats;
 import utils.ConnTuple;
 import utils.NodeTuple;
-import utils.Stats;
 
 public abstract class UpperLayer extends Layer {
 	Map<NodeTuple, Node> inputNodes;
 	Map<NodeTuple, Double> normInputs;
 	public int layNum;
 	
-	public UpperLayer(Map<Integer,ConnSetPair> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network, int layNum) {
+	public UpperLayer(Map<Integer,NodePhene> pairs, Map<ConnTuple,Double> weights, NeuralNetwork network, int layNum) {
 		super(network);
 		this.layNum = layNum;
 		inputNodes = new Hashtable<NodeTuple,Node>();
@@ -31,7 +31,7 @@ public abstract class UpperLayer extends Layer {
 	}
 	
 	
-	public Map<NodeTuple,Double> getConnsForNode(Map<ConnTuple,Double> source, ConnSetPair pair) {
+	public Map<NodeTuple,Double> getConnsForNode(Map<ConnTuple,Double> source, NodePhene pair) {
 		Map<NodeTuple,Double> weights = new TreeMap<>();
 		for (ConnTuple cTuple : pair.downConns) {
 			weights.put(cTuple.getFirst(), source.get(cTuple));

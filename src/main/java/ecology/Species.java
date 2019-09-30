@@ -2,10 +2,8 @@ package ecology;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +22,9 @@ import genetics.HomologPair;
 import genetics.LayerGene;
 import genetics.NodeGene;
 import network.Organism;
-import utils.CMUtils;
+import staticUtils.CMUtils;
+import staticUtils.RNG;
 import utils.ConnTuple;
-import utils.RNG;
 
 /*
  * This class is mostly a variable dump and simulation setup class. It doesn't do anything, After creating

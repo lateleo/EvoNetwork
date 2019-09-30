@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ecology.Species;
-import utils.RNG;
+import staticUtils.RNG;
 
 /*
  * represents a homologous pair of chromosomes (chromosomes with the same chromosome number, each one coming from a different parent).
