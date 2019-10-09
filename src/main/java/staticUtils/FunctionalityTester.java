@@ -36,11 +36,12 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
-		Double test = null;
+		double max = Double.MAX_VALUE;
+		double min = Double.MIN_NORMAL;
+		double min2 = Double.MIN_VALUE;
+
 		
-		
-		
-		System.out.println(test);
+
 		
 	}
 

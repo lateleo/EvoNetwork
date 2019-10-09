@@ -13,8 +13,8 @@ import network.Organism;
 public class Stats {
 	
 	public static double meanOutput(Collection<Node> vals) {
-		double[] array = vals.stream().mapToDouble(node -> node.output).toArray();
-		return StatUtils.mean(array);
+		double[] outputs = vals.stream().mapToDouble(node -> node.output).toArray();
+		return StatUtils.mean(outputs);
 	}
 	
 	public static double nodeSigma(Collection<Node> vals) {

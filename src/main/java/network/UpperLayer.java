@@ -1,5 +1,6 @@
 package network;
 
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,43 +20,53 @@ public abstract class UpperLayer extends Layer {
 		this.layNum = layNum;
 		inputNodes = new Hashtable<NodeTuple,Node>();
 		normInputs = new Hashtable<NodeTuple,Double>();
-		fillInputs(conns, network);
+		fillInputs(nodePhenes);
 		fillNodes(nodePhenes, conns);
 	}
 	
 	
-	protected void fillInputs(Map<ConnTuple,Conn> conns, NeuralNetwork network) {
-		for (ConnTuple tuple : conns.keySet()) {
-			Node inNode = network.get(tuple.iLay()).nodes.get(tuple.iNode());
-			inputNodes.put(tuple.getKey(), inNode);
-		}
+	protected void fillInputs(Map<Integer, NodePhene> nodePhenes) {
+		nodePhenes.forEach((nodeNum, phene) -> {
+			phene.downConns.forEach(tuple -> {
+				Node inNode = network.get(tuple.iLay()).nodes.get(tuple.iNode());
+				inputNodes.put(tuple.getKey(), inNode);
+			});
+		});
 	}
 	
 	protected void fillNodes(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Conn> conns) {
 		nodePhenes.forEach((nodeNum, phene) -> {
-			Map<NodeTuple, Conn> nodeConns = getConnsForNode(conns, phene);
-			nodes.put(nodeNum, addNode(nodeNum, phene, nodeConns));
+			nodes.put(nodeNum, addNode(nodeNum, phene, conns));
 		});
 	}
 	
-	protected abstract UpperNode addNode(int nodeNum, NodePhene phene, Map<NodeTuple, Conn> nodeConns);
+	protected abstract UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns);
 	
-	
-	public Map<NodeTuple,Conn> getConnsForNode(Map<ConnTuple,Conn> source, NodePhene pair) {
-		Map<NodeTuple,Conn> conns = new TreeMap<>();
-		for (ConnTuple cTuple : pair.downConns) {
-			conns.put(cTuple.getFirst(), source.get(cTuple));
-		}
-		return conns;
-	}
 
 	protected void normalize() {
-		double mean = Math.max(Double.MIN_NORMAL, Stats.meanOutput(inputNodes.values()));
+//		inputNodes.forEach((tuple,node) -> {
+//			normInputs.put(tuple, node.output);
+//		});
+		double mean = Stats.meanOutput(inputNodes.values());
 		nanCheck(mean, "Normalization Mean in Layer " + layNum);
-		double sigma = Math.max(Double.MIN_NORMAL, Stats.nodeSigma(inputNodes.values()));
-		nanCheck(mean, "Normalization Sigma in Layer " + layNum);
+		nanCheck(mean*mean, "Norm Mean Squared in Layer " + layNum);
+		double invSigma = Math.max(Double.MIN_NORMAL, 1/Stats.nodeSigma(inputNodes.values()));
+		if (nanCheck(invSigma, "Normalization invSigma in Layer " + layNum)) {
+			double partialSum = 0;
+			System.out.println("Mean: " + mean);
+			for (Node inNode : inputNodes.values()) {
+				double sqr = Math.pow(inNode.output - mean, 2.0);
+				partialSum += sqr;
+//				System.out.println(inNode.output + ": " + sqr);
+			}
+			System.out.println("PartialSum: " + partialSum);
+			double var = partialSum/inputNodes.size();
+			System.out.println("Variance: " + var);
+			System.out.println("Sigma: " + Math.sqrt(var));
+
+		}
 		inputNodes.forEach((tuple, node) -> {
-			double norm = (node.output - mean)/sigma;
+			double norm = (node.output - mean)*invSigma;
 			normInputs.put(tuple, norm);
 			nanCheck(norm, "Normalized Input from " + tuple);
 		});
