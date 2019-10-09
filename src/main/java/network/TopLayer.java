@@ -5,12 +5,8 @@ import java.util.Map;
 import ecology.Species;
 import genetics.NodePhene;
 import utils.ConnTuple;
-import utils.NodeTuple;
 
 public class TopLayer extends UpperLayer {
-	private static int nodeCount = Species.topNodes;
-	double[] outputs = new double[nodeCount];
-	double loss;
 	
 	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Conn> conns, NeuralNetwork network) {
 		super(nodePhenes, conns, network, -1);
@@ -25,6 +21,14 @@ public class TopLayer extends UpperLayer {
 	@Override
 	public void run() {
 		super.run();
+		softMax();
+		int label = network.currentImage.getLabel();
+		Node correct = nodes.get(label);
+		correct.output = 1 - correct.output;
+		for (Node node : nodes.values()) ((TopNode) node).updateError();
+	}
+	
+	private void softMax() {
 		double sum = 0.0;
 		for (Node node : nodes.values()) sum += node.output;
 		final double finalSum = Math.max(sum, Double.MIN_NORMAL);
@@ -34,20 +38,12 @@ public class TopLayer extends UpperLayer {
 			nanCheck(node.output, "Top Node Post-SoftMax: " + nodeNum);
 
 		});
-//		for (Node node : nodes.values()) {
-//			node.output /= sum;
-//			nanCheck(node.output, "Top Node Post-SoftMax: ");
-//		}
-		int label = network.currentImage.getLabel();
-		Node correct = nodes.get(label);
-		correct.output = 1 - correct.output;
-		for (Node node : nodes.values()) ((TopNode) node).updateError();
 	}
 	
-	public void setLoss() {
-		nodes.forEach((nodeNum,node) -> {
-			loss += ((TopNode) node).error;
-		});
+	public double getLoss() {
+		double loss = 0;
+		for (Node node : nodes.values()) loss += ((TopNode) node).error;
+		return loss;
 	}
 	
 	private class TopNode extends UpperNode {

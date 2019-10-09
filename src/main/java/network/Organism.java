@@ -22,6 +22,11 @@ public class Organism {
 		this.genome = new Genome(a.genome.getHaploidSet(forcedMutation), b.genome.getHaploidSet(forcedMutation));
 	}
 	
+	
+	public void buildNetwork() {
+		network = new NeuralNetwork(this);
+	}
+	
 	public void updatePerfAndAge(double sizeRMS) {
 		age++;
 		performance = network.getAccuracy()*Math.sqrt(sizeRMS/network.size());
@@ -69,8 +74,8 @@ public class Organism {
 		network.run();
 	}
 	
-	public void buildNetwork() {
-		network = new NeuralNetwork(this);
+	public void learn() {
+		network.backProp();
 	}
 
 }

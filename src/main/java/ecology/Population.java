@@ -98,6 +98,7 @@ public class Population {
 		updateFitness();
 		sortByFitness();
 		filter();
+		learn();
 		repopulate(false);
 	}
 
@@ -112,7 +113,7 @@ public class Population {
 
 	public void sortByFitness() {
 		adults.sort((a, b) -> {
-			double delta = b.getPerformance() - a.getPerformance();
+			double delta = b.getFitness() - a.getFitness();
 			return (int) (Math.signum(delta) * Math.ceil(Math.abs(delta)));
 		});
 	}
@@ -137,6 +138,10 @@ public class Population {
 			lineUp.addAll(survivors);
 			survivors.clear();
 		}
+	}
+	
+	public void learn() {
+		for (Organism org : adults) org.learn();
 	}
 
 	public void repopulate(boolean forcedMutation) {

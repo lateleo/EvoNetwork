@@ -30,7 +30,7 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	private double lossScalar = 1/(2.0*batchSize);
 	private int size = 0;
 	
-	public boolean nanFound;
+	public boolean nanFound = false;
 	
 	public ArrayList<double[]> allOutputs = new ArrayList<>();
 	
@@ -55,8 +55,7 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 
 	@Override
 	public void run() {
-		top.loss = 0.0;
-		nanFound = false;
+		currentIndex = 0;
 		while (!nanFound && currentIndex < batchSize) {
 			currentImage = currentImageSet[currentIndex];
 			forEach((layNum, layer) -> {
@@ -65,16 +64,12 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 			currentIndex++;
 		}
 		if (!nanFound) {
-			top.setLoss();
-			accuracy = 1 - top.loss*lossScalar;
+			accuracy = 1 - top.getLoss()*lossScalar;
 			if (!Double.isFinite(accuracy)) {
 				nanFound = true;
 				System.out.println("Non-Finite Accuracy: " + accuracy);
 			}
-			currentIndex = 0;
-			backProp();
 		} else {
-			org.age = -1;
 			Population.getInstance().remove(org);
 		}
 	}
