@@ -168,7 +168,6 @@ public class Population {
 			double[] stats = getMeanAndSigma((org)-> org.networkSize());
 			double scalar = Math.min(0.0, 2*meanAccuracy - 1);
 			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1], scalar);
-
 		}
 		while (adults.size() + youth.size() < populationSize) {
 			Organism org1 = null;

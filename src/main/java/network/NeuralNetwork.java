@@ -56,6 +56,7 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	@Override
 	public void run() {
 		currentIndex = 0;
+		top.reset();
 		while (!nanFound && currentIndex < batchSize) {
 			currentImage = currentImageSet[currentIndex];
 			forEach((layNum, layer) -> {

@@ -10,7 +10,7 @@ public class Organism {
 	private double performance;
 	private double regressionPerf;
 	private double fitness;
-	private double attractiveness;
+	private double attractiveness = 0;
 	public int age = 0;
 	private Genome genome;
 	private NeuralNetwork network;
@@ -29,9 +29,10 @@ public class Organism {
 	}
 	
 	public void updatePerf() {
+		age++;
 //		performance = network.getAccuracy()*Math.sqrt(sizeRMS/network.size());
 		performance = network.getAccuracy();
-		regressionPerf = 1/(1 - performance);
+		regressionPerf = 1/(1 - performance) - 1;
 	}
 	
 	public double getPerformance() {
@@ -89,7 +90,6 @@ public class Organism {
 	
 	public void learn() {
 		network.backProp();
-		age++;
 	}
 
 }

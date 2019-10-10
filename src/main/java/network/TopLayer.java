@@ -46,6 +46,10 @@ public class TopLayer extends UpperLayer {
 		return loss;
 	}
 	
+	public void reset() {
+		for (Node node : nodes.values()) ((TopNode) node).error = 0;
+	}
+	
 	private class TopNode extends UpperNode {
 		double error = 0.0;
 		
@@ -64,12 +68,6 @@ public class TopLayer extends UpperLayer {
 		public void run() {
 			output = 0;
 			super.run();
-		}
-		
-		@Override
-		public void backProp() {
-			super.backProp();
-			error = 0;
 		}
 
 		@Override

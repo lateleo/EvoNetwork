@@ -44,32 +44,32 @@ public abstract class UpperLayer extends Layer {
 	
 
 	protected void normalize() {
-//		inputNodes.forEach((tuple,node) -> {
-//			normInputs.put(tuple, node.output);
-//		});
-		double mean = Stats.meanOutput(inputNodes.values());
-		nanCheck(mean, "Normalization Mean in Layer " + layNum);
-		nanCheck(mean*mean, "Norm Mean Squared in Layer " + layNum);
-		double invSigma = Math.max(Double.MIN_NORMAL, 1/Stats.nodeSigma(inputNodes.values()));
-		if (nanCheck(invSigma, "Normalization invSigma in Layer " + layNum)) {
-			double partialSum = 0;
-			System.out.println("Mean: " + mean);
-			for (Node inNode : inputNodes.values()) {
-				double sqr = Math.pow(inNode.output - mean, 2.0);
-				partialSum += sqr;
-//				System.out.println(inNode.output + ": " + sqr);
-			}
-			System.out.println("PartialSum: " + partialSum);
-			double var = partialSum/inputNodes.size();
-			System.out.println("Variance: " + var);
-			System.out.println("Sigma: " + Math.sqrt(var));
-
-		}
-		inputNodes.forEach((tuple, node) -> {
-			double norm = (node.output - mean)*invSigma;
-			normInputs.put(tuple, norm);
-			nanCheck(norm, "Normalized Input from " + tuple);
+		inputNodes.forEach((tuple,node) -> {
+			normInputs.put(tuple, node.output);
 		});
+//		double mean = Stats.meanOutput(inputNodes.values());
+//		nanCheck(mean, "Normalization Mean in Layer " + layNum);
+//		nanCheck(mean*mean, "Norm Mean Squared in Layer " + layNum);
+//		double invSigma = Math.max(Double.MIN_NORMAL, 1/Stats.nodeSigma(inputNodes.values()));
+//		if (nanCheck(invSigma, "Normalization invSigma in Layer " + layNum)) {
+//			double partialSum = 0;
+//			System.out.println("Mean: " + mean);
+//			for (Node inNode : inputNodes.values()) {
+//				double sqr = Math.pow(inNode.output - mean, 2.0);
+//				partialSum += sqr;
+////				System.out.println(inNode.output + ": " + sqr);
+//			}
+//			System.out.println("PartialSum: " + partialSum);
+//			double var = partialSum/inputNodes.size();
+//			System.out.println("Variance: " + var);
+//			System.out.println("Sigma: " + Math.sqrt(var));
+//
+//		}
+//		inputNodes.forEach((tuple, node) -> {
+//			double norm = (node.output - mean)*invSigma;
+//			normInputs.put(tuple, norm);
+//			nanCheck(norm, "Normalized Input from " + tuple);
+//		});
 	}
 	
 	public boolean nanCheck(double value, String message) {

@@ -8,7 +8,7 @@ public class Environment {
 		double mRate = 0.05;
 		double mMag = 1.25;
 		double slip = 2;
-		double lRate = 0.01;
+		double lRate = 0.05;
 		int haploidNum = 10;
 		int layers = 3;
 		int nodes = 25;
