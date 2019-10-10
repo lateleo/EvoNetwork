@@ -1,6 +1,10 @@
 package network;
 
+import java.util.Map;
+
 import ecology.Species;
+import staticUtils.CMUtils;
+import utils.ConnTuple;
 
 public class BottomLayer extends Layer {
 //	private static MnistImage[][] images = Species.images;
@@ -11,10 +15,10 @@ public class BottomLayer extends Layer {
 //	private int currentIndex = 0;
 
 	
-	BottomLayer(NeuralNetwork network) {
+	BottomLayer(NeuralNetwork network, Map<ConnTuple, Conn> conns) {
 		super(network);
 		for (int i = 0; i < nodeNum; i++) {
-			nodes.put(i, new BottomNode(network, i));
+			nodes.put(i, new BottomNode(network, conns, i));
 		}
 	}
 
@@ -22,9 +26,11 @@ public class BottomLayer extends Layer {
 		NeuralNetwork network;
 		private int nodeNum;
 
-		BottomNode(NeuralNetwork network, int nodeNum) {
+		BottomNode(NeuralNetwork network, Map<ConnTuple, Conn> conns, int nodeNum) {
 			this.network = network;
 			this.nodeNum = nodeNum;
+			Map<ConnTuple, Conn> nodeConns = CMUtils.subMap(conns, (tuple) -> tuple.iNode() == nodeNum);
+			for (Conn conn : nodeConns.values()) conn.setDownNode(this);
 		}
 		
 		public void run() {

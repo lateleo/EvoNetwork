@@ -1,6 +1,5 @@
 package staticUtils;
 
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,9 +9,6 @@ import java.util.function.Predicate;
 
 import javax.xml.crypto.dsig.TransformException;
 
-import genetics.NodePhene;
-import network.Conn;
-import utils.ConnTuple;
 
 /*
  * This class contains various static methods used for manipulating Collections and Maps.

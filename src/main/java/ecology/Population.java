@@ -3,7 +3,6 @@ package ecology;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -111,9 +110,6 @@ public class Population {
 	}
 
 	public void updateFitness() {
-//		double sizeRMS = 0.0;
-//		for (Organism org : adults) sizeRMS += Math.pow(org.networkSize(),2);
-//		sizeRMS = Math.sqrt(sizeRMS/adults.size());
 		if (maxAge > 0) {
 			for (Organism org : adults) org.updatePerf();
 			SimpleRegression regression = Stats.getRegression(adults);
@@ -166,8 +162,8 @@ public class Population {
 	public void repopulate(boolean forcedMutation) {
 		if (!forcedMutation) {
 			double[] stats = getMeanAndSigma((org)-> org.networkSize());
-			double scalar = Math.min(0.0, 2*meanAccuracy - 1);
-			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1], scalar);
+//			double scalar = Math.min(0.0, 2*(meanAccuracy - 0.5));
+			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1], 1);
 		}
 		while (adults.size() + youth.size() < populationSize) {
 			Organism org1 = null;

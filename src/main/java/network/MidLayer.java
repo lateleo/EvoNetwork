@@ -6,7 +6,6 @@ import java.util.Map;
 
 import genetics.NodePhene;
 import utils.ConnTuple;
-import utils.NodeTuple;
 
 public class MidLayer extends UpperLayer {
 
@@ -31,7 +30,9 @@ public class MidLayer extends UpperLayer {
 		private List<Conn> getUpConns(Map<ConnTuple, Conn> source, NodePhene phene) {
 			List<Conn> conns = new ArrayList<>();
 			for (ConnTuple cTuple : phene.upConns) {
-				conns.add(source.get(cTuple));
+				Conn conn = source.get(cTuple);
+				conn.setDownNode(this);
+				conns.add(conn);
 			}
 			return conns;
 		}

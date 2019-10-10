@@ -30,7 +30,6 @@ public class Organism {
 	
 	public void updatePerf() {
 		age++;
-//		performance = network.getAccuracy()*Math.sqrt(sizeRMS/network.size());
 		performance = network.getAccuracy();
 		regressionPerf = 1/(1 - performance) - 1;
 	}

@@ -1,6 +1,5 @@
 package network;
 
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,14 +16,11 @@ public abstract class UpperNode extends Node {
 	protected int nodeNum;
 	protected double avgOutput = 0;
 	protected double derivative = 0;
-	Map<NodeTuple, Double> norms;
 	Map<NodeTuple, Conn> downConns;
-//	Map<NodeTuple, Node> inputNodes;
 	
 	UpperNode(UpperLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns){
 		this.layer = layer;
 		this.nodeNum = nodeNum;
-		this.norms = layer.normInputs;
 		this.downConns = getDownConns(conns, phene);
 	}
 	
@@ -39,7 +35,7 @@ public abstract class UpperNode extends Node {
 	}
 
 	public void run() {
-		downConns.forEach((tuple, conn) -> output += conn.weight()*norms.get(tuple));
+		downConns.forEach((tuple, conn) -> output += conn.weight()*conn.downNode().output);
 		output = Math.max(0.0, output);
 		layer.nanCheck(output, "Node Output - Layer " + layer.layNum + ", Node " + nodeNum);
 		avgOutput += output;

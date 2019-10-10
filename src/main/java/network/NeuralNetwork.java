@@ -1,7 +1,5 @@
 package network;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,17 +29,17 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	private int size = 0;
 	
 	public boolean nanFound = false;
-	
-	public ArrayList<double[]> allOutputs = new ArrayList<>();
-	
+		
 	public NeuralNetwork(Organism org) {
 		super(Species.comparator);
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
 		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
 		TreeMap<ConnTuple,Conn> conns = getConns(xscript.getConnWeights());
-		setBottom();
+		setBottom(conns);
+		size = conns.size();
 		laysAndNodes.forEach((layNum, nodePhenes) -> {
+			size += nodePhenes.size();
 			if (layNum != -1) {
 				MidLayer layer = new MidLayer(nodePhenes, conns, this, layNum);
 				put(layNum, layer);
@@ -50,7 +48,6 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		Map<Integer,NodePhene> nodePhenes = laysAndNodes.get(-1);
 		TopLayer top = new TopLayer(nodePhenes, conns, this);
 		setTop(top);
-		setSize();
 	}
 
 	@Override
@@ -81,9 +78,10 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		});
 	}
 	
-	void setBottom() {
+	void setBottom(Map<ConnTuple,Conn> conns) {
 		if (bottom == null) {
-			bottom = new BottomLayer(this);
+			Map<ConnTuple,Conn> bottomConns = CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0);
+			bottom = new BottomLayer(this, bottomConns);
 			put(0, bottom);
 		}
 	}
@@ -93,16 +91,6 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 			this.top = top;
 			put(-1, top);
 		}
-	}
-	
-	private void setSize() {
-		forEach((layNum,layer) -> {
-			if (layNum != 0) {
-				size += 1;
-				layer.nodes.forEach((nodeNum,node) -> size += 1);
-				((UpperLayer) layer).inputNodes.forEach((tuple,node) -> size += 3);
-			}
-		});
 	}
 	
 	private TreeMap<ConnTuple,Conn> getConns(TreeMap<ConnTuple,Double> weights) {

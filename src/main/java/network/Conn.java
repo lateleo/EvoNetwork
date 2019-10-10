@@ -6,6 +6,7 @@ package network;
  */
 public class Conn {
 	private UpperNode upNode = null;
+	private Node downNode = null;
 	private double weight;
 	private double oldWeight = 0;
 	
@@ -22,6 +23,16 @@ public class Conn {
 	
 	public UpperNode upNode() {
 		return upNode;
+	}
+	
+	public void setDownNode(Node node) {
+		if (downNode == null) {
+			downNode = node;
+		}
+	}
+	
+	public Node downNode() {
+		return downNode;
 	}
 	
 	public double weight() {
