@@ -3,6 +3,8 @@ package staticUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -31,13 +33,13 @@ public class Stats {
 			data.add(pair);
 		}
 		double[][] dataArray = data.toArray(new double[0][0]);
-		SimpleRegression regression = new SimpleRegression(false);
+		SimpleRegression regression = new SimpleRegression();
 		regression.addData(dataArray);
 		return regression;
 	}
 	
-	public static double getFitnessSigma(List<Organism> orgs) {
-		double[] deltas = orgs.stream().mapToDouble(org -> org.getFitness()).toArray();
+	public static double getFitnessSigma(List<Organism> orgs, ToDoubleFunction<Organism> function) {
+		double[] deltas = orgs.stream().mapToDouble(function).toArray();
 		return Math.sqrt(StatUtils.populationVariance(deltas));
 	}
 

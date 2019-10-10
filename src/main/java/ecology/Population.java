@@ -3,6 +3,8 @@ package ecology;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -13,12 +15,16 @@ import staticUtils.Stats;
 
 public class Population {
 	private static int populationSize = Species.populationSize;
+	private static double invPopSize = 1.0/populationSize;
 	private static int simulatedGenerations = Species.simulatedGenerations;
 	
 	private static Population instance = null;
 
 	List<Organism> adults = new ArrayList<Organism>();
 	List<Organism> youth = new ArrayList<Organism>();
+	
+	private double meanAccuracy = 0;
+	private int maxAge = 0;
 	
 	public static Population getInstance() {
 		return instance;
@@ -46,15 +52,24 @@ public class Population {
 		youth.addAll(adults);
 		adults.clear();
 	}
+	
+	public void buildNetworks() {
+//		System.out.println("Building Networks...");
+		youth.forEach(org -> org.buildNetwork());
+	}
+	
+	public void testGeneration() {
+		NeuralNetwork.testBatch();
+		adults.forEach(org -> org.run());
+		getMeanAccuracy();
+	}
 
 	public void iterate(double target) {
 		int gen = 1;
-		double meanAccuracy = 0.0;
 		while (meanAccuracy < target) {
 			runGeneration();
-			meanAccuracy = getMeanAccuracy();
-			int maxAge = 0;
-			for (Organism org : adults) if (org.age > maxAge) maxAge = org.age;
+			getMeanAccuracy();
+			getMaxAge();
 			System.out.println("Gen " + gen + ": Max Age: " + maxAge + ", Accuracy: " + meanAccuracy);
 			if (meanAccuracy < target) {
 				getNextGeneration();
@@ -63,25 +78,18 @@ public class Population {
 		}
 	}
 	
-	public void testGeneration() {
-		NeuralNetwork.testBatch();
-		adults.forEach(org -> org.run());
-		getMeanAccuracy();
-	}
-	
-	public void buildNetworks() {
-//		System.out.println("Building Networks...");
-		youth.forEach(org -> org.buildNetwork());
-	}
-	
-	public double getMeanAccuracy() {
-		double meanAccuracy = 0.0;
+	public void getMeanAccuracy() {
+		meanAccuracy = 0.0;
 		for (Organism org : adults) {
 			double accuracy = org.getNetwork().getAccuracy();
 			meanAccuracy += accuracy;
 		}
-		meanAccuracy /= populationSize;
-		return meanAccuracy;
+		meanAccuracy *= invPopSize;
+	}
+	
+	public void getMaxAge() {
+		maxAge = 0;
+		for (Organism org : adults) if (org.age > maxAge) maxAge = org.age;
 	}
 
 	public void runGeneration() {
@@ -103,12 +111,23 @@ public class Population {
 	}
 
 	public void updateFitness() {
-		double sizeRMS = 0.0;
-		for (Organism org : adults) sizeRMS += Math.pow(org.networkSize(),2);
-		sizeRMS = Math.sqrt(sizeRMS/adults.size());
-		for (Organism org : adults) org.updatePerfAndAge(sizeRMS);
-		SimpleRegression regression = Stats.getRegression(adults);
-		for (Organism org : adults) org.setFitness(regression);
+//		double sizeRMS = 0.0;
+//		for (Organism org : adults) sizeRMS += Math.pow(org.networkSize(),2);
+//		sizeRMS = Math.sqrt(sizeRMS/adults.size());
+		if (maxAge > 0) {
+			for (Organism org : adults) org.updatePerf();
+			SimpleRegression regression = Stats.getRegression(adults);
+			for (Organism org : adults) org.setFitness(regression);
+		} else {
+			double meanPerf = 0;
+			for (Organism org : adults) {
+				org.updatePerf();
+				meanPerf += org.getRegressionPerf();
+			}
+			meanPerf *= invPopSize;
+			for (Organism org : adults) org.setFitness(meanPerf);
+		}
+		
 	}
 
 	public void sortByFitness() {
@@ -123,7 +142,7 @@ public class Population {
 		for (Organism org : adults) {
 			if (best == null || org.getFitness() > best.getFitness()) best = org;
 		}
-		double[] stats = getFitnessStats();
+		double[] stats = getMeanAndSigma((org) -> org.getFitness());
 		List<Organism> lineUp = new ArrayList<>(adults);
 		List<Organism> survivors = new ArrayList<>();
 		while (adults.size() > populationSize/2) {
@@ -131,7 +150,7 @@ public class Population {
 			for (Organism org : lineUp) {
 				if (adults.size() <= populationSize/2) break;
 				if (org.equals(best)) survivors.add(org);
-				else if (RNG.getGauss(stats[0], stats[1]) <= org.getFitness()) survivors.add(org);
+				else if (RNG.getGauss(stats[1], stats[0]) <= org.getFitness()) survivors.add(org);
 				else adults.remove(org);
 			}
 			lineUp.clear();
@@ -145,14 +164,19 @@ public class Population {
 	}
 
 	public void repopulate(boolean forcedMutation) {
-		double[] stats = getFitnessStats();
+		if (!forcedMutation) {
+			double[] stats = getMeanAndSigma((org)-> org.networkSize());
+			double scalar = Math.min(0.0, 2*meanAccuracy - 1);
+			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1], scalar);
+
+		}
 		while (adults.size() + youth.size() < populationSize) {
 			Organism org1 = null;
 			Collections.shuffle(adults);
 			for (Organism org2 : adults) {
 				if (adults.size() + youth.size() >= populationSize) break;
 				if (org2.equals(org1)) break;
-				if (forcedMutation || RNG.getGauss(stats[0], stats[1]) <= org2.getFitness()) {
+				if (forcedMutation || RNG.getGauss() <= org2.getAttractiveness()) {
 					if (org1 == null) org1 = org2;
 					else {
 						youth.add(new Organism(org1, org2, forcedMutation));
@@ -163,12 +187,12 @@ public class Population {
 		}
 	}
 	
-	public double[] getFitnessStats() {
+	public double[] getMeanAndSigma(ToDoubleFunction<Organism> function) {
 		double mean = 0.0;
-		for (Organism org : adults) mean += org.getFitness();
+		for (Organism org : adults) mean += function.applyAsDouble(org);
 		mean /= adults.size();
-		double sigma = Stats.getFitnessSigma(adults);
-		double[] stats = {sigma,mean};
+		double sigma = Stats.getFitnessSigma(adults, function);
+		double[] stats = {mean, sigma};
 		return stats;
 	}
 	
