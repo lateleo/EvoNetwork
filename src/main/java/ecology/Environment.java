@@ -15,9 +15,9 @@ public class Environment {
 		int conns = 10;
 		int topRedundancy = 5;
 		int bottomRedundancy = 3;
-		int popSize = 20;
+		int popSize = 10;
 		int simGens = 40;
-		int batchSize = 500;
+		int batchSize = 50;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();

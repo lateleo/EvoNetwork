@@ -69,7 +69,9 @@ public class Population {
 			runGeneration();
 			getMeanAccuracy();
 			getMaxAge();
-			System.out.println("Gen " + gen + ": Max Age: " + maxAge + ", Accuracy: " + meanAccuracy);
+//			System.out.println("Gen " + gen + ": Max Age: " + maxAge + ", Accuracy: " + meanAccuracy);
+			System.out.println(meanAccuracy);
+
 			if (meanAccuracy < target) {
 				getNextGeneration();
 				gen++;				
@@ -97,7 +99,7 @@ public class Population {
 		youth.clear();
 		List<Organism> orgs = new ArrayList<>(adults);
 		NeuralNetwork.nextBatch();
-		System.out.println("Running Batch...");
+//		System.out.println("Running Batch...");
 		orgs.forEach(org -> org.run());
 	}
 
@@ -110,6 +112,7 @@ public class Population {
 	}
 
 	public void updateFitness() {
+		if (meanAccuracy >= 0.5) System.out.println("Updating Fitness...");
 		if (maxAge > 0) {
 			for (Organism org : adults) org.updatePerf();
 			SimpleRegression regression = Stats.getRegression(adults);
@@ -127,6 +130,7 @@ public class Population {
 	}
 
 	public void sortByFitness() {
+		if (meanAccuracy >= 0.5) System.out.println("Sorting by Fitness...");
 		adults.sort((a, b) -> {
 			double delta = b.getFitness() - a.getFitness();
 			return (int) (Math.signum(delta) * Math.ceil(Math.abs(delta)));
@@ -134,20 +138,36 @@ public class Population {
 	}
 
 	public void filter() {
+		if (meanAccuracy >= 0.5) System.out.println("Filtering...");
 		Organism best = null;
 		for (Organism org : adults) {
 			if (best == null || org.getFitness() > best.getFitness()) best = org;
 		}
+//		if (meanAccuracy >= 0.5) System.out.println("Best Chosen...");
 		double[] stats = getMeanAndSigma((org) -> org.getFitness());
+//		if (meanAccuracy >= 0.5) System.out.println("Mean and Sigma...");
 		List<Organism> lineUp = new ArrayList<>(adults);
 		List<Organism> survivors = new ArrayList<>();
 		while (adults.size() > populationSize/2) {
 			Collections.shuffle(lineUp);
+//			if (meanAccuracy >= 0.5) System.out.println("Shuffle...");
 			for (Organism org : lineUp) {
 				if (adults.size() <= populationSize/2) break;
-				if (org.equals(best)) survivors.add(org);
-				else if (RNG.getGauss(stats[1], stats[0]) <= org.getFitness()) survivors.add(org);
-				else adults.remove(org);
+				double rng = RNG.getGauss(stats[1], stats[0]);
+//				if (meanAccuracy >= 0.5) System.out.println("RNG: " + rng);
+				if (org.equals(best)) {
+//					if (meanAccuracy >= 0.5) System.out.println("Best Org...");
+					survivors.add(org);
+				}
+				else if (rng <= org.getFitness()) {
+//					if (meanAccuracy >= 0.5) System.out.println("Survivor: " + org.getFitness());
+					survivors.add(org);
+				}
+				else {
+//					if (meanAccuracy >= 0.5) System.out.println("Culled...");
+					adults.remove(org);
+				}
+
 			}
 			lineUp.clear();
 			lineUp.addAll(survivors);
@@ -156,14 +176,18 @@ public class Population {
 	}
 	
 	public void learn() {
+//		if (meanAccuracy >= 0.5) System.out.println("Learning...");
 		for (Organism org : adults) org.learn();
 	}
 
-	public void repopulate(boolean forcedMutation) {
-		if (!forcedMutation) {
+	public void repopulate(boolean forced) {
+		double scalar = 0;
+		if (!forced) {
+//			if (meanAccuracy >= 0.5) System.out.println("Repopulating...");
 			double[] stats = getMeanAndSigma((org)-> org.networkSize());
-//			double scalar = Math.min(0.0, 2*(meanAccuracy - 0.5));
-			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1], 1);
+//			scalar = Math.max(0.0, 2*(meanAccuracy - 0.5));
+//			if (meanAccuracy >= 0.5) System.out.println("Scalar: " + scalar);
+			for (Organism org : adults) org.setAttractiveness(stats[0], stats[1]);
 		}
 		while (adults.size() + youth.size() < populationSize) {
 			Organism org1 = null;
@@ -171,10 +195,14 @@ public class Population {
 			for (Organism org2 : adults) {
 				if (adults.size() + youth.size() >= populationSize) break;
 				if (org2.equals(org1)) break;
-				if (forcedMutation || RNG.getGauss() <= org2.getAttractiveness()) {
+				double rng = RNG.getGauss();
+				if (meanAccuracy >= 0.5) {
+//					System.out.println("RNG: " + rng + "; Attractiveness: " + org2.getAttractiveness());
+				}
+				if (forced || rng <= scalar*org2.getAttractiveness()) {
 					if (org1 == null) org1 = org2;
 					else {
-						youth.add(new Organism(org1, org2, forcedMutation));
+						youth.add(new Organism(org1, org2, forced));
 						org1 = null;
 					}
 				}

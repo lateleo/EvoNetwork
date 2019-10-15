@@ -58,8 +58,8 @@ public class Organism {
 		return fitness;
 	}
 	
-	public void setAttractiveness(double mean, double sigma, double scalar) {
-		attractiveness = scalar*(networkSize() - mean)/Math.max(sigma, Double.MIN_NORMAL);
+	public void setAttractiveness(double mean, double sigma) {
+		attractiveness = (networkSize() - mean)/Math.max(sigma, Double.MIN_NORMAL);
 	}
 	
 	public double getAttractiveness() {
