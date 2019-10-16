@@ -12,7 +12,7 @@ import staticUtils.RNG;
  */
 public class NodeGene extends Gene {
 	private static double mMag = Species.mutationMagnitude;
-	public double xprLevel, layerNum, nodeNum, bias;
+	public double xprLevel, layerNum, nodeNum, bias, learnFactor;
 	Mutation xprMutation = (mutant) -> ((NodeGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
 	Mutation layNumMutation = (gene) -> {
 		NodeGene mutant = (NodeGene) gene;
@@ -23,38 +23,42 @@ public class NodeGene extends Gene {
 		mutant.nodeNum = Math.max(0.0, mutant.nodeNum + RNG.getShiftDouble()*mMag);
 	};
 	Mutation biasMutation = (mutant) -> ((NodeGene) mutant).bias += RNG.getGauss()*mMag;
+	Mutation learnMutation = (mutant) -> ((NodeGene) mutant).learnFactor += RNG.getGauss()*mMag;
 	 
 	
-	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias) {
+	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias, double learnFactor) {
 		this.xprLevel = xprLevel;
 		this.layerNum = layerNum;
 		this.nodeNum = nodeNum;
 		this.bias = bias;
+		this.learnFactor = learnFactor;
 	}
 	
 	public NodeGene(boolean positive, int layerNum, int nodeNum) {
 		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
-		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
 		this.bias = RNG.getGauss();
+		this.learnFactor = RNG.getGauss();
 	}
 	
 	public NodeGene(int layerNum, int nodeNum) {
 		this.xprLevel = RNG.getGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
-		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
 		this.bias = RNG.getGauss();
+		this.learnFactor = RNG.getGauss();
 	}
 	
 	
 	@Override
 	protected Gene clone() {
-		return new NodeGene(this.xprLevel, this.layerNum, this.nodeNum, this.bias);
+		return new NodeGene(this.xprLevel, this.layerNum, this.nodeNum, this.bias, this.learnFactor);
 	}
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, biasMutation}, rand);
+		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, biasMutation, learnMutation}, rand);
 	}
 
 }

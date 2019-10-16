@@ -41,7 +41,6 @@ public abstract class Species {
 	public static double mutationRate;
 	public static double mutationMagnitude;
 	public static double slipFactor;
-	public static double learningRate;
 
 	public static int batchSize, haploidNum, layers, nodes, conns, topRedundancy, bottomRedundancy;
 
@@ -80,13 +79,12 @@ public abstract class Species {
 
 	}
 
-	public static Population createPopulation(double mRate, double mMag, double slip, double lRate, int haploidNum,
+	public static Population createPopulation(double mRate, double mMag, double slip, int haploidNum,
 			int layers, int nodes, int conns, int topRedundancy, int bottomRedundancy, int popSize, int simGens) {
 
 		Species.mutationRate = mRate;
 		Species.mutationMagnitude = mMag;
 		Species.slipFactor = slip;
-		Species.learningRate = lRate;
 		Species.populationSize = popSize;
 		Species.simulatedGenerations = simGens;
 

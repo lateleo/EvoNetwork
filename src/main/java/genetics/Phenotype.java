@@ -14,14 +14,17 @@ public abstract class Phenotype {
 			xprSum = 0.0;
 			for (Pair<Double,Double> pair : valPairs) {
 				xprSum += pair.getFirst();
-			}
-			xprSum /= valPairs.size();				
+			}				
 		}
 		return xprSum;
 	}
 	
 	public double getWeightedAvg() {
-		return valPairs.stream().mapToDouble((pair) -> Math.abs(pair.getFirst())*pair.getSecond()).sum()/xprSum;
+		double sum = 0;
+		for (Pair<Double,Double> pair : valPairs) {
+			sum += pair.getFirst()*pair.getSecond();
+		}
+		return sum/xprSum;
 	}
 
 }

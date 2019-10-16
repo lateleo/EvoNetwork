@@ -24,7 +24,7 @@ public class HomologPair {
 	}
 	
 	public HomologPair copy() {
-		return new HomologPair(this.a.copy(), this.b.copy());
+		return new HomologPair(a.copy(), b.copy());
 	}
 	
 	/*

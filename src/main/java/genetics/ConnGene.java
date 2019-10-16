@@ -41,10 +41,10 @@ public class ConnGene extends Gene {
 	
 	public ConnGene(boolean positive, ConnTuple tuple) {
 		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
-		this.inLayNum = tuple.iLay() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
-		this.inNodeNum = tuple.iNode() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
-		this.outLayNum = tuple.oLay() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
-		this.outNodeNum = tuple.oNode() + RNG.getBoundGauss(0, 1, 0.3, 0.5);
+		this.inLayNum = tuple.iLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.inNodeNum = tuple.iNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.outLayNum = tuple.oLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.outNodeNum = tuple.oNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
 		this.weight = RNG.getGauss();
 	}
 	

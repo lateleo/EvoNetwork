@@ -7,11 +7,13 @@ package network;
 public class Conn {
 	private UpperNode upNode = null;
 	private Node downNode = null;
+	private double initWeight;
 	private double weight;
 	private double oldWeight = 0;
 	
 	
 	public Conn(double weight) {
+		this.initWeight = weight;
 		this.weight = weight;
 	}
 	
@@ -44,8 +46,13 @@ public class Conn {
 	}
 	
 	public void updateWeight(double increase) {
+		if (increase < 0) System.out.println(increase);
 		oldWeight = weight;
 		weight += increase;
+	}
+	
+	public double initWeight() {
+		return initWeight;
 	}
 
 }

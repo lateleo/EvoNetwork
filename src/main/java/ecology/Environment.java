@@ -8,21 +8,22 @@ public class Environment {
 		double mRate = 0.05;
 		double mMag = 1.25;
 		double slip = 2;
-		double lRate = 0.05;
+		
 		int haploidNum = 10;
 		int layers = 3;
 		int nodes = 25;
 		int conns = 10;
+		
 		int topRedundancy = 5;
 		int bottomRedundancy = 3;
 		int popSize = 10;
-		int simGens = 40;
-		int batchSize = 50;
+		int simGens = 10;
+		int batchSize = 500;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();
 		Species.initialize("original", batchSize);
-		Population pop = Species.createPopulation(mRate,  mMag,  slip,  lRate,  haploidNum,  layers,  nodes, conns,
+		Population pop = Species.createPopulation(mRate,  mMag,  slip, haploidNum,  layers,  nodes, conns,
 				topRedundancy, bottomRedundancy, popSize,  simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();

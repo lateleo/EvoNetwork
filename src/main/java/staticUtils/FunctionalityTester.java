@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -36,7 +37,6 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
-		
 
 		
 

@@ -1,6 +1,7 @@
 package network;
 
 
+
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import genetics.Genome;
@@ -9,8 +10,8 @@ import genetics.Genome;
 public class Organism {
 	private double performance;
 	private double regressionPerf;
-	private double fitness;
-	private double attractiveness = 0;
+	private double fitness = 0;
+//	private double attractiveness = 0;
 	public int age = 0;
 	private Genome genome;
 	private NeuralNetwork network;
@@ -46,25 +47,25 @@ public class Organism {
 		return age;
 	}
 	
-	public void setFitness(SimpleRegression regression) {
-		fitness = regressionPerf - regression.predict(age);
-	}
-	
-	public void setFitness(double mean) {
-		fitness = regressionPerf - mean;
+	public void setFitness(double fitness) {
+		this.fitness = fitness;
 	}
 		
 	public double getFitness() {
 		return fitness;
 	}
 	
-	public void setAttractiveness(double mean, double sigma) {
-		attractiveness = (networkSize() - mean)/Math.max(sigma, Double.MIN_NORMAL);
-	}
-	
-	public double getAttractiveness() {
-		return attractiveness;
-	}
+//	public void setAttractiveness(double mean, double sigma) {
+//		attractiveness = (networkSize() - mean)/Math.max(sigma, Double.MIN_NORMAL);
+//	}
+//	
+//	public void setAttractiveness(double attractiveness) {
+//		this.attractiveness = attractiveness;
+//	}
+//	
+//	public double getAttractiveness() {
+//		return attractiveness;
+//	}
 	
 	
 	public NeuralNetwork getNetwork() {

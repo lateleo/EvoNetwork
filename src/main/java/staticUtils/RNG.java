@@ -24,48 +24,44 @@ public class RNG {
 		return ThreadLocalRandom.current().nextDouble();
 	}
 	
-	public static double getPsuedoGauss(double bound) {
-		return (getShiftDouble()+getShiftDouble()+getShiftDouble()+getShiftDouble())*bound/4.0;
-	}
-	
 	public static double getGauss() {
 		return ThreadLocalRandom.current().nextGaussian();
 	}
 	
-	public static double getGauss(double sigma, double mean) {
+	public static double getGauss(double mean, double sigma) {
 		return ThreadLocalRandom.current().nextGaussian()*sigma + mean;
 	}
 	
-	public static double getBoundGauss(double min, double max, double sigma, double mean) {
+	public static double getBoundGauss(double min, double max, double mean, double sigma) {
 		double output;
 		do {
-			output = getGauss(sigma, mean);
+			output = getGauss(mean, sigma);
 		} while (output > max || output < min);
 		return output;		
 	}
 	
 	public static double getBoundGauss(double min, double max, double sigma) {
-		return getBoundGauss(min, max, sigma, 0.0);
+		return getBoundGauss(min, max, 0.0, sigma);
 	}
 	
-	public static double getMinGauss(double min, double sigma, double mean) {
-		return getBoundGauss(min, Double.POSITIVE_INFINITY, sigma, mean);
+	public static double getMinGauss(double min, double mean, double sigma) {
+		return getBoundGauss(min, Double.POSITIVE_INFINITY, mean, sigma);
 	}
 	
 	public static double getMinGauss(double min, double sigma) {
-		return getMinGauss(min, sigma, 0.0);
+		return getMinGauss(min, 0.0, sigma);
 	}
 	
-	public static double getMaxGauss(double max, double sigma, double mean) {
-		return getBoundGauss(Double.NEGATIVE_INFINITY, max, sigma, mean);
+	public static double getMaxGauss(double max, double mean, double sigma) {
+		return getBoundGauss(Double.NEGATIVE_INFINITY, max, mean, sigma);
 	}
 	
 	public static double getMaxGauss(double max, double sigma) {
-		return getMaxGauss(max, sigma, 0.0);
+		return getMaxGauss(max, 0.0, sigma);
 	}
 	
 	public static double getHalfGauss(double sigma) {
-		return Math.abs(getGauss(sigma, 0.0));
+		return Math.abs(getGauss(0.0, sigma));
 	}
 	
 	public static double getHalfGauss() {
@@ -106,7 +102,7 @@ public class RNG {
 		if (sampleSize < population.size()) {
 			List<E> output = new ArrayList<E>();
 			Set<Integer> indices = new HashSet<Integer>();
-			while (indices.size() < sampleSize) indices.add(ThreadLocalRandom.current().nextInt(population.size()));
+			while (indices.size() < sampleSize) indices.add(getIntMax(population.size()));
 			for (Integer index : indices) output.add(population.get(index));
 			return output;
 		} else if (sampleSize == population.size()) {

@@ -23,12 +23,12 @@ public class TopLayer extends UpperLayer {
 		softMax();
 		int label = network.currentImage.getLabel();
 		Node correct = nodes.get(label);
-		correct.output = 1 - correct.output;
+		correct.output = correct.output - 1;
 		for (Node node : nodes.values()) ((TopNode) node).updateError();
 	}
 	
 	private void softMax() {
-		double sum = 0.0;
+		double sum = 0;
 		for (Node node : nodes.values()) sum += node.output;
 		final double finalSum = Math.max(sum, Double.MIN_NORMAL);
 		nanCheck(sum, "Top Layer SoftMax Sum: ");
@@ -41,16 +41,19 @@ public class TopLayer extends UpperLayer {
 	
 	public double getLoss() {
 		double loss = 0;
-		for (Node node : nodes.values()) loss += ((TopNode) node).error;
+		for (Node node : nodes.values()) loss += ((TopNode) node).loss;
 		return loss;
 	}
 	
 	public void reset() {
-		for (Node node : nodes.values()) ((TopNode) node).error = 0;
+		for (Node node : nodes.values()) {
+			((TopNode) node).reset();
+		}
 	}
 	
 	private class TopNode extends UpperNode {
-		double error = 0.0;
+		double error = 0;
+		double loss = 0;
 		
 
 		TopNode(TopLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
@@ -58,9 +61,15 @@ public class TopLayer extends UpperLayer {
 		}
 		
 		public void updateError() {
+			error += output;
 			double sqrOut = output*output;
 			nanCheck(sqrOut, "Top Node Output Squared: ");
-			error += sqrOut;
+			loss += sqrOut;
+		}
+		
+		public void reset() {
+			error = 0;
+			loss = 0;
 		}
 		
 		@Override
