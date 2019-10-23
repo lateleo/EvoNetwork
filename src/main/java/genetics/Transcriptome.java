@@ -154,7 +154,7 @@ public class Transcriptome {
 				TreeMap<Integer,NodePhene> pheneMap = laysAndNodes.get(tuple.oLay());
 				NodePhene nodePhene = pheneMap.get(tuple.oNode());
 				nodePhene.addDown(tuple);
-				connWeights.put(tuple, connPhene.getWeightedAvg());
+				connWeights.put(tuple, connPhene.getAvgWeight());
 			}
 		});
 	}
