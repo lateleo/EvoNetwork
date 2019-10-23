@@ -1,6 +1,5 @@
 package genetics;
 
-import ecology.Species;
 import staticUtils.RNG;
 import utils.ConnTuple;
 
@@ -12,22 +11,15 @@ import utils.ConnTuple;
  * 'weight' indicates the connection's weight value.
  */
 public class ConnGene extends Gene {
-	private static double mMag = Species.mutationMagnitude;
-	public double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
-//	int signature;
+	private static Mutation[] mutations = new Mutation[] {
+			(gene) -> gene.mutateXpr(),
+			(gene) -> ((ConnGene) gene).mutateInput(),
+			(gene) -> ((ConnGene) gene).mutateOutput(),
+			(gene) -> ((ConnGene) gene).mutateWeight()
+	};
 	
-	Mutation xprMutation = (gene) -> ((ConnGene) gene).xprLevel += RNG.getShiftDouble()*mMag;
-	Mutation layNumMutation = (gene) -> {
-		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inLayNum = Math.max(0.0, mutant.inLayNum + RNG.getShiftDouble()*mMag);
-		else mutant.outLayNum = Math.max(-1.0, mutant.outLayNum + RNG.getShiftDouble()*mMag);
-	};
-	Mutation nodeNumMutation = (gene) -> {
-		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inNodeNum = Math.max(0.0, mutant.inNodeNum + RNG.getShiftDouble()*mMag);
-		else mutant.outNodeNum = Math.max(0.0, mutant.outNodeNum + RNG.getShiftDouble()*mMag);		
-	};
-	Mutation weightMutation = (gene) -> ((ConnGene) gene).weight *= 1 + RNG.getGauss()*mMag;
+	public double inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
+	
 	
 	public ConnGene(double xprLevel, double inLayNum, double inNodeNum,
 			double outLayNum, double outNodeNum, double weight) {
@@ -48,7 +40,19 @@ public class ConnGene extends Gene {
 		this.weight = RNG.getGauss();
 	}
 	
-
+	private void mutateInput() {
+		if (RNG.getBoolean()) inLayNum = Math.max(0.0, inLayNum + RNG.getShiftDouble(mMag));
+		else inNodeNum = Math.max(0.0, inNodeNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateOutput() {
+		if (RNG.getBoolean()) outLayNum = Math.max(0.0, outLayNum + RNG.getShiftDouble(mMag));
+		else outNodeNum = Math.max(0.0, outNodeNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateWeight() {
+		weight *= RNG.getGauss(1, mMag);
+	}
 
 	@Override
 	protected Gene clone() {
@@ -58,7 +62,7 @@ public class ConnGene extends Gene {
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, weightMutation}, rand);
+		return mutate(mutations, rand);
 	}
 
 }

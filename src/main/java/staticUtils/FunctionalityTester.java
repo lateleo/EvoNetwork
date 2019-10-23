@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -37,12 +38,8 @@ import network.NeuralNetwork;
 public class FunctionalityTester {
 
 	public static void main(String[] args) throws IOException {
-
-		
-
 		
 	}
-
 
 
 }

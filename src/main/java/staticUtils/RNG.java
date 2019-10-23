@@ -9,11 +9,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RNG {
 
 	
-	public static double getShiftDouble() {
+	public static double getShiftDouble(double scalar) {
 		double out = ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
 		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
 		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		return out/3.0;
+		return scalar*out/3.0;
 	}
 	
 	public static double getDouble() {
@@ -28,8 +28,12 @@ public class RNG {
 		return ThreadLocalRandom.current().nextGaussian();
 	}
 	
+	public static double getGauss(double sigma) {
+		return getGauss()*sigma;
+	}
+	
 	public static double getGauss(double mean, double sigma) {
-		return ThreadLocalRandom.current().nextGaussian()*sigma + mean;
+		return getGauss(sigma) + mean;
 	}
 	
 	public static double getBoundGauss(double min, double max, double mean, double sigma) {

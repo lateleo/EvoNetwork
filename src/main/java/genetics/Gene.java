@@ -1,11 +1,22 @@
 package genetics;
 
+import ecology.Species;
+import staticUtils.RNG;
+
 /* 
  * Abstract parent class for all the different types of Genes.
  * Also contains code for the internal functional interface "Mutation".
 */
 public abstract class Gene {
+	protected static double mMag = Species.mutationMagnitude;
+	
+	public double xprLevel;
 
+
+	protected void mutateXpr() {
+		xprLevel += RNG.getShiftDouble(mMag);
+	}
+	
 	/*
 	 * Abstract method, defined in child classes, used to create an exact copy of a gene, to later be mutated.
 	 */

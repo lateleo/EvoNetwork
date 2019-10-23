@@ -2,7 +2,6 @@ package genetics;
 
 import java.text.DecimalFormat;
 
-import ecology.Species;
 import staticUtils.RNG;
 
 /*
@@ -11,13 +10,12 @@ import staticUtils.RNG;
  * and 'layerNum' indicates which layer the gene encodes.
  */
 public class LayerGene extends Gene {
-	private static double mMag = Species.mutationMagnitude;
-	public double xprLevel, layerNum;
-	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
-	Mutation layNumMutation = (gene) -> {
-		LayerGene mutant = (LayerGene) gene;
-		mutant.layerNum = Math.max(1.0, mutant.layerNum + RNG.getShiftDouble()*mMag);
+	private static Mutation[] mutations = new Mutation[] {
+			(gene) -> gene.mutateXpr(),
+			(gene) -> ((LayerGene) gene).mutateLayNum()
 	};
+	
+	public double layerNum;
 	
 	public LayerGene(double xprLevel, double layerNum) {
 		this.xprLevel = xprLevel;
@@ -34,7 +32,9 @@ public class LayerGene extends Gene {
 		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
 	}
 	
-
+	private void mutateLayNum() {
+		layerNum = Math.max(1.0, layerNum + RNG.getShiftDouble(mMag));
+	}
 
 	@Override
 	protected Gene clone() {
@@ -43,7 +43,7 @@ public class LayerGene extends Gene {
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation}, rand);
+		return mutate(mutations, rand);
 	}
 	
 	public String toString() {

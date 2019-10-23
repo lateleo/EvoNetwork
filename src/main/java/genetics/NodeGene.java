@@ -1,6 +1,5 @@
 package genetics;
 
-import ecology.Species;
 import staticUtils.RNG;
 
 /*
@@ -11,19 +10,15 @@ import staticUtils.RNG;
  * 'bias' indicates the node's individual bias.
  */
 public class NodeGene extends Gene {
-	private static double mMag = Species.mutationMagnitude;
-	public double xprLevel, layerNum, nodeNum, bias, learnFactor;
-	Mutation xprMutation = (mutant) -> ((NodeGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
-	Mutation layNumMutation = (gene) -> {
-		NodeGene mutant = (NodeGene) gene;
-		mutant.layerNum = Math.max(-1.0, mutant.layerNum + RNG.getShiftDouble()*mMag);
+	private static Mutation[] mutations = new Mutation[] {
+			(gene) -> gene.mutateXpr(),
+			(gene) -> ((NodeGene) gene).mutateLayNum(),
+			(gene) -> ((NodeGene) gene).mutateNodeNum(),
+			(gene) -> ((NodeGene) gene).mutateBias(),
+			(gene) -> ((NodeGene) gene).mutateLearnFactor()
 	};
-	Mutation nodeNumMutation = (gene) -> {
-		NodeGene mutant = (NodeGene) gene;
-		mutant.nodeNum = Math.max(0.0, mutant.nodeNum + RNG.getShiftDouble()*mMag);
-	};
-	Mutation biasMutation = (mutant) -> ((NodeGene) mutant).bias += RNG.getGauss()*mMag;
-	Mutation learnMutation = (mutant) -> ((NodeGene) mutant).learnFactor += RNG.getGauss()*mMag;
+	
+	public double layerNum, nodeNum, bias, learnFactor;
 	 
 	
 	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias, double learnFactor) {
@@ -50,6 +45,22 @@ public class NodeGene extends Gene {
 		this.learnFactor = RNG.getGauss();
 	}
 	
+	private void mutateLayNum() {
+		layerNum = Math.max(-1.0, layerNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateNodeNum() {
+		nodeNum = Math.max(0.0, nodeNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateBias() {
+		bias += RNG.getGauss(mMag);
+	}
+	
+	private void mutateLearnFactor() {
+		learnFactor += RNG.getGauss(mMag);
+	}
+	
 	
 	@Override
 	protected Gene clone() {
@@ -58,7 +69,7 @@ public class NodeGene extends Gene {
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, biasMutation, learnMutation}, rand);
+		return mutate(mutations, rand);
 	}
 
 }
