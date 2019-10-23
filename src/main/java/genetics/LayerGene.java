@@ -1,38 +1,40 @@
 package genetics;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import ecology.Species;
-import utils.RNG;
+import staticUtils.RNG;
 
+/*
+ * This class represents genes that determine the presence/absence of additional layers in a network.
+ * 'xprLevel' is a value that roughly represents how strongly a gene is expressed,
+ * and 'layerNum' indicates which layer the gene encodes.
+ */
 public class LayerGene extends Gene {
-	private static double mMag = Species.mutationMagnitude;
-	double xprLevel, layerNum;
-	Mutation xprMutation = (mutant) -> ((LayerGene) mutant).xprLevel += RNG.getShiftDouble()*mMag;
-	Mutation layNumMutation = (gene) -> {
-		LayerGene mutant = (LayerGene) gene;
-		mutant.layerNum = Math.max(1.0, mutant.layerNum + RNG.getShiftDouble()*mMag);
+	private static Mutation[] mutations = new Mutation[] {
+			(gene) -> gene.mutateXpr(),
+			(gene) -> ((LayerGene) gene).mutateLayNum()
 	};
+	
+	public double layerNum;
 	
 	public LayerGene(double xprLevel, double layerNum) {
 		this.xprLevel = xprLevel;
 		this.layerNum = layerNum;
 	}
 	
-	public static ArrayList<Gene> generate(int layers, int diploidNum){
-		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = layers*diploidNum/2;
-		double sigma = layers/2.0;
-		double xprShift = 2/diploidNum;
-		while (genes.size() < 4*geneNum) {
-			double layNum = RNG.getMinGauss(1.0, sigma, 1+sigma);
-			genes.add(new LayerGene(RNG.getGauss(0.5,xprShift), layNum));
-		}
-		return genes;
-	};
+	public LayerGene(boolean positive, int layerNum) {
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+	}
+	
+	public LayerGene(int layerNum) {
+		this.xprLevel = RNG.getGauss();
+		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+	}
+	
+	private void mutateLayNum() {
+		layerNum = Math.max(1.0, layerNum + RNG.getShiftDouble(mMag));
+	}
 
 	@Override
 	protected Gene clone() {
@@ -41,7 +43,7 @@ public class LayerGene extends Gene {
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation}, rand);
+		return mutate(mutations, rand);
 	}
 	
 	public String toString() {

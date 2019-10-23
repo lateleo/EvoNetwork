@@ -2,29 +2,50 @@ package genetics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import org.apache.commons.math3.util.Pair;
 
 import ecology.Species;
+import network.Conn;
 import utils.ConnTuple;
 
+/*
+ * This class is where the bulk of the computations are done to create a Neural Network object from a genome.
+ * When a Transcriptome object is created (which should only be done using a genome object's 'transcribe()' method),
+ * it sorts all the genes in the given genome based on their class, and then expresses those genes, eventually creating
+ * two Map objects that will persist as long as the Transcriptome does:
+ * - 'laysAndNodes', a TreeMap describing the layers that exist in the Network, the nodes that exist in each layer,
+ * 	and the biases for each node
+ * - 'connWeights', a TreeMap describing all connections in the Network, and their weights.
+ * These two will eventually be used by the Organism to create the actual NeuralNetwork.
+ */
 public class Transcriptome {
 	private static int bottomNodes = Species.bottomNodes;
 	private static int topNodes = Species.topNodes;
+	private static Comparator<Integer> comparator = Species.comparator;
 	
-	private Map<Integer,Map<Integer,Double>> laysAndNodes = new TreeMap<>();
-	private Map<ConnTuple,Double> connWeights = new Hashtable<>();
+
+	private TreeMap<Integer, TreeMap<Integer, NodePhene>> laysAndNodes = new TreeMap<>(comparator);
+	private TreeMap<ConnTuple, Double> connWeights = new TreeMap<>();
+
+	/*
+	 * Public getter for the 'laysAndNodes' map
+	 */
+	public TreeMap<Integer, TreeMap<Integer, NodePhene>> getLaysAndNodes() {
+		return laysAndNodes;
+	}
+
+	/*
+	 * Public getter for the 'connWeights' map
+	 */
+	public TreeMap<ConnTuple, Double> getConnWeights() {
+		return connWeights;
+	}
 	
 	/*
 	 * IMPORTANT: This constructor should *only* be called by the Genome.transcribe() method.
@@ -35,27 +56,24 @@ public class Transcriptome {
 		List<LayerGene> layGenes = new ArrayList<LayerGene>();
 		List<NodeGene> nodeGenes = new ArrayList<NodeGene>();
 		List<ConnGene> connGenes = new ArrayList<ConnGene>();
+
+//		Gathers all the genes from all the chromosomes in the genome, then sorts them based on Child Class.
 		for (Gene gene : poolAllGenes(genome)) {
 			if (gene.getClass().equals(LayerGene.class)) layGenes.add((LayerGene) gene);
 			else if (gene.getClass().equals(NodeGene.class)) nodeGenes.add((NodeGene) gene);
 			else if (gene.getClass().equals(ConnGene.class)) connGenes.add((ConnGene) gene);
 		}
-		Set<Integer> layerSet = parseLayGenes(layGenes);
-		TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap = parseNodeGenes(nodeGenes, layerSet);
-		TreeMap<ConnTuple,List<Triplet>> tripletMap = parseConnGenes(connGenes, tupleMap);
-		removeOrphans(tripletMap.navigableKeySet(), tupleMap);
-		combineTriplets(tripletMap);
 
+		parseLayGenes(layGenes);
+		fillNodes(nodeGenes);
+		filterNodes();
+		parseConnGenes(connGenes);
+		removeOrphans(connWeights.navigableKeySet());
 	}
 	
-	public Map<Integer, Map<Integer, Double>> getLaysAndNodes() {
-		return laysAndNodes;
-	}
-
-	public Map<ConnTuple, Double> getConnWeights() {
-		return connWeights;
-	}
-	
+	/*
+	 * Called by the Constructor to pool all the non-Centromere genes from a genome into a single, 1-Dimensional List
+	 */
 	private List<Gene> poolAllGenes(Genome genome) {
 		List<Gene> genes = new ArrayList<Gene>();
 		Consumer<HomologPair> chromConsumer = (pair) -> genes.addAll(pair.getGenes());
@@ -64,8 +82,12 @@ public class Transcriptome {
 	}
 	
 //	LayerGene Stuff
-	private Set<Integer> parseLayGenes(List<LayerGene> layGenes) {
-		TreeMap<Integer,List<Double>> layerMap = new TreeMap<Integer,List<Double>>();
+	/*
+	 * Goes through all LayerGenes, combines them by layer number, removes those with total xprLevels <= 0,
+	 * and returns a Set of Integers representing the remaining layers.
+	 */
+	private void parseLayGenes(List<LayerGene> layGenes) {
+		TreeMap<Integer,List<Double>> layerMap = new TreeMap<Integer,List<Double>>(comparator);
 		for (LayerGene gene : layGenes) {
 			int layNum = (int) gene.layerNum;
 			if (layerMap.containsKey(layNum)) {
@@ -76,209 +98,146 @@ public class Transcriptome {
 				layerMap.put(layNum, new ArrayList<>(Arrays.asList(gene.xprLevel)));
 			}
 		}
-		layerMap.entrySet().removeIf((entry) -> entry.getValue().stream().mapToDouble((d) -> d).sum() < 0);
-		layerMap.put(-1, null);
-		return layerMap.keySet();
+		layerMap.forEach((layNum,xprVals) -> {
+			if (xprVals.stream().mapToDouble((d) -> d).sum() >= 0.0) {
+				laysAndNodes.put(layNum, new TreeMap<Integer,NodePhene>());
+			}
+		});
+		laysAndNodes.put(-1, new TreeMap<Integer,NodePhene>());
 	}
 	
 //	NodeGene Stuff
-	private TreeMap<Integer,TreeMap<Integer,TupleSet>> parseNodeGenes(List<NodeGene> nodeGenes, Set<Integer> layerSet) {
-		Map<Integer,Map<Integer,PheneDummy>> nodePhenes = fillNodes(nodeGenes, layerSet);
-		return filterNodes(nodePhenes);
-	}
-
-	private Map<Integer,Map<Integer,PheneDummy>> fillNodes(List<NodeGene> nodeGenes, Set<Integer> layerSet) {
-		Map<Integer,Map<Integer,PheneDummy>> nodePhenes = new Hashtable<Integer,Map<Integer,PheneDummy>>();
+	private void fillNodes(List<NodeGene> nodeGenes) {
 		for (NodeGene gene: nodeGenes) {
-			int layNum = (int) gene.layerNum;
-			if (!layerSet.contains(layNum)) continue;
-			if (!nodePhenes.containsKey(layNum)) nodePhenes.put(layNum, new Hashtable<Integer,PheneDummy>());
-			Map<Integer,PheneDummy> layerMap = nodePhenes.get(layNum);
+			int layNum = (int) Math.floor(gene.layerNum);
+			if (!laysAndNodes.containsKey(layNum)) continue;
+			Map<Integer,NodePhene> pheneMap = laysAndNodes.get(layNum);
 			int nodeNum = (int) gene.nodeNum;
-			if (!layerMap.containsKey(nodeNum)) layerMap.put(nodeNum, new PheneDummy());
-			layerMap.get(nodeNum).addGene(gene);
+			if (!pheneMap.containsKey(nodeNum)) pheneMap.put(nodeNum, new NodePhene());
+			pheneMap.get(nodeNum).addGene(gene);
 		}
-		return nodePhenes;
 	}
 	
-	private TreeMap<Integer,TreeMap<Integer,TupleSet>> filterNodes(Map<Integer,Map<Integer,PheneDummy>> nodePhenes) {
-		TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap = new TreeMap<Integer,TreeMap<Integer,TupleSet>>();
-		nodePhenes.forEach((layNum, nodeDummies) -> {
-			nodeDummies.entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0 && layNum != -1);
-			Map<Integer,Double> biasMap = new Hashtable<Integer,Double>();
-			TreeMap<Integer,TupleSet> nodeTuples = new TreeMap<Integer,TupleSet>();
-			nodeDummies.forEach((nodeNum, phene) -> {
-				biasMap.put(nodeNum, phene.getWeightedAvg());
-				nodeTuples.put(nodeNum, new TupleSet());
-			});
-			laysAndNodes.put(layNum, biasMap);
-			tupleMap.put(layNum,  nodeTuples);
+	private void filterNodes() {
+		laysAndNodes.forEach((layNum, pheneMap) -> {
+			if (layNum == -1) {
+				for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) {
+					if (!pheneMap.containsKey(nodeNum)) pheneMap.put(nodeNum, new NodePhene());
+				}
+			}
+			else {
+				pheneMap.entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0.0);
+				pheneMap.forEach((nodeNum, phene) -> phene.setBias());
+			}
 		});
-		return tupleMap;
 	}
 	
 //	ConnGene Stuff
-	private TreeMap<ConnTuple,List<Triplet>> parseConnGenes(List<ConnGene> connGenes,
-			TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap) {
-		TreeMap<ConnTuple,List<Triplet>> tripletMap = new TreeMap<ConnTuple,List<Triplet>>();
+	/*
+	 * Creates a Map of PheneDummy objects, which represent the phenotype for a given connection, using ConnTuple objects as keys.
+	 * Then filters the PheneDummy map based on xprLevel, and uses the remaining connections to populate both the TupleSet objects
+	 * in 'tupleMap', and a new Map 'connWeights' with the same ConnTuple keys, but a single Double (representing the connection weight)
+	 * as a value.
+	 * (PheneDummy is defined below, and more information on its functionality is provided there).
+	 */
+	private void parseConnGenes(List<ConnGene> connGenes) {
+		TreeMap<ConnTuple, ConnPhene> connPhenes = new TreeMap<ConnTuple,ConnPhene>();
 		for (ConnGene gene : connGenes) {
-			ConnTuple tuple = new ConnTuple(gene);
-			if (!validTuple(tuple)) continue;
-			Triplet triplet = new Triplet(gene);
-			if (tripletMap.containsKey(tuple)) tripletMap.get(tuple).add(triplet);
-			else tripletMap.put(tuple, new ArrayList<>(Arrays.asList(triplet)));
+			ConnTuple connTuple = new ConnTuple(gene);
+			if (!isConnTupleValid(connTuple)) continue;
+			if (!connPhenes.containsKey(connTuple)) connPhenes.put(connTuple, new ConnPhene());
+			connPhenes.get(connTuple).addGene(gene);
 		}
-		Predicate<Map.Entry<ConnTuple, List<Triplet>>> filter = (entry) -> {
-			boolean valid = entry.getValue().stream().mapToDouble((trip) -> trip.xprLevel).sum() > 0;
-			ConnTuple tuple = entry.getKey();
-			if (valid) {
-				if (tuple.iLay() != 0) tupleMap.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
-				if (tuple.oLay() != -1) tupleMap.get(tuple.oLay()).get(tuple.oNode()).addDown(tuple);
+		connPhenes.forEach((tuple,connPhene) -> {
+			if (connPhene.getXprSum() > 0) {
+				if (tuple.iLay() != 0) laysAndNodes.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
+				TreeMap<Integer,NodePhene> pheneMap = laysAndNodes.get(tuple.oLay());
+				NodePhene nodePhene = pheneMap.get(tuple.oNode());
+				nodePhene.addDown(tuple);
+				connWeights.put(tuple, connPhene.getWeightedAvg());
 			}
-			return !valid;
-		};
-		tripletMap.entrySet().removeIf(filter);
-		return tripletMap;
+		});
 	}
 	
-	private boolean validTuple(ConnTuple tup) {
-		if (tup.oLay() == 0) return false;
-		if (tup.oLay() > 0 && tup.oLay() < tup.iLay()) return false;
-		boolean bottomIn = false;
-		boolean topOut = false;
-		if (tup.iLay() == 0) {
-			if (tup.iNode() >= bottomNodes) bottomIn = true;
+/*	private void loadReasons() {
+		validityMap.put("Top/Bottom in wrong position: ", new TreeSet<>());
+		validityMap.put("Input Layer Matches Output: ", new TreeSet<>());
+		validityMap.put("Bottom NodeNum > " + bottomNodes + ": \t", new TreeSet<>());
+		validityMap.put("Top NodeNum > " + topNodes + ": \t", new TreeSet<>());
+		validityMap.put("Tuple pointing downwards: ", new TreeSet<>());
+		validityMap.put("Non-Existent Input Layer: ", new TreeSet<>());
+		validityMap.put("Non-Existent Input Node: ", new TreeSet<>());
+		validityMap.put("Non-Existent Output Layer: ", new TreeSet<>());
+		validityMap.put("Non-Existent Output Node: ", new TreeSet<>());
+		validityMap.put("Valid: \t\t\t", new TreeSet<>());
+	}
+	*/
+	
+	/*
+	 * checks to make sure a given tuple is valid (IE, the connection doesn't point backwards, and both input and output nodes exist)
+	 */
+	private boolean isConnTupleValid(ConnTuple tuple) {
+		if (tuple.iLay() == -1 || tuple.oLay() == 0) return false;
+		if (tuple.iLay() == tuple.oLay()) return false;
+		boolean iValid = false;
+		boolean oValid = false;
+		if (tuple.iLay() == 0) {
+			if (tuple.iNode() < bottomNodes) iValid = true;
 			else return false;
 		}
-		if (tup.oLay() == -1) {
-			if (tup.oNode() < topNodes) topOut = true;
+		if (tuple.oLay() == -1) {
+			if (tuple.oNode() < topNodes) oValid = true;
 			else return false;
 		}
-		if (!bottomIn && (!laysAndNodes.containsKey(tup.iLay()) || !laysAndNodes.get(tup.iLay()).containsKey(tup.iNode()))) return false;
-		if (!topOut && (!laysAndNodes.containsKey(tup.oLay()) || !laysAndNodes.get(tup.oLay()).containsKey(tup.oNode()))) return false;
-		return true;
+		if (!(iValid && oValid)) {
+			if (!(comparator.compare(tuple.iLay(), tuple.oLay()) < 0)) return false;
+			if (!iValid) {
+				if (!laysAndNodes.containsKey(tuple.iLay())) return false;
+				else if (!laysAndNodes.get(tuple.iLay()).containsKey(tuple.iNode())) return false;
+				else iValid = true;
+			}
+			if (!oValid) {
+				if (!laysAndNodes.containsKey(tuple.oLay())) return false;
+				else if (!laysAndNodes.get(tuple.oLay()).containsKey(tuple.oNode())) return false;
+				else oValid = true;
+			}
+		}
+		return iValid && oValid;
 	}
 
 //	Orphan Stuff
-	private void removeOrphans(NavigableSet<ConnTuple> tuples, TreeMap<Integer,TreeMap<Integer,TupleSet>> tupleMap) {
-		tupleMap.entrySet().removeIf(entry -> {
+	/*
+	 * Used to remove orphans. An orphan node is a node that either has no connections leading into it,
+	 * or leading out of it. An orphan layer is simply a layer with no non-orphan nodes.
+	 * Removal of orphans is done at this step to speed up runtime when the Network is eventually built.
+	 */
+	private void removeOrphans(NavigableSet<ConnTuple> connTuples) {
+		laysAndNodes.entrySet().removeIf(entry -> {
 			int layNum = entry.getKey();
 			if (layNum == -1) return false;
-			return isLayerOrphan(tuples, layNum, tupleMap.get(layNum), true);
+			return isLayerOrphan(connTuples, laysAndNodes.get(layNum), true);
 		});
-		tupleMap.descendingMap().entrySet().removeIf(entry -> {
+		laysAndNodes.descendingMap().entrySet().removeIf(entry -> {
 			int layNum = entry.getKey();
 			if (layNum == -1) return false;
-			return isLayerOrphan(tuples, layNum, tupleMap.get(layNum), false);
+			return isLayerOrphan(connTuples, laysAndNodes.get(layNum), false);
 		});
-		for (TupleSet set : tupleMap.get(-1).values()) set.clean(tuples);
+		for (NodePhene setPair : laysAndNodes.get(-1).values()) setPair.downConns.retainAll(connTuples);
 	}
 	
-	private boolean isLayerOrphan(NavigableSet<ConnTuple> tuples, int layNum, TreeMap<Integer,TupleSet> tupleMap, boolean direction) {
-		tupleMap.entrySet().removeIf((entry) -> {
-			TupleSet tupleSet = entry.getValue();
-			boolean isNodeOrphan = isNodeOrphan(tuples, tupleSet, direction);
-			if (isNodeOrphan){
-				Set<ConnTuple> otherSet = (direction)? tupleSet.downConns : tupleSet.upConns;
-				tuples.removeIf(tuple -> otherSet.contains(tuple));
+	private boolean isLayerOrphan(NavigableSet<ConnTuple> connTuples, TreeMap<Integer,NodePhene> pheneMap, boolean direction) {
+		pheneMap.entrySet().removeIf((entry) -> {
+			NodePhene nodePhene = entry.getValue();
+			Set<ConnTuple> connSet = (direction)? nodePhene.downConns : nodePhene.upConns;
+			connSet.retainAll(connTuples);
+			boolean orphanNode = connSet.isEmpty();
+			if (orphanNode){
+				Set<ConnTuple> otherSet = (direction)? nodePhene.upConns : nodePhene.downConns;
+				connTuples.removeAll(otherSet);
 			}
-			return isNodeOrphan;
+			return orphanNode;
 		});
-		return tupleMap.isEmpty();
-	}
-	
-	private boolean isNodeOrphan(NavigableSet<ConnTuple> tuples, TupleSet tupleSet, boolean direction) {
-		tupleSet.clean(tuples);
-		Set<ConnTuple> set = (direction)? tupleSet.upConns : tupleSet.downConns;
-		return set.isEmpty();
-	}
-	
-
-
-	
-	private Map<Integer,Double> filterFams(Map<Integer,PheneDummy> pheneMap) {
-		Map<Integer,Double> famWeights = new Hashtable<Integer,Double>();
-		pheneMap.entrySet().removeIf((entry)-> entry.getValue().getXprSum() < 0);
-		pheneMap.forEach((sign, dummy) -> famWeights.put(sign, dummy.getWeightedAvg()));
-		return famWeights;
-	}
-	
-	private void applyFamWeights(Map<Integer,Double> famWeights, List<Triplet> tripletList) {
-		famWeights.forEach((signFilter, weight) -> {
-			List<Triplet> matches = new ArrayList<Triplet>(tripletList);
-			matches.removeIf((triplet) -> triplet.match(signFilter));
-			matches.forEach((triplet) -> triplet.addWeight(weight));
-		});
-	}
-	
-	private void combineTriplets(Map<ConnTuple,List<Triplet>> tripletMap) {
-		tripletMap.forEach((tuple, triplets) -> {
-			double xprSum = triplets.stream().mapToDouble((triplet) -> triplet.xprLevel).sum();
-			double finalWeight = triplets.stream().mapToDouble((triplet) -> triplet.getFinalWeight()).sum()/xprSum;
-			connWeights.put(tuple, finalWeight);
-		});
-	}
-	
-//	HELPER CLASSES
-	
-//	Used briefly in parsing NodeGenes.
-	private class PheneDummy {
-		List<Double> xprVals = new ArrayList<Double>();
-		List<Pair<Double, Double>> valPairs = new ArrayList<Pair<Double,Double>>();
-		
-		void addGene(NodeGene gene) {
-			xprVals.add(gene.xprLevel);
-			valPairs.add(new Pair<Double,Double>(gene.xprLevel, gene.bias));
-		}
-
-		
-		double getXprSum() {
-			return xprVals.stream().mapToDouble((d) -> d).sum();
-		}
-		
-		double getWeightedAvg() {
-			return valPairs.stream().mapToDouble((pair) -> pair.getFirst()*pair.getSecond()).sum()/getXprSum();
-		}
-	}
-	
-//	Used in ConnGene and FamGene parsing, eventually replaced by single weight value
-	private class Triplet {
-		int sign;
-		double weight, xprLevel;
-		
-		Triplet(ConnGene gene) {
-			this.weight = gene.weight;
-			this.xprLevel = gene.xprLevel;
-		}
-		
-		void addWeight(double weight) {
-			this.weight += weight;
-		}
-		
-		double getFinalWeight() {
-			return weight*xprLevel;
-		}
-		
-		boolean match(int signFilter) {
-			return (sign & signFilter) > 0L;
-		}
+		return pheneMap.isEmpty();
 	}
 
-//	Used for Orphan removal, but created/added to in earlier steps for efficiency
-	private class TupleSet {
-		Set<ConnTuple> upConns = new HashSet<>();
-		Set<ConnTuple> downConns = new HashSet<>();
-		
-		void addUp(ConnTuple tuple) {
-			upConns.add(tuple);
-		}
-		
-		void addDown(ConnTuple tuple) {
-			upConns.add(tuple);
-		}
-		
-		void clean(Set<ConnTuple> tuples) {
-			upConns.removeIf(tuple -> !tuples.contains(tuple));
-		}
-	}
 }

@@ -1,97 +1,68 @@
 package genetics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import staticUtils.RNG;
+import utils.ConnTuple;
 
-import ecology.Species;
-import utils.RNG;
-
+/*
+ * This class represents genes that determine the presence/absence and weight of connections between nodes in a network.
+ * 'xprLevel' is a value that roughly represents how strongly a gene is expressed,
+ * 'inLayNum' and 'inNodeNum' indicate the layer and node numbers, respectively, of the node whose output is to be used,
+ * 'outLayNum' and 'outNodeNum' indicate the layer and node numbers, respectively, of the node taking in said output,
+ * 'weight' indicates the connection's weight value.
+ */
 public class ConnGene extends Gene {
-	private static int bottomNodes = Species.bottomNodes;
-	private static int topNodes = Species.topNodes;
-	private static double mMag = Species.mutationMagnitude;
-	public double xprLevel, inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
-	int signature;
+	private static Mutation[] mutations = new Mutation[] {
+			(gene) -> gene.mutateXpr(),
+			(gene) -> ((ConnGene) gene).mutateInput(),
+			(gene) -> ((ConnGene) gene).mutateOutput(),
+			(gene) -> ((ConnGene) gene).mutateWeight()
+	};
 	
-	Mutation xprMutation = (gene) -> ((ConnGene) gene).xprLevel += RNG.getShiftDouble()*mMag;
-	Mutation layNumMutation = (gene) -> {
-		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inLayNum = Math.max(0.0, mutant.inLayNum + RNG.getShiftDouble()*mMag);
-		else mutant.outLayNum = Math.max(-1.0, mutant.outLayNum + RNG.getShiftDouble()*mMag);
-	};
-	Mutation nodeNumMutation = (gene) -> {
-		ConnGene mutant = (ConnGene) gene;
-		if (RNG.getBoolean()) mutant.inNodeNum = Math.max(0.0, mutant.inNodeNum + RNG.getShiftDouble()*mMag);
-		else mutant.outNodeNum = Math.max(0.0, mutant.outNodeNum + RNG.getShiftDouble()*mMag);		
-	};
-	Mutation weightMutation = (gene) -> ((ConnGene) gene).weight *= 1 + RNG.getGauss()*mMag;
-	Mutation signMutation = (gene) -> {
-		ConnGene mutant = (ConnGene) gene;
-		mutant.signature = mutant.signature ^ (int) Math.pow(2, RNG.getBit());
-	};
+	public double inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
+	
 	
 	public ConnGene(double xprLevel, double inLayNum, double inNodeNum,
-			double outLayNum, double outNodeNum, double weight, int signature) {
+			double outLayNum, double outNodeNum, double weight) {
 		this.xprLevel = xprLevel;
 		this.inLayNum = inLayNum;
 		this.inNodeNum = inNodeNum;
 		this.outLayNum = outLayNum;
 		this.outNodeNum = outNodeNum;
 		this.weight = weight;
-		this.signature = signature;
 	}
 	
-	public static ArrayList<Gene> generate(int layers, int nodes, int conns, int diploidNum, int signBits) {
-		ArrayList<Gene> genes = new ArrayList<>();
-		int geneNum = conns;
-		double laySigma = layers/2.5;
-		double nodeSigma = nodes/2.0;
-		double xprShift = 1/diploidNum;
-		for (int i = 0; i<bottomNodes; i++) {
-			double oLay = RNG.getMinGauss(-1.0, 1+laySigma, 2+laySigma);
-			double oNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			int[] bits = new int[signBits];
-			for (int b = 0; b < bits.length; b++) bits[b] = RNG.getBit();
-			int sign = Arrays.stream(bits).sum();
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), 0.5, i+0.5, oLay, oNode, RNG.getGauss(), sign));			
-		}
-		for (int i = 0; i<topNodes; i++) {
-			double iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			double iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			int[] bits = new int[signBits];
-			for (int b = 0; b < bits.length; b++) bits[b] = RNG.getBit();
-			int sign = Arrays.stream(bits).sum();
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, -0.5, i+0.5, RNG.getGauss(), sign));
-			iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			bits = new int[signBits];
-			for (int b = 0; b < bits.length; b++) bits[b] = RNG.getBit();
-			sign = Arrays.stream(bits).sum();
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, -0.5, i+0.5, RNG.getGauss(), sign));	
-		}
-		while (genes.size() < 2*geneNum) {
-			double iLay = RNG.getMinGauss(0.0, laySigma, 1+laySigma);
-			double iNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			double oLay = RNG.getMinGauss(-1.0, 1+laySigma, 2+laySigma);
-			double oNode = RNG.getMinGauss(0.0, nodeSigma, 1+nodeSigma);
-			int[] bits = new int[signBits];
-			for (int i = 0; i < bits.length; i++) bits[i] = RNG.getBit();
-			int sign = Arrays.stream(bits).sum();
-			genes.add(new ConnGene(RNG.getGauss(0.5,xprShift), iLay, iNode, oLay, oNode, RNG.getGauss(), sign));
-		}
-		return genes;	
+	public ConnGene(boolean positive, ConnTuple tuple) {
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
+		this.inLayNum = tuple.iLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.inNodeNum = tuple.iNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.outLayNum = tuple.oLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.outNodeNum = tuple.oNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.weight = RNG.getGauss();
+	}
+	
+	private void mutateInput() {
+		if (RNG.getBoolean()) inLayNum = Math.max(0.0, inLayNum + RNG.getShiftDouble(mMag));
+		else inNodeNum = Math.max(0.0, inNodeNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateOutput() {
+		if (RNG.getBoolean()) outLayNum = Math.max(0.0, outLayNum + RNG.getShiftDouble(mMag));
+		else outNodeNum = Math.max(0.0, outNodeNum + RNG.getShiftDouble(mMag));
+	}
+	
+	private void mutateWeight() {
+		weight *= RNG.getGauss(1, mMag);
 	}
 
 	@Override
 	protected Gene clone() {
 		return new ConnGene(this.xprLevel, this.inLayNum, this.inNodeNum, 
-				this.outLayNum, this.outNodeNum, this.weight, this.signature);
+				this.outLayNum, this.outNodeNum, this.weight);
 	}
 
 	@Override
 	public Gene mutate(double rand) {
-		return mutate(new Mutation[] {xprMutation, layNumMutation, nodeNumMutation, weightMutation}, rand);
+		return mutate(mutations, rand);
 	}
 
 }

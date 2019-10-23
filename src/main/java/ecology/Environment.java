@@ -8,20 +8,23 @@ public class Environment {
 		double mRate = 0.05;
 		double mMag = 1.25;
 		double slip = 2;
-		int diploidNum = 10;
+		
+		int haploidNum = 10;
 		int layers = 3;
 		int nodes = 25;
-		int conns = 800;
-		int signBits = 5;
-		int fams = 0;
+		int conns = 10;
+		
+		int topRedundancy = 5;
+		int bottomRedundancy = 3;
 		int popSize = 10;
-		int simGens = 20;
-		int batches = 600;
+		int simGens = 10;
+		int batchSize = 500;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.nanoTime();
-		Species.initialize("original", batches);
-		Population pop = Species.createPopulation(mRate, mMag, slip, diploidNum, layers, nodes, conns, signBits, fams, popSize, simGens);
+		Species.initialize("original", batchSize);
+		Population pop = Species.createPopulation(mRate,  mMag,  slip, haploidNum,  layers,  nodes, conns,
+				topRedundancy, bottomRedundancy, popSize,  simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();
 		pop.iterate(targetAccuracy);
@@ -39,7 +42,7 @@ public class Environment {
 			minutes -= 60;
 		}
 		System.out.println("Training Done: " + hours + "h" + minutes + "m" + seconds + "s");
-		pop.testGeneration();
+//		pop.testGeneration();
 		System.out.println("Done.");
 	}
 

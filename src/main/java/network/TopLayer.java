@@ -1,38 +1,87 @@
 package network;
 
-import java.util.Hashtable;
 import java.util.Map;
 
-import ecology.Species;
+import genetics.NodePhene;
 import utils.ConnTuple;
 
-public class TopLayer extends Layer {
-	private static int nodeCount = Species.topNodes;
-	double[] outputs = new double[nodeCount];
+public class TopLayer extends UpperLayer {
 	
-	public TopLayer(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights, NeuralNetwork network) {
-		super(nodeBiases, inputConnWeights, network);
+	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Conn> conns, NeuralNetwork network) {
+		super(nodePhenes, conns, network, -1);
 	}
 	
-	protected void fillNodes(Map<Integer,Double> nodeBiases, Map<ConnTuple,Double> inputConnWeights) {
-		if (nodeBiases == null) nodeBiases = new Hashtable<>();
-		for (int i = 0; i < nodeCount; i++) {
-			if (!nodeBiases.containsKey(i)) {
-				nodeBiases.put(i, 0.0);
-			}
-		}
-		super.fillNodes(nodeBiases, inputConnWeights);
+
+	@Override
+	protected UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
+		return new TopNode(this, nodeNum, phene, conns);
 	}
-	
+
 	@Override
 	public void run() {
 		super.run();
-		double sum = nodes.values().stream().mapToDouble(d->d.output).sum();
-		nodes.forEach((nodeNum,node)-> outputs[nodeNum] = node.output/sum);
+		softMax();
+		int label = network.currentImage.getLabel();
+		Node correct = nodes.get(label);
+		correct.output = correct.output - 1;
+		for (Node node : nodes.values()) ((TopNode) node).updateError();
 	}
 	
-	@Override
-	public void backProp() {
+	private void softMax() {
+		double sum = 0;
+		for (Node node : nodes.values()) sum += node.output;
+		final double finalSum = Math.max(sum, Double.MIN_NORMAL);
+		nanCheck(sum, "Top Layer SoftMax Sum: ");
+		nodes.forEach((nodeNum,node) -> {
+			node.output /= finalSum;
+			nanCheck(node.output, "Top Node Post-SoftMax: " + nodeNum);
+
+		});
+	}
+	
+	public double getLoss() {
+		double loss = 0;
+		for (Node node : nodes.values()) loss += ((TopNode) node).loss;
+		return loss;
+	}
+	
+	public void reset() {
+		for (Node node : nodes.values()) {
+			((TopNode) node).reset();
+		}
+	}
+	
+	private class TopNode extends UpperNode {
+		double error = 0;
+		double loss = 0;
+		
+
+		TopNode(TopLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
+			super(layer, nodeNum, phene, conns);
+		}
+		
+		public void updateError() {
+			error += output;
+			double sqrOut = output*output;
+			nanCheck(sqrOut, "Top Node Output Squared: ");
+			loss += sqrOut;
+		}
+		
+		public void reset() {
+			error = 0;
+			loss = 0;
+		}
+		
+		@Override
+		public void run() {
+			output = 0;
+			super.run();
+		}
+
+		@Override
+		public void updateDerivative() {
+			derivative = 2*error*invBatchSize;			
+		}
 		
 	}
 
