@@ -3,28 +3,26 @@ package genetics;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.util.Pair;
-
 public abstract class Phenotype {
 	private Double xprSum = null;
-	List<Pair<Double, Double>> valPairs = new ArrayList<Pair<Double,Double>>();
+	List<double[]> vals = new ArrayList<double[]>();
 	
 	public double getXprSum() {
 		if (xprSum == null) {
 			xprSum = 0.0;
-			for (Pair<Double,Double> pair : valPairs) {
-				xprSum += pair.getFirst();
+			for (double[] pair : vals) {
+				xprSum += pair[0];
 			}				
 		}
 		return xprSum;
 	}
 	
-	public double getWeightedAvg() {
+	protected double getAvg(int index) {
 		double sum = 0;
-		for (Pair<Double,Double> pair : valPairs) {
-			sum += pair.getFirst()*pair.getSecond();
+		for (double[] pair : vals) {
+			sum += pair[0]*pair[index];
 		}
-		return sum/xprSum;
+		return sum/getXprSum();
 	}
 
 }
