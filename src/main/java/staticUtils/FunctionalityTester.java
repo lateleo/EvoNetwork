@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import data.MnistDataReader;
 import data.MnistImage;
@@ -36,10 +37,89 @@ import network.NeuralNetwork;
  */
 @SuppressWarnings("unused")
 public class FunctionalityTester {
+	static DecimalFormat f1 = new DecimalFormat("#,##0.0###");
+	static DecimalFormat f2 = new DecimalFormat("#,##0.00#");
 
-	public static void main(String[] args) throws IOException {
+
+	public static void main(String[] args) {
+		System.out.println("Start...");
+		int count = 5000;
 		
+		List<List<Double>> allRands = new ArrayList<>(count);
+		long start1 = System.nanoTime();
+		for (int i = 0; i < count; i++) {
+			List<Double> rands = new ArrayList<Double>(count);
+			for (int j = 0; j < count; j++) rands.add(RNG.getFauxGauss());
+			allRands.add(rands);
+		}
+		long end1 = System.nanoTime();
+		
+		List<List<Double>> allShifts = new ArrayList<>(count);
+		long start2 = System.nanoTime();
+		for (int i = 0; i < count; i++) {
+			List<Double> rands = new ArrayList<Double>(count);
+			for (int j = 0; j < count; j++) rands.add(RNG.getShiftDouble());
+			allShifts.add(rands);
+		}
+		long end2 = System.nanoTime();
+		
+		List<List<Double>> allGauss = new ArrayList<>(count);
+		long start3 = System.nanoTime();
+		for (int i = 0; i < count; i++) {
+			List<Double> rands = new ArrayList<Double>(count);
+			for (int j = 0; j < count; j++) rands.add(RNG.getGauss());
+			allGauss.add(rands);
+		}
+		long end3 = System.nanoTime();
+		
+		double newLong = (end1 - start1)/1e9;
+		double newShift = (end2 - start2)/1e9;
+		double gauss = (end3 - start3)/1e9;
+		
+		System.out.println("NewLong: " + newLong);
+		System.out.println("NewShift: " + newShift);
+		System.out.println("Gauss: " + gauss);
+		
+		double longMean = 0;
+		double longSigma = 0;
+		for (List<Double> rands : allRands) {
+			for (Double rand : rands) {
+				longMean += rand;
+				longSigma += rand*rand;
+			}
+		}
+		longMean /= count*count;
+		longSigma = Math.sqrt(longSigma/(count*count) - longMean*longMean);
+		double shiftMean = 0;
+		double shiftSigma = 0;
+		for (List<Double> rands : allShifts) {
+			for (Double rand : rands) {
+				shiftMean += rand;
+				shiftSigma += rand*rand;
+			}
+		}
+		shiftMean /= count*count;
+		shiftSigma = Math.sqrt(shiftSigma/(count*count) - shiftMean*shiftMean);
+		double gaussMean = 0;
+		double gaussSigma = 0;
+		for (List<Double> rands : allGauss) {
+			for (Double rand : rands) {
+				gaussMean += rand;
+				gaussSigma += rand*rand;
+			}
+		}
+		gaussMean /= count*count;
+		gaussSigma = Math.sqrt(gaussSigma/(count*count) - gaussMean*gaussMean);
+		
+		System.out.println("longMean: " + longMean);
+		System.out.println("longSigma: " + longSigma);
+		System.out.println("shiftMean: " + shiftMean);
+		System.out.println("shiftSigma: " + shiftSigma);
+		System.out.println("gaussMean: " + gaussMean);
+		System.out.println("gaussSigma: " + gaussSigma);
 	}
+	
 
+	
 
 }

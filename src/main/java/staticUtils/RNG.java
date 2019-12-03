@@ -16,6 +16,24 @@ public class RNG {
 		return scalar*out/3.0;
 	}
 	
+	public static double getShiftDouble() {
+		double out = ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
+		return out;
+	}
+	
+	public static long getAnyLong() {
+		return ThreadLocalRandom.current().nextLong(Long.MIN_VALUE+1, Long.MAX_VALUE);
+	}
+	
+	public static double getFauxGauss() {
+		double out = getAnyLong();
+		out += getAnyLong();
+		out += getAnyLong();
+		return out/Long.MAX_VALUE;
+	}
+	
 	public static double getDouble() {
 		return ThreadLocalRandom.current().nextDouble(0.0, Math.nextUp(1.0));
 	}

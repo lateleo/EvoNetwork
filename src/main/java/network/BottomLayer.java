@@ -18,7 +18,7 @@ public class BottomLayer extends Layer {
 	BottomLayer(NeuralNetwork network, Map<ConnTuple, Conn> conns) {
 		super(network);
 		for (int i = 0; i < nodeNum; i++) {
-			nodes.put(i, new BottomNode(network, conns, i));
+			nodes.add(new BottomNode(network, conns, i));
 		}
 	}
 

@@ -16,9 +16,7 @@ public abstract class UpperLayer extends Layer {
 
 	
 	protected void fillNodes(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Conn> conns) {
-		nodePhenes.forEach((nodeNum, phene) -> {
-			nodes.put(nodeNum, addNode(nodeNum, phene, conns));
-		});
+		nodePhenes.forEach((nodeNum, phene) -> nodes.add(addNode(nodeNum, phene, conns)));
 	}
 	
 	protected abstract UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns);
@@ -34,7 +32,7 @@ public abstract class UpperLayer extends Layer {
 	}
 	
 	public void backProp() {
-		nodes.forEach((nodeNum,node) -> ((UpperNode) node).backProp());
+		for (Node node : nodes) ((UpperNode) node).backProp();
 	}
 
 }

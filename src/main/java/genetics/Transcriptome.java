@@ -68,7 +68,7 @@ public class Transcriptome {
 		fillNodes(nodeGenes);
 		filterNodes();
 		parseConnGenes(connGenes);
-		removeOrphans(connWeights.navigableKeySet());
+		removeOrphans();
 	}
 	
 	/*
@@ -159,26 +159,11 @@ public class Transcriptome {
 		});
 	}
 	
-/*	private void loadReasons() {
-		validityMap.put("Top/Bottom in wrong position: ", new TreeSet<>());
-		validityMap.put("Input Layer Matches Output: ", new TreeSet<>());
-		validityMap.put("Bottom NodeNum > " + bottomNodes + ": \t", new TreeSet<>());
-		validityMap.put("Top NodeNum > " + topNodes + ": \t", new TreeSet<>());
-		validityMap.put("Tuple pointing downwards: ", new TreeSet<>());
-		validityMap.put("Non-Existent Input Layer: ", new TreeSet<>());
-		validityMap.put("Non-Existent Input Node: ", new TreeSet<>());
-		validityMap.put("Non-Existent Output Layer: ", new TreeSet<>());
-		validityMap.put("Non-Existent Output Node: ", new TreeSet<>());
-		validityMap.put("Valid: \t\t\t", new TreeSet<>());
-	}
-	*/
-	
 	/*
 	 * checks to make sure a given tuple is valid (IE, the connection doesn't point backwards, and both input and output nodes exist)
 	 */
 	private boolean isConnTupleValid(ConnTuple tuple) {
-		if (tuple.iLay() == -1 || tuple.oLay() == 0) return false;
-		if (tuple.iLay() == tuple.oLay()) return false;
+		if (tuple.iLay() == -1 || tuple.oLay() == 0 || tuple.iLay() == tuple.oLay()) return false;
 		boolean iValid = false;
 		boolean oValid = false;
 		if (tuple.iLay() == 0) {
@@ -211,31 +196,18 @@ public class Transcriptome {
 	 * or leading out of it. An orphan layer is simply a layer with no non-orphan nodes.
 	 * Removal of orphans is done at this step to speed up runtime when the Network is eventually built.
 	 */
-	private void removeOrphans(NavigableSet<ConnTuple> connTuples) {
-		laysAndNodes.entrySet().removeIf(entry -> {
-			int layNum = entry.getKey();
-			if (layNum == -1) return false;
-			return isLayerOrphan(connTuples, laysAndNodes.get(layNum), true);
-		});
-		laysAndNodes.descendingMap().entrySet().removeIf(entry -> {
-			int layNum = entry.getKey();
-			if (layNum == -1) return false;
-			return isLayerOrphan(connTuples, laysAndNodes.get(layNum), false);
-		});
-		for (NodePhene setPair : laysAndNodes.get(-1).values()) setPair.downConns.retainAll(connTuples);
+	private void removeOrphans() {
+		laysAndNodes.entrySet().removeIf(entry -> isLayerOrphan(entry, true));
+		laysAndNodes.descendingMap().entrySet().removeIf(entry -> isLayerOrphan(entry, false));
+		
+		for (NodePhene phene : laysAndNodes.get(-1).values()) phene.filterConns(connWeights.navigableKeySet(), true);
 	}
 	
-	private boolean isLayerOrphan(NavigableSet<ConnTuple> connTuples, TreeMap<Integer,NodePhene> pheneMap, boolean direction) {
-		pheneMap.entrySet().removeIf((entry) -> {
-			NodePhene nodePhene = entry.getValue();
-			Set<ConnTuple> connSet = (direction)? nodePhene.downConns : nodePhene.upConns;
-			connSet.retainAll(connTuples);
-			boolean orphanNode = connSet.isEmpty();
-			if (orphanNode){
-				Set<ConnTuple> otherSet = (direction)? nodePhene.upConns : nodePhene.downConns;
-				connTuples.removeAll(otherSet);
-			}
-			return orphanNode;
+	private boolean isLayerOrphan(Map.Entry<Integer,TreeMap<Integer,NodePhene>> entry, boolean direction) {
+		if (entry.getKey() == -1) return false;
+		TreeMap<Integer,NodePhene> pheneMap = entry.getValue();
+		pheneMap.values().removeIf((phene) ->  {
+			return phene.isOrphan(connWeights.navigableKeySet(), direction);
 		});
 		return pheneMap.isEmpty();
 	}

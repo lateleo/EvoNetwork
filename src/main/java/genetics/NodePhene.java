@@ -16,14 +16,6 @@ public class NodePhene extends Phenotype {
 	public void addGene(NodeGene gene) {
 		vals.add(new double[] {gene.xprLevel, gene.learnFactor, gene.bias});
 	}
-
-	public void addUp(ConnTuple tuple) {
-		upConns.add(tuple);
-	}
-
-	public void addDown(ConnTuple tuple) {
-		downConns.add(tuple);
-	}
 	
 	public double getLearnRate() {
 		if (learnRate == null) learnRate = 1/(1 + Math.pow(Math.E, -getAvg(1)));	
@@ -33,6 +25,26 @@ public class NodePhene extends Phenotype {
 	public double getBias() {
 		if (bias == null) bias = getAvg(2);
 		return bias;
+	}
+	
+	public void addUp(ConnTuple tuple) {
+		upConns.add(tuple);
+	}
+
+	public void addDown(ConnTuple tuple) {
+		downConns.add(tuple);
+	}
+	
+	public boolean isOrphan(Set<ConnTuple> connTuples, boolean direction) {
+		boolean orphan = filterConns(connTuples, direction);
+		if (orphan) connTuples.removeAll((direction)? upConns : downConns);
+		return orphan;
+	}
+	
+	public boolean filterConns(Set<ConnTuple> connTuples, boolean direction) {
+		Set<ConnTuple> connSet = (direction)? downConns : upConns;
+		connSet.retainAll(connTuples);
+		return connSet.isEmpty();
 	}
 
 }

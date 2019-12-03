@@ -24,6 +24,7 @@ public class NodeTuple extends Pair<Integer, Integer> implements Comparable<Node
 		return getValue();
 	}
 
+
 	@Override
 	public int compareTo(NodeTuple other) {
 		int layComp = comparator.compare(layer(), other.layer());

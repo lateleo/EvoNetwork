@@ -17,6 +17,9 @@ public class MidLayer extends UpperLayer {
 		return new MidNode(this, nodeNum, phene, conns);
 	}
 
+	
+	
+	
 	private class MidNode extends UpperNode {
 		private List<Conn> upConns;
 		private double bias;
@@ -24,17 +27,16 @@ public class MidLayer extends UpperLayer {
 		MidNode(MidLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
 			super(layer, nodeNum, phene, conns);
 			this.bias = phene.getBias();
-			this.upConns = getUpConns(conns, phene);
+			getUpConns(conns, phene);
 		}
 		
-		private List<Conn> getUpConns(Map<ConnTuple, Conn> source, NodePhene phene) {
-			List<Conn> conns = new ArrayList<>();
+		private void getUpConns(Map<ConnTuple, Conn> source, NodePhene phene) {
+			upConns = new ArrayList<>();
 			for (ConnTuple cTuple : phene.upConns) {
 				Conn conn = source.get(cTuple);
 				conn.setDownNode(this);
-				conns.add(conn);
+				upConns.add(conn);
 			}
-			return conns;
 		}
 
 		@Override
