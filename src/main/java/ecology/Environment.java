@@ -21,7 +21,7 @@ public class Environment {
 		int batchSize = 500;
 		double targetAccuracy = 0.9;
 		
-		long startTime = System.nanoTime();
+		long startTime = System.currentTimeMillis();
 		Species.initialize("original", batchSize);
 		Population pop = Species.createPopulation(mRate,  mMag,  slip, haploidNum,  layers,  nodes, conns,
 				topRedundancy, bottomRedundancy, popSize,  simGens);
@@ -29,8 +29,8 @@ public class Environment {
 		pop.simulateGenerations();
 		pop.iterate(targetAccuracy);
 		
-		long endTime = System.nanoTime();
-		long seconds = (endTime - startTime)/1000000000;
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime)/1000;
 		int minutes = 0;
 		int hours = 0;
 		while (seconds > 60) {

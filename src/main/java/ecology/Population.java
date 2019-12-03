@@ -90,10 +90,9 @@ public class Population {
 	}
 
 	public void getNextGeneration() {
-		for (Organism org : adults) org.updatePerf();
+		for (Organism org : adults) org.updatePerformance();
 		updateFitness();
-//		randomFilter();
-		strictFilter();
+		filterOrganisms();
 		for (Organism org : adults) org.learn();
 		repopulate(false);
 	}
@@ -121,7 +120,7 @@ public class Population {
 //		System.out.println("Done");
 	}
 
-	public void randomFilter() {
+	public void filterOrganisms() {
 //		System.out.println("Filtering...");
 		adults.sort((a, b) -> {
 			double delta = b.getFitness() - a.getFitness();
@@ -141,10 +140,7 @@ public class Population {
 		}
 //		System.out.println("Done");
 	}
-	
-	public void strictFilter() {
-		adults.removeIf(org -> org.getFitness() < 0);
-	}
+
 	
 	public void repopulate(boolean forced) {
 //		System.out.print("Repopulating...");

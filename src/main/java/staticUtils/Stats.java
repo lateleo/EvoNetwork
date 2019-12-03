@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
-import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import network.Organism;

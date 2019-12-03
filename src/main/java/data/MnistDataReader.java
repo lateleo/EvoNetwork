@@ -30,6 +30,7 @@ public class MnistDataReader {
 	public MnistImage[] readData(String prefix) throws IOException {
 		DataInputStream dataStream = new DataInputStream(
 				new BufferedInputStream(new FileInputStream(pathHeader + prefix + imageSuffix)));
+		@SuppressWarnings("unused")
 		int imageMagicNum = dataStream.readInt();
 		int imageCount = dataStream.readInt();
 		int pixelCount = dataStream.readInt()*dataStream.readInt();
@@ -42,6 +43,7 @@ public class MnistDataReader {
 
 		DataInputStream labelStream = new DataInputStream(
 				new BufferedInputStream(new FileInputStream(pathHeader + prefix + labelSuffix)));
+		@SuppressWarnings("unused")
 		int labelMagicNum = labelStream.readInt();
 		int labelCount = labelStream.readInt();
 

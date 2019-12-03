@@ -1,9 +1,5 @@
 package network;
 
-
-
-import org.apache.commons.math3.stat.regression.SimpleRegression;
-
 import genetics.Genome;
 
 
@@ -29,7 +25,7 @@ public class Organism {
 		network = new NeuralNetwork(this);
 	}
 	
-	public void updatePerf() {
+	public void updatePerformance() {
 		age++;
 		performance = network.getAccuracy();
 		regressionPerf = 1/(1 - performance) - 1;

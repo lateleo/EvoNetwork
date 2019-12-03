@@ -2,8 +2,6 @@ package network;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public abstract class Layer implements Runnable {
 	List<Node> nodes = new ArrayList<>();
