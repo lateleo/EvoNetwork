@@ -43,7 +43,7 @@ public class MidNode extends UpperNode {
 		derivative = 0;
 		for (Connection conn : upConns) {
 			UpperNode upNode = conn.upNode();
-			if (upNode.avgOutput != 0) derivative += conn.oldWeight()*upNode.derivative;
+			derivative += conn.oldWeight()*upNode.derivative;
 		}
 	}
 
