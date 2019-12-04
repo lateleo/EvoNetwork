@@ -20,27 +20,18 @@ public class TopLayer extends UpperLayer {
 	@Override
 	public void run() {
 		super.run();
-		softMax();
-		int label = network.currentImage.getLabel();
-		Node correct = nodes.get(label);
-		correct.output = correct.output - 1;
-		for (Node node : nodes) ((TopNode) node).updateError();
-	}
-	
-	private void softMax() {
 		double sum = 0;
-		for (Node node : nodes) sum += node.output;
-		final double finalSum = Math.max(sum, Double.MIN_NORMAL);
-		nanCheck(sum, "Top Layer SoftMax Sum: ");
-		for (Node node : nodes) {
-			node.output /= finalSum;
-			nanCheck(node.output, "Top Node Post-SoftMax");
-		}
+		for (Node node : nodes) sum += node.getOutput();
+		sum = Math.max(sum, Double.MIN_NORMAL);
+		nanCheck(sum, "Top Layer SoftMax Sum");
+		int label = network.currentImage.getLabel();
+		for (Node node : nodes) ((TopNode) node).updateError(sum, label);
 	}
+
 	
 	public double getLoss() {
 		double loss = 0;
-		for (Node node : nodes) loss += ((TopNode) node).loss;
+		for (Node node : nodes) loss += ((TopNode) node).getLoss();
 		return loss;
 	}
 	

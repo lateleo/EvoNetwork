@@ -35,7 +35,7 @@ public abstract class UpperNode extends Node {
 	}
 
 	public void run() {
-		for (Connection conn : downConns) output += conn.weight()*conn.downNode().output;
+		for (Connection conn : downConns) output += conn.weightedOutput();
 		output = Math.max(0.0, output);
 		layer.nanCheck(output, "Node Output - Layer " + layer.layNum + ", Node " + nodeNum);
 		avgOutput += output;
@@ -46,6 +46,10 @@ public abstract class UpperNode extends Node {
 		updateDerivative();
 		downConns.forEach(conn -> conn.updateWeight(learningRate*avgOutput*derivative));
 		avgOutput = 0;
+	}
+	
+	public double getDerivative() {
+		return derivative;
 	}
 	
 	public abstract void updateDerivative();

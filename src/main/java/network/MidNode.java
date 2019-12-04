@@ -41,10 +41,7 @@ public class MidNode extends UpperNode {
 	@Override
 	public void updateDerivative() {
 		derivative = 0;
-		for (Connection conn : upConns) {
-			UpperNode upNode = conn.upNode();
-			derivative += conn.oldWeight()*upNode.derivative;
-		}
+		for (Connection conn : upConns) derivative += conn.weightedDerivative();
 	}
-
+	
 }
