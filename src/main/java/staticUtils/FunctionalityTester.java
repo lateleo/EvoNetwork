@@ -16,6 +16,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,7 +47,29 @@ public class FunctionalityTester {
 	static DecimalFormat f2 = new DecimalFormat("#,##0.00#");
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException, ExecutionException {
+		
+		ExecutorService exec = Executors.newSingleThreadExecutor();
+		Callable<Integer> caller = ()-> {
+			TimeUnit.SECONDS.sleep(1);
+			return 0;
+		};
+		FutureTask<Integer> task = new FutureTask<>(caller);
+		System.out.println("Start");
+		exec.execute(task);
+		System.out.println("Ran");
+		int result = task.get();
+		System.out.println("Done");
+		exec.execute(task);
+		System.out.println("Ran");
+		result = task.get();
+		System.out.println("Done");
+		
+		
+	}
+	
+	
+	public static void newRands() {
 		System.out.println("Start...");
 		int count = 5000;
 		

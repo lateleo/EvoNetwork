@@ -35,7 +35,7 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
 		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
-		TreeMap<ConnTuple,Conn> conns = getConns(xscript.getConnWeights());
+		TreeMap<ConnTuple,Connection> conns = getConns(xscript.getConnWeights());
 		setBottom(conns);
 		size = conns.size();
 		laysAndNodes.forEach((layNum, nodePhenes) -> {
@@ -78,9 +78,9 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		});
 	}
 	
-	void setBottom(Map<ConnTuple,Conn> conns) {
+	void setBottom(Map<ConnTuple,Connection> conns) {
 		if (bottom == null) {
-			Map<ConnTuple,Conn> bottomConns = CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0);
+			Map<ConnTuple,Connection> bottomConns = CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0);
 			bottom = new BottomLayer(this, bottomConns);
 			put(0, bottom);
 		}
@@ -93,9 +93,9 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 		}
 	}
 	
-	private TreeMap<ConnTuple,Conn> getConns(TreeMap<ConnTuple,Double> weights) {
-		TreeMap<ConnTuple,Conn> conns = new TreeMap<>();
-		weights.forEach((tuple,weight) -> conns.put(tuple, new Conn(weight)));
+	private TreeMap<ConnTuple,Connection> getConns(TreeMap<ConnTuple,Double> weights) {
+		TreeMap<ConnTuple,Connection> conns = new TreeMap<>();
+		weights.forEach((tuple,weight) -> conns.put(tuple, new Connection(weight)));
 		return conns;
 	}
 	

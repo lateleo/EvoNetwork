@@ -16,26 +16,26 @@ public abstract class UpperNode extends Node {
 	protected double avgOutput = 0;
 	protected double derivative = 0;
 	protected double learningRate;
-	List<Conn> downConns;
+	List<Connection> downConns;
 	
-	UpperNode(UpperLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns){
+	UpperNode(UpperLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns){
 		this.layer = layer;
 		this.nodeNum = nodeNum;
 		this.learningRate = phene.getLearnRate();
 		getDownConns(conns, phene);
 	}
 	
-	private void getDownConns(Map<ConnTuple,Conn> source, NodePhene phene) {
+	private void getDownConns(Map<ConnTuple,Connection> source, NodePhene phene) {
 		downConns = new ArrayList<>();
 		for (ConnTuple cTuple : phene.downConns) {
-			Conn conn = source.get(cTuple);
+			Connection conn = source.get(cTuple);
 			conn.setUpNode(this);
 			downConns.add(conn);
 		}
 	}
 
 	public void run() {
-		for (Conn conn : downConns) output += conn.weight()*conn.downNode().output;
+		for (Connection conn : downConns) output += conn.weight()*conn.downNode().output;
 		output = Math.max(0.0, output);
 		layer.nanCheck(output, "Node Output - Layer " + layer.layNum + ", Node " + nodeNum);
 		avgOutput += output;

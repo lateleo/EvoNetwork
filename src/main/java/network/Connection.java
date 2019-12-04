@@ -4,7 +4,7 @@ package network;
  * This class probably seems unnecessary, but is used in place of the built-in Double class so that changes
  * made at one end of the connection will be visible at the other end.
  */
-public class Conn {
+public class Connection {
 	private UpperNode upNode = null;
 	private Node downNode = null;
 	private double initWeight;
@@ -12,7 +12,7 @@ public class Conn {
 	private double oldWeight = 0;
 	
 	
-	public Conn(double weight) {
+	public Connection(double weight) {
 		this.initWeight = weight;
 		this.weight = weight;
 	}

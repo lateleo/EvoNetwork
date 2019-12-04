@@ -7,13 +7,13 @@ import utils.ConnTuple;
 
 public class TopLayer extends UpperLayer {
 	
-	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Conn> conns, NeuralNetwork network) {
+	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network) {
 		super(nodePhenes, conns, network, -1);
 	}
 	
 
 	@Override
-	protected UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
+	protected UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns) {
 		return new TopNode(this, nodeNum, phene, conns);
 	}
 
@@ -48,40 +48,6 @@ public class TopLayer extends UpperLayer {
 		for (Node node : nodes) {
 			((TopNode) node).reset();
 		}
-	}
-	
-	private class TopNode extends UpperNode {
-		double error = 0;
-		double loss = 0;
-		
-
-		TopNode(TopLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Conn> conns) {
-			super(layer, nodeNum, phene, conns);
-		}
-		
-		public void updateError() {
-			error += output;
-			double sqrOut = output*output;
-			nanCheck(sqrOut, "Top Node Output Squared: ");
-			loss += sqrOut;
-		}
-		
-		public void reset() {
-			error = 0;
-			loss = 0;
-		}
-		
-		@Override
-		public void run() {
-			output = 0;
-			super.run();
-		}
-
-		@Override
-		public void updateDerivative() {
-			derivative = 2*error*invBatchSize;			
-		}
-		
 	}
 
 }
