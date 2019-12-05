@@ -52,8 +52,10 @@ public abstract class UpperNode extends Node {
 		return derivative;
 	}
 	
+	protected void nanCheck() {
+		layer.nanCheck(output, "Node Output - Layer " + layer.layNum() + ", Node " + nodeNum);
+	}
+	
 	public abstract void updateDerivative();
 	
-	protected abstract void nanCheck();
-
 }

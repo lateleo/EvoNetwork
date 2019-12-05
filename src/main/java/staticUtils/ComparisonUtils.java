@@ -1,6 +1,6 @@
 package staticUtils;
 
-import network.MidLayer;
+import network.UpperLayer;
 import utils.ConnTuple;
 import utils.NodeTuple;
 
@@ -13,7 +13,7 @@ public class ComparisonUtils {
 		else return a - b;
 	}
 	
-	public static int compareMidLayers(MidLayer a, MidLayer b) {
+	public static int compareUpperLayers(UpperLayer a, UpperLayer b) {
 		return compareLayNums(a.layNum(), b.layNum());
 	}
 	

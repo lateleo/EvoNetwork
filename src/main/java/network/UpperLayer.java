@@ -6,9 +6,11 @@ import genetics.NodePhene;
 import utils.ConnTuple;
 
 public abstract class UpperLayer extends Layer {
+	protected int layNum;
 	
-	public UpperLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network) {
+	public UpperLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network, int layNum) {
 		super(network);
+		this.layNum = layNum;
 		fillNodes(nodePhenes, conns);
 	}
 
@@ -31,6 +33,11 @@ public abstract class UpperLayer extends Layer {
 	
 	public void backProp() {
 		for (Node node : nodes) ((UpperNode) node).backProp();
+	}
+	
+	
+	public int layNum() {
+		return layNum;
 	}
 
 }

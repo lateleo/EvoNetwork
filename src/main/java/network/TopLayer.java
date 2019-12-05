@@ -8,7 +8,7 @@ import utils.ConnTuple;
 public class TopLayer extends UpperLayer {
 	
 	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network) {
-		super(nodePhenes, conns, network);
+		super(nodePhenes, conns, network, -1);
 	}
 	
 

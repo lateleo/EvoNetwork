@@ -24,7 +24,7 @@ public class NeuralNetwork implements Runnable {
 	private Organism org;
 	private BottomLayer bottom;
 	private TopLayer top;
-	private TreeSet<MidLayer> midLayers = new TreeSet<>(ComparisonUtils::compareMidLayers);
+	private TreeSet<UpperLayer> upperLayers = new TreeSet<>(ComparisonUtils::compareUpperLayers);
 
 	private double accuracy = 0.0;
 	private double lossScalar = 1/(2.0*batchSize);
@@ -43,9 +43,10 @@ public class NeuralNetwork implements Runnable {
 			int layNum = entry.getKey();
 			TreeMap<Integer,NodePhene> nodePhenes = entry.getValue();
 			size += nodePhenes.size();
-			if (layNum != -1) midLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
+			if (layNum != -1) upperLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
 		}
 		this.top = new TopLayer(laysAndNodes.get(-1), conns, this);
+		upperLayers.add(top);
 	}
 	
 	private TreeMap<ConnTuple,Connection> getConns(TreeMap<ConnTuple,Double> weights) {
@@ -61,8 +62,7 @@ public class NeuralNetwork implements Runnable {
 		for (int index = 0; !nanFound && index < batchSize; index++) {
 			currentImage = currentImageSet[index];
 			bottom.run();
-			for (MidLayer layer : midLayers) if (!nanFound) layer.run();
-			if (!nanFound) top.run();
+			for (UpperLayer layer : upperLayers) if (!nanFound) layer.run();
 		}
 		if (!nanFound) {
 			accuracy = 1 - top.getLoss()*lossScalar;
@@ -77,7 +77,7 @@ public class NeuralNetwork implements Runnable {
 	
 	public void backProp() {
 		top.backProp();
-		for (MidLayer layer : midLayers.descendingSet()) layer.backProp();
+		for (UpperLayer layer : upperLayers.descendingSet()) layer.backProp();
 	}
 
 	
