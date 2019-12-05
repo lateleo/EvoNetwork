@@ -5,12 +5,12 @@ import java.util.Comparator;
 import org.apache.commons.math3.util.Pair;
 
 import ecology.Species;
+import staticUtils.ComparisonUtils;
 
 /*
  * This class is used to represent "coordinates" of sorts for a given node.
  */
 public class NodeTuple extends Pair<Integer, Integer> implements Comparable<NodeTuple>{
-	private static Comparator<Integer> comparator = Species.comparator;
 	
 	public NodeTuple(Integer layer, Integer node) {
 		super(layer, node);
@@ -27,9 +27,7 @@ public class NodeTuple extends Pair<Integer, Integer> implements Comparable<Node
 
 	@Override
 	public int compareTo(NodeTuple other) {
-		int layComp = comparator.compare(layer(), other.layer());
-		if (layComp == 0) return node() - other.node();
-		else return layComp;
+		return ComparisonUtils.compareNodeTuples(this, other);
 	}
 	
 	public boolean equals(NodeTuple other) {

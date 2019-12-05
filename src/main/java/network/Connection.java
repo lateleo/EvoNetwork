@@ -7,6 +7,7 @@ package network;
 public class Connection {
 	private UpperNode upNode = null;
 	private Node downNode = null;
+	private boolean bottom = false;
 	private double weight;
 	private double oldWeight = 0;
 	
@@ -14,7 +15,7 @@ public class Connection {
 	public Connection(double weight) {
 		this.weight = weight;
 	}
-	
+		
 	public void setUpNode(UpperNode node) {
 		if (upNode == null) {
 			upNode = node;

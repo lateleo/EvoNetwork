@@ -37,7 +37,7 @@ public abstract class UpperNode extends Node {
 	public void run() {
 		for (Connection conn : downConns) output += conn.weightedOutput();
 		output = Math.max(0.0, output);
-		layer.nanCheck(output, "Node Output - Layer " + layer.layNum + ", Node " + nodeNum);
+		nanCheck();
 		avgOutput += output;
 	}
 	
@@ -53,5 +53,7 @@ public abstract class UpperNode extends Node {
 	}
 	
 	public abstract void updateDerivative();
+	
+	protected abstract void nanCheck();
 
 }

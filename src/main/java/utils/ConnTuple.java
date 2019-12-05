@@ -4,6 +4,7 @@ package utils;
 import org.apache.commons.math3.util.Pair;
 
 import genetics.ConnGene;
+import staticUtils.ComparisonUtils;
 
 /*
  * This class is used exclusively as a Key object for the 'conns' map that is produced by the Transcriptome.
@@ -42,8 +43,7 @@ public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<
 	}
 
 	public int compareTo(ConnTuple other) {
-		if (!getKey().equals(other.getKey())) return getKey().compareTo(other.getKey());
-		else return getValue().compareTo(other.getValue());
+		return ComparisonUtils.compareConnTuples(this, other);
 	}
 	
 	@Override

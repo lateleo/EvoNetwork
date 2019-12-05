@@ -23,6 +23,7 @@ import genetics.LayerGene;
 import genetics.NodeGene;
 import network.Organism;
 import staticUtils.CMUtils;
+import staticUtils.ComparisonUtils;
 import staticUtils.RNG;
 import utils.ConnTuple;
 
@@ -46,17 +47,6 @@ public abstract class Species {
 
 	public static int populationSize;
 	public static int simulatedGenerations;
-
-	public static Comparator<Integer> comparator = (int1, int2) -> {
-		if (int1 == int2)
-			return 0;
-		if (int1 == -1)
-			return 1;
-		if (int2 == -1)
-			return -1;
-		else
-			return int1 - int2;
-	};
 
 	public static void initialize(String dataset, int batchSize) {
 		Species.batchSize = batchSize;
@@ -109,7 +99,7 @@ public abstract class Species {
 
 	public static List<Gene> generateGenes() {
 		ArrayList<Gene> genes = new ArrayList<>();
-		Map<Integer, Set<Integer>> layNodeNums = new TreeMap<>(comparator);
+		Map<Integer, Set<Integer>> layNodeNums = new TreeMap<>(ComparisonUtils::compareLayNums);
 
 		genes.addAll(generateLayerGenes(layNodeNums));
 
@@ -224,7 +214,7 @@ public abstract class Species {
 		}
 		int node2 = RNG.sampleSet(layNodeNums.get(lay2));
 		ConnTuple tuple = null;
-		if (comparator.compare(lay1, lay2) > 0) {
+		if (ComparisonUtils.compareLayNums(lay1, lay2) > 0) {
 			tuple = new ConnTuple(lay2, node2, lay1, node1);
 		} else {
 			tuple = new ConnTuple(lay1, node1, lay2, node2);

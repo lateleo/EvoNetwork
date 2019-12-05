@@ -23,11 +23,6 @@ public class TopNode extends UpperNode {
 		loss += sqrOut;
 	}
 	
-	public void reset() {
-		error = 0;
-		loss = 0;
-	}
-	
 	public double getLoss() {
 		return loss;
 	}
@@ -40,7 +35,14 @@ public class TopNode extends UpperNode {
 
 	@Override
 	public void updateDerivative() {
-		derivative = 2*error*invBatchSize;			
+		derivative = 2*error*invBatchSize;
+		error = 0;
+		loss = 0;
+	}
+	
+	@Override
+	protected void nanCheck() {
+		layer.nanCheck(output, "Top Node Output, Node " + nodeNum);
 	}
 	
 }

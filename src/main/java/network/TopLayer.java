@@ -8,7 +8,7 @@ import utils.ConnTuple;
 public class TopLayer extends UpperLayer {
 	
 	public TopLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network) {
-		super(nodePhenes, conns, network, -1);
+		super(nodePhenes, conns, network);
 	}
 	
 
@@ -33,12 +33,6 @@ public class TopLayer extends UpperLayer {
 		double loss = 0;
 		for (Node node : nodes) loss += ((TopNode) node).getLoss();
 		return loss;
-	}
-	
-	public void reset() {
-		for (Node node : nodes) {
-			((TopNode) node).reset();
-		}
 	}
 
 }

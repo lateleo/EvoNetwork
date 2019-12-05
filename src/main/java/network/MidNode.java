@@ -44,4 +44,9 @@ public class MidNode extends UpperNode {
 		for (Connection conn : upConns) derivative += conn.weightedDerivative();
 	}
 	
+	@Override
+	protected void nanCheck() {
+		layer.nanCheck(output, "Node Output - Layer " + ((MidLayer) layer).layNum() + ", Node " + nodeNum);
+	}
+	
 }

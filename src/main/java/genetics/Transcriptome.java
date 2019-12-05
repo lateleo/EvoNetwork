@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 
 import ecology.Species;
+import staticUtils.ComparisonUtils;
 import utils.ConnTuple;
 
 /*
@@ -24,8 +25,7 @@ import utils.ConnTuple;
 public class Transcriptome {
 	private static int bottomNodes = Species.bottomNodes;
 	private static int topNodes = Species.topNodes;
-	private static Comparator<Integer> comparator = Species.comparator;
-	
+	private static Comparator<Integer> comparator = ComparisonUtils::compareLayNums;
 
 	private TreeMap<Integer, TreeMap<Integer, NodePhene>> laysAndNodes = new TreeMap<>(comparator);
 	private TreeMap<ConnTuple, Double> connWeights = new TreeMap<>();

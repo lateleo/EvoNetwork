@@ -2,6 +2,7 @@ package network;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import data.MnistImage;
 import ecology.Population;
@@ -9,21 +10,22 @@ import ecology.Species;
 import genetics.NodePhene;
 import genetics.Transcriptome;
 import staticUtils.CMUtils;
+import staticUtils.ComparisonUtils;
 import utils.ConnTuple;
 
-public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
-	private static final long serialVersionUID = -2513726838630426232L;
+public class NeuralNetwork implements Runnable {
 	private static int batchSize = Species.batchSize;
 	private static MnistImage[][] images = Species.images;
 	private static MnistImage[] currentImageSet = images[0];
 	private static int currentBatchNum = 0;
 	
 	MnistImage currentImage;
-	private int currentIndex = 0;
-	
+		
 	private Organism org;
 	private BottomLayer bottom;
 	private TopLayer top;
+	private TreeSet<MidLayer> midLayers = new TreeSet<>(ComparisonUtils::compareMidLayers);
+
 	private double accuracy = 0.0;
 	private double lossScalar = 1/(2.0*batchSize);
 	private int size = 0;
@@ -31,35 +33,36 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	public boolean nanFound = false;
 		
 	public NeuralNetwork(Organism org) {
-		super(Species.comparator);
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
 		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
 		TreeMap<ConnTuple,Connection> conns = getConns(xscript.getConnWeights());
-		setBottom(conns);
+		this.bottom = new BottomLayer(this, CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0));
 		size = conns.size();
-		laysAndNodes.forEach((layNum, nodePhenes) -> {
+		for (Map.Entry<Integer, TreeMap<Integer,NodePhene>> entry : laysAndNodes.entrySet()) {
+			int layNum = entry.getKey();
+			TreeMap<Integer,NodePhene> nodePhenes = entry.getValue();
 			size += nodePhenes.size();
-			if (layNum != -1) {
-				MidLayer layer = new MidLayer(nodePhenes, conns, this, layNum);
-				put(layNum, layer);
-			}
-		});
-		Map<Integer,NodePhene> nodePhenes = laysAndNodes.get(-1);
-		TopLayer top = new TopLayer(nodePhenes, conns, this);
-		setTop(top);
+			if (layNum != -1) midLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
+		}
+		this.top = new TopLayer(laysAndNodes.get(-1), conns, this);
+	}
+	
+	private TreeMap<ConnTuple,Connection> getConns(TreeMap<ConnTuple,Double> weights) {
+		TreeMap<ConnTuple,Connection> conns = new TreeMap<>();
+		for (Map.Entry<ConnTuple, Double> entry : weights.entrySet()) {
+			conns.put(entry.getKey(), new Connection(entry.getValue()));
+		}
+		return conns;
 	}
 
 	@Override
 	public void run() {
-		currentIndex = 0;
-		top.reset();
-		while (!nanFound && currentIndex < batchSize) {
-			currentImage = currentImageSet[currentIndex];
-			forEach((layNum, layer) -> {
-				if (!nanFound) layer.run();	
-			});
-			currentIndex++;
+		for (int index = 0; !nanFound && index < batchSize; index++) {
+			currentImage = currentImageSet[index];
+			bottom.run();
+			for (MidLayer layer : midLayers) if (!nanFound) layer.run();
+			if (!nanFound) top.run();
 		}
 		if (!nanFound) {
 			accuracy = 1 - top.getLoss()*lossScalar;
@@ -73,31 +76,10 @@ public class NeuralNetwork extends TreeMap<Integer, Layer> implements Runnable {
 	}
 	
 	public void backProp() {
-		descendingKeySet().forEach((layNum) -> {
-			if (layNum != 0) ((UpperLayer) get(layNum)).backProp();
-		});
+		top.backProp();
+		for (MidLayer layer : midLayers.descendingSet()) layer.backProp();
 	}
-	
-	void setBottom(Map<ConnTuple,Connection> conns) {
-		if (bottom == null) {
-			Map<ConnTuple,Connection> bottomConns = CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0);
-			bottom = new BottomLayer(this, bottomConns);
-			put(0, bottom);
-		}
-	}
-	
-	void setTop(TopLayer top) {
-		if (this.top == null) {
-			this.top = top;
-			put(-1, top);
-		}
-	}
-	
-	private TreeMap<ConnTuple,Connection> getConns(TreeMap<ConnTuple,Double> weights) {
-		TreeMap<ConnTuple,Connection> conns = new TreeMap<>();
-		weights.forEach((tuple,weight) -> conns.put(tuple, new Connection(weight)));
-		return conns;
-	}
+
 	
 	public int size() {
 		return size;
