@@ -1,27 +1,24 @@
 package utils;
 
-import java.util.Comparator;
-
-import org.apache.commons.math3.util.Pair;
-
-import ecology.Species;
 import staticUtils.ComparisonUtils;
 
 /*
  * This class is used to represent "coordinates" of sorts for a given node.
  */
-public class NodeTuple extends Pair<Integer, Integer> implements Comparable<NodeTuple>{
+public class NodeTuple implements Comparable<NodeTuple>{
+	private int layer, node;
 	
-	public NodeTuple(Integer layer, Integer node) {
-		super(layer, node);
+	public NodeTuple(int layer, int node) {
+		this.layer = layer;
+		this.node = node;
 	}
 	
 	public int layer() {
-		return getKey();
+		return layer;
 	}
 	
 	public int node() {
-		return getValue();
+		return node;
 	}
 
 

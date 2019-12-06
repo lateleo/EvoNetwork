@@ -90,6 +90,7 @@ public class Population {
 	}
 
 	public void getNextGeneration() {
+//		System.out.println("Get Next Generation...");
 		for (Organism org : adults) org.updatePerformance();
 		updateFitness();
 		filterOrganisms();
@@ -98,7 +99,7 @@ public class Population {
 	}
 
 	public void updateFitness() {
-//		System.out.print("Updating Fitness...");
+//		System.out.println("Updating Fitness...");
 		if (maxAge > 0) {
 			regression = Stats.getRegression(adults);
 			ToDoubleFunction<Organism> func = (org) -> {
@@ -133,7 +134,7 @@ public class Population {
 				if (adults.size()*2 > populationSize) {
 					if (!org.equals(best) && RNG.getGauss() > org.getFitness()) {
 						iter.remove();
-					}
+					} 
 
 				}
 			}
@@ -143,7 +144,7 @@ public class Population {
 
 	
 	public void repopulate(boolean forced) {
-//		System.out.print("Repopulating...");
+//		System.out.println("Repopulating...");
 		while (adults.size() + youth.size() < populationSize) {
 			List<Organism> parents = RNG.getSample(adults, 2);
 			youth.add(new Organism(parents.get(0), parents.get(1), forced));

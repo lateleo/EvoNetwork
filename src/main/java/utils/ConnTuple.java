@@ -1,8 +1,5 @@
 package utils;
 
-
-import org.apache.commons.math3.util.Pair;
-
 import genetics.ConnGene;
 import staticUtils.ComparisonUtils;
 
@@ -11,35 +8,46 @@ import staticUtils.ComparisonUtils;
  * It is essentially a Pair of NodeTuples, which are themselves Pairs of Integers, with shortcut methods for ease of use.
  * ConnTuples as a whole represent the starting point and ending point for a given connection.
  */
-public class ConnTuple extends Pair<NodeTuple, NodeTuple> implements Comparable<ConnTuple> {
+public class ConnTuple implements Comparable<ConnTuple> {
+	private NodeTuple in, out;
 	
 	public ConnTuple(NodeTuple in, NodeTuple out) {
-		super(in,out);
+		this.in = in;
+		this.out = out;
 	}
 
 	public ConnTuple(ConnGene gene) {
-		super(new NodeTuple((int) gene.inLayNum, (int) gene.inNodeNum),
-				new NodeTuple((int) Math.floor(gene.outLayNum), (int) gene.outNodeNum));
+		in = new NodeTuple((int) gene.inLayNum, (int) gene.inNodeNum);
+		out = new NodeTuple((int) Math.floor(gene.outLayNum), (int) gene.outNodeNum);
 	}
 	
 	public ConnTuple(int iLay, int iNode, int oLay, int oNode) {
-		super(new NodeTuple(iLay, iNode), new NodeTuple(oLay, oNode));
+		in = new NodeTuple(iLay, iNode);
+		out = new NodeTuple(oLay, oNode);
+	}
+	
+	public NodeTuple in() {
+		return in;
+	}
+	
+	public NodeTuple out() {
+		return out;
 	}
 	
 	public int iLay() {
-		return getKey().layer();
+		return in.layer();
 	}
 
 	public int iNode() {
-		return getKey().node();
+		return in.node();
 	}
 
 	public int oLay() {
-		return getValue().layer();
+		return out.layer();
 	}
 
 	public int oNode() {
-		return getValue().node();
+		return out.node();
 	}
 
 	public int compareTo(ConnTuple other) {

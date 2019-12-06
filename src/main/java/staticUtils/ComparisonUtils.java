@@ -24,8 +24,8 @@ public class ComparisonUtils {
 	}
 	
 	public static int compareConnTuples(ConnTuple a, ConnTuple b) {
-		if (a.getKey().equals(b.getKey())) return a.getValue().compareTo(b.getValue());
-		else return a.getKey().compareTo(b.getKey());
+		if (a.in().equals(b.in())) return a.out().compareTo(b.out());
+		else return a.in().compareTo(b.in());
 	}
 
 }
