@@ -33,12 +33,12 @@ public class LayerGene extends Gene {
 	}
 	
 	private void mutateLayNum() {
-		layerNum = Math.max(1.0, layerNum + RNG.getShiftDouble(mMag));
+		layerNum = Math.max(1.0, layerNum + RNG.getPseudoGauss(mMag));
 	}
 
 	@Override
 	protected Gene clone() {
-		return new LayerGene(this.xprLevel, this.layerNum);
+		return new LayerGene(xprLevel, layerNum);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package genetics;
 
 import staticUtils.RNG;
+import utils.NodeVector;
 
 /*
  * This class represents genes that determine the presence/absence and bias of nodes within a specific layer in a network.
@@ -13,44 +14,51 @@ public class NodeGene extends Gene {
 	private static Mutation[] mutations = new Mutation[] {
 			(gene) -> gene.mutateXpr(),
 			(gene) -> ((NodeGene) gene).mutateLayNum(),
-			(gene) -> ((NodeGene) gene).mutateNodeNum(),
+			(gene) -> ((NodeGene) gene).mutateNodeVector(),
 			(gene) -> ((NodeGene) gene).mutateBias(),
 			(gene) -> ((NodeGene) gene).mutateLearnFactor()
 	};
 	
-	public double layerNum, nodeNum, bias, learnFactor;
+	public double layerNum, bias, learnFactor;
+	public NodeVector nodeVector;
 	 
 	
-	public NodeGene(double xprLevel, double layerNum, double nodeNum, double bias, double learnFactor) {
+	public NodeGene(double xprLevel, double layerNum, NodeVector nodeVector, double bias, double learnFactor) {
 		this.xprLevel = xprLevel;
 		this.layerNum = layerNum;
-		this.nodeNum = nodeNum;
+		this.nodeVector = nodeVector;
 		this.bias = bias;
 		this.learnFactor = learnFactor;
 	}
 	
-	public NodeGene(boolean positive, int layerNum, int nodeNum) {
+	public NodeGene(boolean positive, int layerNum, int nodeX, int nodeY) {
 		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
 		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		double x = nodeX + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		double y = nodeY + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.nodeVector = new NodeVector(x,y);
 		this.bias = RNG.getGauss();
 		this.learnFactor = RNG.getGauss();
 	}
 	
-	public NodeGene(int layerNum, int nodeNum) {
+	public NodeGene(int layerNum, int nodeX, int nodeY) {
 		this.xprLevel = RNG.getGauss();
 		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		this.nodeNum = nodeNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		double x = nodeX + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		double y = nodeY + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.nodeVector = new NodeVector(x,y);
 		this.bias = RNG.getGauss();
 		this.learnFactor = RNG.getGauss();
 	}
 	
 	private void mutateLayNum() {
-		layerNum = Math.max(-1.0, layerNum + RNG.getShiftDouble(mMag));
+		layerNum = Math.max(-1.0, layerNum + RNG.getPseudoGauss(mMag));
 	}
 	
-	private void mutateNodeNum() {
-		nodeNum = Math.max(0.0, nodeNum + RNG.getShiftDouble(mMag));
+	private void mutateNodeVector() {
+		double mag = RNG.getHalfPseudoGauss(mMag);
+		double theta = RNG.getDouble()*2*Math.PI;
+		nodeVector.add(mag, theta);
 	}
 	
 	private void mutateBias() {
@@ -64,7 +72,7 @@ public class NodeGene extends Gene {
 	
 	@Override
 	protected Gene clone() {
-		return new NodeGene(this.xprLevel, this.layerNum, this.nodeNum, this.bias, this.learnFactor);
+		return new NodeGene(xprLevel, layerNum, nodeVector.clone(), bias, learnFactor);
 	}
 
 	@Override

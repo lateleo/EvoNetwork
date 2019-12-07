@@ -7,40 +7,35 @@ import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RNG {
-
 	
-	public static double getShiftDouble(double scalar) {
-		double out = ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		return scalar*out/3.0;
+	public static double getPseudoGauss() {
+		return (getDouble() + getDouble() + getDouble())*2 - 3;
 	}
 	
-	public static double getShiftDouble() {
-		double out = ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		out += ThreadLocalRandom.current().nextDouble(-1.0, Math.nextUp(1.0));
-		return out;
+	public static double getPseudoGauss(double scalar) {
+		return scalar*getPseudoGauss();
+	}
+	
+	public static double getHalfPseudoGauss(double scalar) {
+		return Math.abs(getPseudoGauss(scalar));
 	}
 	
 	public static long getAnyLong() {
 		return ThreadLocalRandom.current().nextLong(Long.MIN_VALUE+1, Long.MAX_VALUE);
 	}
 	
-	public static double getFauxGauss() {
-		double out = getAnyLong();
-		out += getAnyLong();
-		out += getAnyLong();
-		return out/Long.MAX_VALUE;
-	}
-	
 	public static double getDouble() {
-		return ThreadLocalRandom.current().nextDouble(0.0, Math.nextUp(1.0));
-	}
-	
-	public static double getExclusiveDouble() {
 		return ThreadLocalRandom.current().nextDouble();
 	}
+	
+	public static double getDouble(double min, double max) {
+		return ThreadLocalRandom.current().nextDouble(min, max);
+	}
+	
+	public static double getWideDouble() {
+		return getDouble()*(getBoolean()?1:-1);
+	}
+
 	
 	public static double getGauss() {
 		return ThreadLocalRandom.current().nextGaussian();

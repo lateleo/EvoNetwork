@@ -6,9 +6,10 @@ import staticUtils.ComparisonUtils;
  * This class is used to represent "coordinates" of sorts for a given node.
  */
 public class NodeTuple implements Comparable<NodeTuple>{
-	private int layer, node;
+	private int layer;
+	private NodeVector node;
 	
-	public NodeTuple(int layer, int node) {
+	public NodeTuple(int layer, NodeVector node) {
 		this.layer = layer;
 		this.node = node;
 	}
@@ -17,7 +18,7 @@ public class NodeTuple implements Comparable<NodeTuple>{
 		return layer;
 	}
 	
-	public int node() {
+	public NodeVector node() {
 		return node;
 	}
 

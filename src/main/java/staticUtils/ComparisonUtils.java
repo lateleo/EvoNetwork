@@ -3,6 +3,7 @@ package staticUtils;
 import network.UpperLayer;
 import utils.ConnTuple;
 import utils.NodeTuple;
+import utils.NodeVector;
 
 public class ComparisonUtils {
 	
@@ -19,13 +20,17 @@ public class ComparisonUtils {
 	
 	public static int compareNodeTuples(NodeTuple a, NodeTuple b) {
 		int layComp = compareLayNums(a.layer(), b.layer());
-		if (layComp == 0) return a.node() - b.node();
-		else return layComp;
+		return ((layComp == 0) ? compareNodeVectors(a.node(), b.node()) : layComp);
 	}
 	
 	public static int compareConnTuples(ConnTuple a, ConnTuple b) {
 		if (a.in().equals(b.in())) return a.out().compareTo(b.out());
 		else return a.in().compareTo(b.in());
+	}
+	
+	public static int compareNodeVectors(NodeVector a, NodeVector b) {
+		double magDif = a.getMagnitude() - b.getMagnitude();
+		return (int)((magDif == 0) ? a.getTheta() - b.getTheta() : magDif);
 	}
 
 }

@@ -2,6 +2,7 @@ package genetics;
 
 import staticUtils.RNG;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 /*
  * This class represents genes that determine the presence/absence and weight of connections between nodes in a network.
@@ -13,21 +14,21 @@ import utils.ConnTuple;
 public class ConnGene extends Gene {
 	private static Mutation[] mutations = new Mutation[] {
 			(gene) -> gene.mutateXpr(),
-			(gene) -> ((ConnGene) gene).mutateInput(),
-			(gene) -> ((ConnGene) gene).mutateOutput(),
+			(gene) -> ((ConnGene) gene).mutateInputLayer(),
+			(gene) -> ((ConnGene) gene).mutateOutputLayer(),
 			(gene) -> ((ConnGene) gene).mutateWeight()
 	};
 	
-	public double inLayNum, inNodeNum, outLayNum, outNodeNum, weight;
+	public double inLayNum, outLayNum, weight;
+	public NodeVector inVector, outVector;
 	
 	
-	public ConnGene(double xprLevel, double inLayNum, double inNodeNum,
-			double outLayNum, double outNodeNum, double weight) {
+	public ConnGene(double xprLevel, double inLayNum, double outLayNum, NodeVector inVector, NodeVector outVector, double weight) {
 		this.xprLevel = xprLevel;
 		this.inLayNum = inLayNum;
-		this.inNodeNum = inNodeNum;
 		this.outLayNum = outLayNum;
-		this.outNodeNum = outNodeNum;
+		this.inVector = inVector;
+		this.outVector = outVector;
 		this.weight = weight;
 	}
 	
@@ -40,14 +41,12 @@ public class ConnGene extends Gene {
 		this.weight = RNG.getGauss();
 	}
 	
-	private void mutateInput() {
-		if (RNG.getBoolean()) inLayNum = Math.max(0.0, inLayNum + RNG.getShiftDouble(mMag));
-		else inNodeNum = Math.max(0.0, inNodeNum + RNG.getShiftDouble(mMag));
+	private void mutateInputLayer() {
+		inLayNum = Math.max(0.0, inLayNum + RNG.getPseudoGauss(mMag));
 	}
 	
-	private void mutateOutput() {
-		if (RNG.getBoolean()) outLayNum = Math.max(0.0, outLayNum + RNG.getShiftDouble(mMag));
-		else outNodeNum = Math.max(0.0, outNodeNum + RNG.getShiftDouble(mMag));
+	private void mutateOutputLayer() {
+		 outLayNum = Math.max(0.0, outLayNum + RNG.getPseudoGauss(mMag));
 	}
 	
 	private void mutateWeight() {
@@ -56,8 +55,7 @@ public class ConnGene extends Gene {
 
 	@Override
 	protected Gene clone() {
-		return new ConnGene(this.xprLevel, this.inLayNum, this.inNodeNum, 
-				this.outLayNum, this.outNodeNum, this.weight);
+		return new ConnGene(xprLevel, inLayNum, outLayNum, inVector.clone(), outVector.clone(), weight);
 	}
 
 	@Override

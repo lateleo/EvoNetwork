@@ -17,11 +17,11 @@ public class ConnTuple implements Comparable<ConnTuple> {
 	}
 
 	public ConnTuple(ConnGene gene) {
-		in = new NodeTuple((int) gene.inLayNum, (int) gene.inNodeNum);
-		out = new NodeTuple((int) Math.floor(gene.outLayNum), (int) gene.outNodeNum);
+		in = new NodeTuple((int) gene.inLayNum, gene.inVector);
+		out = new NodeTuple((int) Math.floor(gene.outLayNum), gene.outVector);
 	}
 	
-	public ConnTuple(int iLay, int iNode, int oLay, int oNode) {
+	public ConnTuple(int iLay, NodeVector iNode, int oLay, NodeVector oNode) {
 		in = new NodeTuple(iLay, iNode);
 		out = new NodeTuple(oLay, oNode);
 	}
@@ -38,7 +38,7 @@ public class ConnTuple implements Comparable<ConnTuple> {
 		return in.layer();
 	}
 
-	public int iNode() {
+	public NodeVector iNode() {
 		return in.node();
 	}
 
@@ -46,7 +46,7 @@ public class ConnTuple implements Comparable<ConnTuple> {
 		return out.layer();
 	}
 
-	public int oNode() {
+	public NodeVector oNode() {
 		return out.node();
 	}
 

@@ -14,7 +14,7 @@ public abstract class Gene {
 
 
 	protected void mutateXpr() {
-		xprLevel += RNG.getShiftDouble(mMag);
+		xprLevel += RNG.getPseudoGauss(mMag);
 	}
 	
 	/*
