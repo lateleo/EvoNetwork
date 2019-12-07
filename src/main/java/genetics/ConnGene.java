@@ -16,6 +16,8 @@ public class ConnGene extends Gene {
 			(gene) -> gene.mutateXpr(),
 			(gene) -> ((ConnGene) gene).mutateInputLayer(),
 			(gene) -> ((ConnGene) gene).mutateOutputLayer(),
+			(gene) -> ((ConnGene) gene).mutateInputVector(),
+			(gene) -> ((ConnGene) gene).mutateOutputVector(),
 			(gene) -> ((ConnGene) gene).mutateWeight()
 	};
 	
@@ -33,11 +35,15 @@ public class ConnGene extends Gene {
 	}
 	
 	public ConnGene(boolean positive, ConnTuple tuple) {
-		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
-		this.inLayNum = tuple.iLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		this.inNodeNum = tuple.iNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		this.outLayNum = tuple.oLay() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		this.outNodeNum = tuple.oNode() + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfPseudoGauss();
+		this.inLayNum = tuple.iLay() + RNG.getUnitPseudoGauss();
+		this.outLayNum = tuple.oLay() + RNG.getUnitPseudoGauss();
+		double inX = tuple.iNode().getX() + RNG.getUnitPseudoGauss();
+		double inY = tuple.iNode().getY() + RNG.getUnitPseudoGauss();
+		this.inVector = new NodeVector(inX, inY);
+		double outX = tuple.oNode().getX() + RNG.getUnitPseudoGauss();
+		double outY = tuple.oNode().getY() + RNG.getUnitPseudoGauss();
+		this.outVector = new NodeVector(outX, outY);
 		this.weight = RNG.getGauss();
 	}
 	
@@ -49,8 +55,20 @@ public class ConnGene extends Gene {
 		 outLayNum = Math.max(0.0, outLayNum + RNG.getPseudoGauss(mMag));
 	}
 	
+	private void mutateInputVector() {
+		double mag = RNG.getHalfPseudoGauss(mMag);
+		double theta = RNG.getDouble()*2*Math.PI;
+		inVector.add(mag, theta);
+	}
+	
+	private void mutateOutputVector() {
+		double mag = RNG.getHalfPseudoGauss(mMag);
+		double theta = RNG.getDouble()*2*Math.PI;
+		outVector.add(mag, theta);
+	}
+	
 	private void mutateWeight() {
-		weight *= RNG.getGauss(1, mMag);
+		weight += RNG.getPseudoGauss(mMag);
 	}
 
 	@Override

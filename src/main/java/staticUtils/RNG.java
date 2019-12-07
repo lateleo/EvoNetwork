@@ -16,8 +16,16 @@ public class RNG {
 		return scalar*getPseudoGauss();
 	}
 	
+	public static double getHalfPseudoGauss() {
+		return Math.abs(getPseudoGauss());
+	}
+	
 	public static double getHalfPseudoGauss(double scalar) {
 		return Math.abs(getPseudoGauss(scalar));
+	}
+	
+	public static double getUnitPseudoGauss() {
+		return (getDouble() + getDouble() + getDouble())/3.0;
 	}
 	
 	public static long getAnyLong() {
@@ -89,6 +97,10 @@ public class RNG {
 		return ThreadLocalRandom.current().nextInt(32);
 	}
 	
+	public static int getInt() {
+		return ThreadLocalRandom.current().nextInt();
+	}
+	
 	public static int getIntRange(int min, int max) {
 		return ThreadLocalRandom.current().nextInt(min, max+1);
 	}
@@ -107,9 +119,7 @@ public class RNG {
 		int a = ThreadLocalRandom.current().nextInt(min, max);
 		int b = ThreadLocalRandom.current().nextInt(min, max);
 		return Math.min(a, b);
-	}
-	
-	
+	}	
 	
 	public static boolean getBoolean() {
 		return ThreadLocalRandom.current().nextBoolean();

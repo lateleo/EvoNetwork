@@ -7,20 +7,21 @@ import java.util.Map;
 import ecology.Species;
 import genetics.NodePhene;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public abstract class UpperNode extends Node {
 	protected static int invBatchSize = 1/Species.batchSize;
 	
 	protected UpperLayer layer;
-	protected int nodeNum;
+	protected NodeVector vector;
 	protected double avgOutput = 0;
 	protected double derivative = 0;
 	protected double learningRate;
 	List<Connection> downConns;
 	
-	UpperNode(UpperLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns){
+	UpperNode(UpperLayer layer, NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns){
 		this.layer = layer;
-		this.nodeNum = nodeNum;
+		this.vector = vector;
 		this.learningRate = phene.getLearnRate();
 		getDownConns(conns, phene);
 	}
@@ -53,7 +54,7 @@ public abstract class UpperNode extends Node {
 	}
 	
 	protected void nanCheck() {
-		layer.nanCheck(output, "Node Output - Layer " + layer.layNum() + ", Node " + nodeNum);
+		layer.nanCheck(output, "Node Output - Layer " + layer.layNum() + ", Node " + vector);
 	}
 	
 	public abstract void updateDerivative();

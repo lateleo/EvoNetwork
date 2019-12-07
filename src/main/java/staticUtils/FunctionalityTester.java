@@ -50,31 +50,15 @@ public class FunctionalityTester {
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		
-		long tries = 500000000;
-				
-		long start = System.currentTimeMillis();
-		for (long i = 0; i < tries; i++) {
-			double rand = binaryDouble()+binaryDouble()+binaryDouble();
-		}
-		long mid = System.currentTimeMillis();
-		for (long i = 0; i < tries; i++) {
-			double rand = sumDouble();
-		}
-		long end = System.currentTimeMillis();
-		
-		System.out.println("first: " + (mid - start));
-		System.out.println("second: " + (end - mid));
-		
-		
 	}
 	
-	public static double binaryDouble() {
-		return RNG.getDouble()*(RNG.getBoolean()?1:-1);
+	public static boolean check(int val) {
+		return val < 1024;
 	}
 	
-	public static double sumDouble() {
-		return (RNG.getDouble()+RNG.getDouble()+RNG.getDouble())*2 - 3;
-	}
+	
+	
+
 	
 
 	

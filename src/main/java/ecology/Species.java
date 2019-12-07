@@ -26,6 +26,7 @@ import staticUtils.CMUtils;
 import staticUtils.ComparisonUtils;
 import staticUtils.RNG;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 /*
  * This class is mostly a variable dump and simulation setup class. It doesn't do anything, After creating
@@ -36,7 +37,7 @@ public abstract class Species {
 	public static MnistDataReader mnistReader;
 	public static MnistImage[][] images;
 	public static MnistImage[] testImages;
-	public static int bottomNodes;
+	public static int bottomWidth;
 	public static int topNodes;
 
 	public static double mutationRate;
@@ -99,7 +100,7 @@ public abstract class Species {
 
 	public static List<Gene> generateGenes() {
 		ArrayList<Gene> genes = new ArrayList<>();
-		Map<Integer, Set<Integer>> layNodeNums = new TreeMap<>(ComparisonUtils::compareLayNums);
+		Map<Integer, Set<NodeVector>> layNodeNums = new TreeMap<>(ComparisonUtils::compareLayNums);
 
 		genes.addAll(generateLayerGenes(layNodeNums));
 
@@ -113,7 +114,7 @@ public abstract class Species {
 
 	/* Method used at the beginning of the simulation to generate a list of
 	 * genes. */
-	public static ArrayList<LayerGene> generateLayerGenes(Map<Integer, Set<Integer>> layNodeNums) {
+	public static ArrayList<LayerGene> generateLayerGenes(Map<Integer, Set<NodeVector>> layNodeNums) {
 		ArrayList<LayerGene> layGenes = new ArrayList<>();
 		while (layNodeNums.size() < 2 * layers) {
 			int layNum = RNG.getIntRange(1, layers * 4);
@@ -136,91 +137,90 @@ public abstract class Species {
 
 	/* Method used at the beginning of the simulation to generate a list of
 	 * genes. */
-	public static ArrayList<NodeGene> generateNodeGenes(Map<Integer, Set<Integer>> layNodeNums) {
+	public static ArrayList<NodeGene> generateNodeGenes(Map<Integer, Set<NodeVector>> layNodeNums) {
 		ArrayList<NodeGene> nodeGenes = new ArrayList<>();
-		layNodeNums.forEach((layNum, nodeSet) -> {
+		for (Map.Entry<Integer,Set<NodeVector>> entry : layNodeNums.entrySet()) {
+			int layNum = entry.getKey();
+			Set<NodeVector> nodeSet = entry.getValue();
 			while (nodeSet.size() < 2 * nodes) {
-				int nodeNum = RNG.getIntRange(0, nodes * 4);
-				if (!nodeSet.contains(nodeNum)) {
-					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
-					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
-					nodeSet.add(nodeNum);
+				int x = RNG.getIntRange(-nodes, nodes);
+				int y = RNG.getIntRange(-nodes, nodes);
+				NodeVector vector = new NodeVector(x,y);
+				if (!nodeSet.contains(vector)) {
+					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, vector));
+					nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, vector));
+					nodeSet.add(vector);
 				}
 			}
-		});
+		}
 		for (int i = 0; i < 1 * layers * nodes;) {
 			int layNum = RNG.sampleSet(layNodeNums.keySet());
-			int nodeNum = RNG.getIntRange(0, nodes * 4);
-			Set<Integer> nodeSet = layNodeNums.get(layNum);
-			if (!nodeSet.contains(nodeNum)) {
-				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
-				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, nodeNum));
-				nodeSet.add(nodeNum);
+			int x = RNG.getIntRange(-nodes, nodes);
+			int y = RNG.getIntRange(-nodes, nodes);
+			NodeVector vector = new NodeVector(x,y);
+			Set<NodeVector> nodeSet = layNodeNums.get(layNum);
+			if (!nodeSet.contains(vector)) {
+				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, vector));
+				nodeGenes.add(new NodeGene(nodeSet.size() % 2 != 0, layNum, vector));
+				nodeSet.add(vector);
 				i++;
 			}
 		}
 		for (int i = 0; i < 3*layers*nodes;) {
 			int layNum = RNG.getIntRange(0, layers*4);
 			if (!layNodeNums.containsKey(layNum)) {
-				int nodeNum = RNG.getIntRange(0, nodes*4);
-				nodeGenes.add(new NodeGene(false, layNum, nodeNum));
+				int x = RNG.getIntRange(-nodes, nodes);
+				int y = RNG.getIntRange(-nodes, nodes);
+				NodeVector vector = new NodeVector(x,y);
+				nodeGenes.add(new NodeGene(false, layNum, vector));
 				i++;
 			}
 		}
-		for (int node = 0; node < topNodes; node++) {
-			nodeGenes.add(new NodeGene(true, -1, node));
-			nodeGenes.add(new NodeGene(true, -1, node));
+		for (NodeVector unitVector : NodeVector.unitVectors) {
+			double offsetTheta = 2*Math.PI/topNodes;
+			NodeVector vector = unitVector.clone().addTheta(offsetTheta).addMagnitude(topNodes);
+			nodeGenes.add(new NodeGene(true, -1, vector));
+			nodeGenes.add(new NodeGene(true, -1, vector));
 		}
 		return nodeGenes;
 	}
 
 	/* Method used at the beginning of the simulation to generate a list of
 	*genes. */
-	public static ArrayList<ConnGene> generateConnGenes(Map<Integer, Set<Integer>> layNodeNums) {
+	public static ArrayList<ConnGene> generateConnGenes(Map<Integer, Set<NodeVector>> layNodeNums) {
 		ArrayList<ConnGene> connGenes = new ArrayList<>();
 		Set<ConnTuple> connTuples = new TreeSet<>();
-//		Top Nodes
-		connGenes.addAll(generateEndConns(layNodeNums, connTuples, true));
-//		Bottom Nodes
-		connGenes.addAll(generateEndConns(layNodeNums, connTuples, false));
-		Set<Integer> topNodeSet = new TreeSet<>();
-		for (int i = 0; i < topNodes; i++) {
-			topNodeSet.add(i);
-		}
+		connGenes.addAll(generateTopConns(layNodeNums, connTuples));
+		connGenes.addAll(generateBottomConns(layNodeNums, connTuples));
+		Set<NodeVector> topNodeSet = new TreeSet<>();
+		for (NodeVector vector : NodeVector.unitVectors) topNodeSet.add(vector);
 		layNodeNums.put(-1, topNodeSet);
 //		Mid Nodes
-		layNodeNums.forEach((lay1, nodeSet) -> {
-			nodeSet.forEach(node1 -> {
+		for (Map.Entry<Integer,Set<NodeVector>> entry : layNodeNums.entrySet()) {
+			int lay1 = entry.getKey();
+			Set<NodeVector> nodeSet = entry.getValue();
+			for (NodeVector vector1 : nodeSet) {
 				for (int i = 0; i < conns;) {
-					if (generateMidConn(layNodeNums, connGenes, connTuples, lay1, node1, i))
-						i++;
+					if (generateMidConn(layNodeNums, connGenes, connTuples, lay1, vector1, i)) i++;
 				}
-			});
-		});
+			}
+		}
 		for (int i = 0; i < 3*(layers*nodes*conns + topNodes);) {
 			int lay1 = RNG.sampleSet(layNodeNums.keySet());
-			int node1 = RNG.sampleSet(layNodeNums.get(lay1));
-			if (generateMidConn(layNodeNums, connGenes, connTuples, lay1, node1, i))
-				i++;
+			NodeVector vector1 = RNG.sampleSet(layNodeNums.get(lay1));
+			if (generateMidConn(layNodeNums, connGenes, connTuples, lay1, vector1, i)) i++;
 		}
 		return connGenes;
 	}
 
-	private static boolean generateMidConn(Map<Integer, Set<Integer>> layNodeNums, List<ConnGene> genes,
-			Set<ConnTuple> tuples, int lay1, int node1, int i) {
+	private static boolean generateMidConn(Map<Integer,Set<NodeVector>> layNodeNums, List<ConnGene> genes,
+			Set<ConnTuple> tuples, int lay1, NodeVector vector1, int i) {
 		int lay2 = RNG.sampleSet(layNodeNums.keySet());
-		while (lay1 == lay2) {
-			lay2 = RNG.sampleSet(layNodeNums.keySet());
-		}
-		int node2 = RNG.sampleSet(layNodeNums.get(lay2));
+		while (lay1 == lay2) lay2 = RNG.sampleSet(layNodeNums.keySet());
+		NodeVector vector2 = RNG.sampleSet(layNodeNums.get(lay2));
 		ConnTuple tuple = null;
-		if (ComparisonUtils.compareLayNums(lay1, lay2) > 0) {
-			tuple = new ConnTuple(lay2, node2, lay1, node1);
-		} else {
-			tuple = new ConnTuple(lay1, node1, lay2, node2);
-		}
-//		System.out.println(tuples.size());
-//		System.out.println(layNodeNums.size());
+		if (ComparisonUtils.compareLayNums(lay1, lay2) > 0) tuple = new ConnTuple(lay2, vector2, lay1, vector1);
+		else tuple = new ConnTuple(lay1, vector1, lay2, vector2);
 		if (!tuples.contains(tuple)) {
 			genes.add(new ConnGene(i % 3 != 0, tuple));
 			genes.add(new ConnGene(i % 3 != 0, tuple));
@@ -230,19 +230,33 @@ public abstract class Species {
 		return false;
 	}
 
-	private static ArrayList<ConnGene> generateEndConns(Map<Integer, Set<Integer>> layNodeNums, Set<ConnTuple> tuples, boolean top) {
+	private static ArrayList<ConnGene> generateTopConns(Map<Integer, Set<NodeVector>> layNodeNums, Set<ConnTuple> tuples) {
 		ArrayList<ConnGene> connGenes = new ArrayList<>();
-		int redundancy = (top) ? topRedundancy : bottomRedundancy;
-		int nodeCount = (top) ? topNodes : bottomNodes;
-		for (int endNode = 0; endNode < nodeCount; endNode++) {
-			for (int i = 0; i < 1.5*redundancy;) {
+		for (NodeVector topVector : NodeVector.unitVectors) {
+			for (int i = 0; i < 1.5*topRedundancy;) {
 				int layNum = RNG.sampleSet(layNodeNums.keySet());
-				int nodeNum = RNG.sampleSet(layNodeNums.get(layNum));
-				ConnTuple tuple = null;
-				if (top)
-					tuple = new ConnTuple(layNum, nodeNum, -1, endNode);
-				else
-					tuple = new ConnTuple(0, endNode, layNum, nodeNum);
+				NodeVector randVector = RNG.sampleSet(layNodeNums.get(layNum));
+				ConnTuple tuple =  new ConnTuple(layNum, randVector, -1, topVector);
+				if (!tuples.contains(tuple)) {
+					connGenes.add(new ConnGene(i % 3 != 0, tuple));
+					connGenes.add(new ConnGene(i % 3 != 0, tuple));
+					tuples.add(tuple);
+					i++;
+				}
+			}
+		}
+		return connGenes;
+	}
+	
+	private static ArrayList<ConnGene> generateBottomConns(Map<Integer,Set<NodeVector>> layNodeNums, Set<ConnTuple> tuples) {
+		ArrayList<ConnGene> connGenes = new ArrayList<>();
+		int start = -bottomWidth/2;
+		int stop = bottomWidth + start;
+		for (NodeVector bottomVector : NodeVector.bottomVectors) {
+			for (int i = 0; i < 1.5*bottomRedundancy;) {
+				int layNum = RNG.sampleSet(layNodeNums.keySet());
+				NodeVector randVector = RNG.sampleSet(layNodeNums.get(layNum));
+				ConnTuple tuple = new ConnTuple(0, bottomVector, layNum, randVector);
 				if (!tuples.contains(tuple)) {
 					connGenes.add(new ConnGene(i % 3 != 0, tuple));
 					connGenes.add(new ConnGene(i % 3 != 0, tuple));

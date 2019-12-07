@@ -23,13 +23,13 @@ public class LayerGene extends Gene {
 	}
 	
 	public LayerGene(boolean positive, int layerNum) {
-		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfPseudoGauss();
+		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
 	}
 	
 	public LayerGene(int layerNum) {
-		this.xprLevel = RNG.getGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+		this.xprLevel = RNG.getPseudoGauss();
+		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
 	}
 	
 	private void mutateLayNum() {

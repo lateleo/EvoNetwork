@@ -6,13 +6,14 @@ import java.util.Map;
 
 import genetics.NodePhene;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public class MidNode extends UpperNode {
 	private List<Connection> upConns;
 	private double bias;
 
-	MidNode(MidLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns) {
-		super(layer, nodeNum, phene, conns);
+	MidNode(MidLayer layer, NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns) {
+		super(layer, vector, phene, conns);
 		this.bias = phene.getBias();
 		getUpConns(conns, phene);
 	}

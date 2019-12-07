@@ -12,6 +12,7 @@ import genetics.Transcriptome;
 import staticUtils.CMUtils;
 import staticUtils.ComparisonUtils;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public class NeuralNetwork implements Runnable {
 	private static int batchSize = Species.batchSize;
@@ -35,13 +36,13 @@ public class NeuralNetwork implements Runnable {
 	public NeuralNetwork(Organism org) {
 		this.org = org;
 		Transcriptome xscript = org.genome().transcribe();
-		TreeMap<Integer,TreeMap<Integer,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
+		TreeMap<Integer,TreeMap<NodeVector,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
 		TreeMap<ConnTuple,Connection> conns = getConns(xscript.getConnWeights());
 		this.bottom = new BottomLayer(this, CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0));
 		size = conns.size();
-		for (Map.Entry<Integer, TreeMap<Integer,NodePhene>> entry : laysAndNodes.entrySet()) {
+		for (Map.Entry<Integer, TreeMap<NodeVector,NodePhene>> entry : laysAndNodes.entrySet()) {
 			int layNum = entry.getKey();
-			TreeMap<Integer,NodePhene> nodePhenes = entry.getValue();
+			TreeMap<NodeVector,NodePhene> nodePhenes = entry.getValue();
 			size += nodePhenes.size();
 			if (layNum != -1) upperLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
 		}

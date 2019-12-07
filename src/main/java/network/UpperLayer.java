@@ -4,22 +4,25 @@ import java.util.Map;
 
 import genetics.NodePhene;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public abstract class UpperLayer extends Layer {
 	protected int layNum;
 	
-	public UpperLayer(Map<Integer,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network, int layNum) {
+	public UpperLayer(Map<NodeVector,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network, int layNum) {
 		super(network);
 		this.layNum = layNum;
 		fillNodes(nodePhenes, conns);
 	}
 
 	
-	protected void fillNodes(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Connection> conns) {
-		nodePhenes.forEach((nodeNum, phene) -> nodes.add(addNode(nodeNum, phene, conns)));
+	protected void fillNodes(Map<NodeVector, NodePhene> nodePhenes, Map<ConnTuple, Connection> conns) {
+		for (Map.Entry<NodeVector, NodePhene> entry : nodePhenes.entrySet()) {
+			nodes.add(addNode(entry.getKey(), entry.getValue(), conns));
+		}
 	}
 	
-	protected abstract UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns);
+	protected abstract UpperNode addNode(NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns);
 
 	
 	public boolean nanCheck(double value, String message) {

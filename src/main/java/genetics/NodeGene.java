@@ -31,24 +31,24 @@ public class NodeGene extends Gene {
 		this.learnFactor = learnFactor;
 	}
 	
-	public NodeGene(boolean positive, int layerNum, int nodeX, int nodeY) {
-		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		double x = nodeX + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		double y = nodeY + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+	public NodeGene(boolean positive, int layerNum, NodeVector vector) {
+		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfPseudoGauss();
+		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
+		double x = vector.getX() + RNG.getUnitPseudoGauss();
+		double y = vector.getY() + RNG.getUnitPseudoGauss();
 		this.nodeVector = new NodeVector(x,y);
-		this.bias = RNG.getGauss();
-		this.learnFactor = RNG.getGauss();
+		this.bias = RNG.getPseudoGauss();
+		this.learnFactor = RNG.getPseudoGauss();
 	}
 	
-	public NodeGene(int layerNum, int nodeX, int nodeY) {
-		this.xprLevel = RNG.getGauss();
-		this.layerNum = layerNum + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		double x = nodeX + RNG.getBoundGauss(0, 1, 0.5, 0.3);
-		double y = nodeY + RNG.getBoundGauss(0, 1, 0.5, 0.3);
+	public NodeGene(int layerNum, NodeVector vector) {
+		this.xprLevel = RNG.getPseudoGauss();
+		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
+		double x = vector.getX() + RNG.getUnitPseudoGauss();
+		double y = vector.getY() + RNG.getUnitPseudoGauss();
 		this.nodeVector = new NodeVector(x,y);
-		this.bias = RNG.getGauss();
-		this.learnFactor = RNG.getGauss();
+		this.bias = RNG.getPseudoGauss();
+		this.learnFactor = RNG.getPseudoGauss();
 	}
 	
 	private void mutateLayNum() {
@@ -62,11 +62,11 @@ public class NodeGene extends Gene {
 	}
 	
 	private void mutateBias() {
-		bias += RNG.getGauss(mMag);
+		bias += RNG.getPseudoGauss(mMag);
 	}
 	
 	private void mutateLearnFactor() {
-		learnFactor += RNG.getGauss(mMag);
+		learnFactor += RNG.getPseudoGauss(mMag);
 	}
 	
 	

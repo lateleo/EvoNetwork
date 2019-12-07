@@ -4,20 +4,21 @@ import java.util.Map;
 
 import staticUtils.CMUtils;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public class BottomNode extends Node {
 	NeuralNetwork network;
-	private int nodeNum;
+	private NodeVector vector;
 
-	BottomNode(NeuralNetwork network, Map<ConnTuple, Connection> conns, int nodeNum) {
+	BottomNode(NeuralNetwork network, Map<ConnTuple, Connection> conns, NodeVector vector) {
 		this.network = network;
-		this.nodeNum = nodeNum;
-		Map<ConnTuple, Connection> nodeConns = CMUtils.subMap(conns, (tuple) -> tuple.iNode() == nodeNum);
+		this.vector = vector;
+		Map<ConnTuple, Connection> nodeConns = CMUtils.subMap(conns, (tuple) -> tuple.iNode() == vector);
 		for (Connection conn : nodeConns.values()) conn.setDownNode(this);
 	}
 	
 	public void run() {
-		output = network.currentImage.getValue(nodeNum);
+		output = network.currentImage.getValue(vector);
 	}	
 	
 }

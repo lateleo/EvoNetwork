@@ -4,16 +4,17 @@ import java.util.Map;
 
 import genetics.NodePhene;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public class MidLayer extends UpperLayer {
 
 
-	public MidLayer(Map<Integer, NodePhene> nodePhenes, Map<ConnTuple, Connection> conns, NeuralNetwork network, int layNum) {
+	public MidLayer(Map<NodeVector, NodePhene> nodePhenes, Map<ConnTuple, Connection> conns, NeuralNetwork network, int layNum) {
 		super(nodePhenes, conns, network, layNum);
 	}
 	
-	protected UpperNode addNode(int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns) {
-		return new MidNode(this, nodeNum, phene, conns);
+	protected UpperNode addNode(NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns) {
+		return new MidNode(this, vector, phene, conns);
 	}
 
 }

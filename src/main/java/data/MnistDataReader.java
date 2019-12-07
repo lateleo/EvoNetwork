@@ -33,9 +33,9 @@ public class MnistDataReader {
 		@SuppressWarnings("unused")
 		int imageMagicNum = dataStream.readInt();
 		int imageCount = dataStream.readInt();
-		int pixelCount = dataStream.readInt()*dataStream.readInt();
+		int pixelCount = dataStream.readInt();
 		
-		Species.bottomNodes = pixelCount;
+		Species.bottomWidth = pixelCount;
 
 //		System.out.println("Image magic number is " + imageMagicNum);
 //		System.out.println("number of items is " + imageCount);
@@ -57,8 +57,12 @@ public class MnistDataReader {
 		byte[] labels = new byte[labelCount];
 		labelStream.readFully(labels);
 		for (int i = 0; i < imageCount; i++) {
-			byte[] byteData = new byte[pixelCount];
-			dataStream.readFully(byteData);
+			byte[][] byteData = new byte[pixelCount][pixelCount];
+			for (int j = 0; j < pixelCount; j++) {
+				byte[] row = new byte[pixelCount];
+				dataStream.readFully(row);
+				byteData[j] = row;
+			}
 			MnistImage mnistMatrix = new MnistImage(labels[i], byteData);
 			matrices[i] = mnistMatrix;
 		}

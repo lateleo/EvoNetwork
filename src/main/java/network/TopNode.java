@@ -4,18 +4,19 @@ import java.util.Map;
 
 import genetics.NodePhene;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 public class TopNode extends UpperNode {
 	private double error = 0;
 	private double loss = 0;
 	
 
-	TopNode(TopLayer layer, int nodeNum, NodePhene phene, Map<ConnTuple, Connection> conns) {
-		super(layer, nodeNum, phene, conns);
+	TopNode(TopLayer layer, NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns) {
+		super(layer, vector, phene, conns);
 	}
 	
 	public void updateError(double sum, int label) {
-		double result = (label == nodeNum) ? output/sum - 1 : output/sum;
+		double result = (label == vector.getThetaFloor()) ? output/sum - 1 : output/sum;
 		layer.nanCheck(result, "Top Node Post-SoftMax");
 		error += result;
 		double sqrOut = result*result;
@@ -42,7 +43,7 @@ public class TopNode extends UpperNode {
 	
 	@Override
 	protected void nanCheck() {
-		layer.nanCheck(output, "Top Node Output, Node " + nodeNum);
+		layer.nanCheck(output, "Top Node Output, Node " + vector);
 	}
 	
 }

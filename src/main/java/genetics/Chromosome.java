@@ -76,10 +76,10 @@ public class Chromosome extends ArrayList<Gene> {
 	Chromosome mutateAll(boolean forced) {
 		UnaryOperator<Gene> mutator;
 		if (forced) {
-			mutator = (gene) -> gene.mutate(RNG.getExclusiveDouble());
+			mutator = (gene) -> gene.mutate(RNG.getDouble());
 		} else {
 			mutator = (gene) -> {
-				double rand = RNG.getExclusiveDouble();
+				double rand = RNG.getDouble();
 				if (rand < mutationRate) return gene.mutate(rand*invMutationRate);
 				else return gene;
 			};

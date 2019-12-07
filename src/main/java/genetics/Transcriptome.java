@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import ecology.Species;
 import staticUtils.ComparisonUtils;
 import utils.ConnTuple;
+import utils.NodeVector;
 
 /*
  * This class is where the bulk of the computations are done to create a Neural Network object from a genome.
@@ -23,17 +24,17 @@ import utils.ConnTuple;
  * These two will eventually be used by the Organism to create the actual NeuralNetwork.
  */
 public class Transcriptome {
-	private static int bottomNodes = Species.bottomNodes;
+	private static int bottomNodes = Species.bottomWidth;
 	private static int topNodes = Species.topNodes;
 	private static Comparator<Integer> comparator = ComparisonUtils::compareLayNums;
 
-	private TreeMap<Integer, TreeMap<Integer, NodePhene>> laysAndNodes = new TreeMap<>(comparator);
+	private TreeMap<Integer, TreeMap<NodeVector, NodePhene>> laysAndNodes = new TreeMap<>(comparator);
 	private TreeMap<ConnTuple, Double> connWeights = new TreeMap<>();
 
 	/*
 	 * Public getter for the 'laysAndNodes' map
 	 */
-	public TreeMap<Integer, TreeMap<Integer, NodePhene>> getLaysAndNodes() {
+	public TreeMap<Integer, TreeMap<NodeVector, NodePhene>> getLaysAndNodes() {
 		return laysAndNodes;
 	}
 
@@ -95,37 +96,40 @@ public class Transcriptome {
 				layerMap.put(layNum, new ArrayList<>(Arrays.asList(gene.xprLevel)));
 			}
 		}
-		layerMap.forEach((layNum,xprVals) -> {
-			if (xprVals.stream().mapToDouble((d) -> d).sum() >= 0.0) {
-				laysAndNodes.put(layNum, new TreeMap<Integer,NodePhene>());
+		for (Map.Entry<Integer, List<Double>> entry : layerMap.entrySet()) {
+			if (entry.getValue().stream().mapToDouble((d) -> d).sum() >= 0.0) {
+				laysAndNodes.put(entry.getKey(), new TreeMap<NodeVector,NodePhene>());
 			}
-		});
-		laysAndNodes.put(-1, new TreeMap<Integer,NodePhene>());
+		}
+		laysAndNodes.put(-1, new TreeMap<>());
 	}
 	
 //	NodeGene Stuff
 	private void fillNodes(List<NodeGene> nodeGenes) {
+		Map<NodeVector,NodePhene> topMap = laysAndNodes.get(-1);
+		for (NodeVector vector : NodeVector.unitVectors) topMap.put(vector, new NodePhene());
 		for (NodeGene gene: nodeGenes) {
 			int layNum = (int) Math.floor(gene.layerNum);
 			if (!laysAndNodes.containsKey(layNum)) continue;
-			Map<Integer,NodePhene> pheneMap = laysAndNodes.get(layNum);
-			int nodeNum = (int) gene.nodeNum;
-			if (!pheneMap.containsKey(nodeNum)) pheneMap.put(nodeNum, new NodePhene());
-			pheneMap.get(nodeNum).addGene(gene);
+			Map<NodeVector,NodePhene> pheneMap = laysAndNodes.get(layNum);
+			NodeVector vector;
+			if (layNum == -1) {
+				vector = gene.nodeVector.getUnitVector();
+			} else {
+				vector = gene.nodeVector.snapToGrid();
+				if (!pheneMap.containsKey(vector)) pheneMap.put(vector, new NodePhene());
+			}
+			pheneMap.get(vector).addGene(gene);
 		}
 	}
 	
 	private void filterNodes() {
-		laysAndNodes.forEach((layNum, pheneMap) -> {
-			if (layNum == -1) {
-				for (int nodeNum = 0; nodeNum < topNodes; nodeNum++) {
-					if (!pheneMap.containsKey(nodeNum)) pheneMap.put(nodeNum, new NodePhene());
-				}
-			}
-			else {
-				pheneMap.entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0.0);
-			}
-		});
+		for (Map.Entry<Integer,TreeMap<NodeVector,NodePhene>> layer : laysAndNodes.entrySet()) {
+			int layNum = layer.getKey();
+			TreeMap<NodeVector,NodePhene> pheneMap = layer.getValue();
+			if (layNum != -1) pheneMap.entrySet().removeIf((entry) -> entry.getValue().getXprSum() < 0.0);
+		}
+
 	}
 	
 //	ConnGene Stuff
@@ -137,52 +141,51 @@ public class Transcriptome {
 	 * (PheneDummy is defined below, and more information on its functionality is provided there).
 	 */
 	private void parseConnGenes(List<ConnGene> connGenes) {
-		TreeMap<ConnTuple, ConnPhene> connPhenes = new TreeMap<ConnTuple,ConnPhene>();
+		TreeMap<ConnTuple,ConnPhene> connPhenes = new TreeMap<ConnTuple,ConnPhene>();
 		for (ConnGene gene : connGenes) {
 			ConnTuple connTuple = new ConnTuple(gene);
 			if (!isConnTupleValid(connTuple)) continue;
 			if (!connPhenes.containsKey(connTuple)) connPhenes.put(connTuple, new ConnPhene());
 			connPhenes.get(connTuple).addGene(gene);
 		}
-		connPhenes.forEach((tuple,connPhene) -> {
+		for (Map.Entry<ConnTuple,ConnPhene> entry : connPhenes.entrySet()) {
+			ConnTuple tuple = entry.getKey();
+			ConnPhene connPhene = entry.getValue();
 			if (connPhene.getXprSum() > 0) {
 				if (tuple.iLay() != 0) laysAndNodes.get(tuple.iLay()).get(tuple.iNode()).addUp(tuple);
-				TreeMap<Integer,NodePhene> pheneMap = laysAndNodes.get(tuple.oLay());
-				NodePhene nodePhene = pheneMap.get(tuple.oNode());
-				nodePhene.addDown(tuple);
-
+				laysAndNodes.get(tuple.oLay()).get(tuple.oNode()).addDown(tuple);
 				connWeights.put(tuple, connPhene.getWeight());
 			}
-		});
+		}
 	}
 	
 	/*
 	 * checks to make sure a given tuple is valid (IE, the connection doesn't point backwards, and both input and output nodes exist)
 	 */
 	private boolean isConnTupleValid(ConnTuple tuple) {
-		if (tuple.iLay() == -1 || tuple.oLay() == 0 || tuple.iLay() == tuple.oLay()) return false;
+		int iLay = tuple.iLay();
+		int oLay = tuple.oLay();
+		NodeVector iNode = tuple.iNode();
+		NodeVector oNode = tuple.oNode();
+		if (comparator.compare(iLay, oLay) >= 0) return false;
 		boolean iValid = false;
 		boolean oValid = false;
-		if (tuple.iLay() == 0) {
-			if (tuple.iNode() < bottomNodes) iValid = true;
+		if (iLay == 0) {
+			double x = iNode.getX();
+			double y = iNode.getY();
+			if (x < bottomNodes && x >= 0 && y < bottomNodes && y >= 0) iValid = true;
 			else return false;
 		}
-		if (tuple.oLay() == -1) {
-			if (tuple.oNode() < topNodes) oValid = true;
-			else return false;
+		if (oLay == -1) oValid = true;
+		if (!iValid) {
+			if (!laysAndNodes.containsKey(iLay)) return false;
+			else if (!laysAndNodes.get(iLay).containsKey(iNode)) return false;
+			else iValid = true;
 		}
-		if (!(iValid && oValid)) {
-			if (!(comparator.compare(tuple.iLay(), tuple.oLay()) < 0)) return false;
-			if (!iValid) {
-				if (!laysAndNodes.containsKey(tuple.iLay())) return false;
-				else if (!laysAndNodes.get(tuple.iLay()).containsKey(tuple.iNode())) return false;
-				else iValid = true;
-			}
-			if (!oValid) {
-				if (!laysAndNodes.containsKey(tuple.oLay())) return false;
-				else if (!laysAndNodes.get(tuple.oLay()).containsKey(tuple.oNode())) return false;
-				else oValid = true;
-			}
+		if (!oValid) {
+			if (!laysAndNodes.containsKey(oLay)) return false;
+			else if (!laysAndNodes.get(oLay).containsKey(oNode)) return false;
+			else oValid = true;
 		}
 		return iValid && oValid;
 	}
@@ -196,16 +199,13 @@ public class Transcriptome {
 	private void removeOrphans() {
 		laysAndNodes.entrySet().removeIf(entry -> isLayerOrphan(entry, true));
 		laysAndNodes.descendingMap().entrySet().removeIf(entry -> isLayerOrphan(entry, false));
-		
 		for (NodePhene phene : laysAndNodes.get(-1).values()) phene.filterConns(connWeights.navigableKeySet(), true);
 	}
 	
-	private boolean isLayerOrphan(Map.Entry<Integer,TreeMap<Integer,NodePhene>> entry, boolean direction) {
+	private boolean isLayerOrphan(Map.Entry<Integer,TreeMap<NodeVector,NodePhene>> entry, boolean direction) {
 		if (entry.getKey() == -1) return false;
-		TreeMap<Integer,NodePhene> pheneMap = entry.getValue();
-		pheneMap.values().removeIf((phene) ->  {
-			return phene.isOrphan(connWeights.navigableKeySet(), direction);
-		});
+		TreeMap<NodeVector,NodePhene> pheneMap = entry.getValue();
+		pheneMap.values().removeIf((phene) -> phene.isOrphan(connWeights.navigableKeySet(), direction));
 		return pheneMap.isEmpty();
 	}
 
