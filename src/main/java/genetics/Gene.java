@@ -8,13 +8,16 @@ import staticUtils.RNG;
  * Also contains code for the internal functional interface "Mutation".
 */
 public abstract class Gene {
-	protected static double mMag = Species.mutationMagnitude;
 	
-	public double xprLevel;
+	public double activation, xprLevel;
 
 
-	protected void mutateXpr() {
-		xprLevel += RNG.getPseudoGauss(mMag);
+	protected void mutateXpr(double mag) {
+		xprLevel += RNG.getPseudoGauss(mag);
+	}
+	
+	protected void mutateActivation(double mag) {
+		activation += RNG.getPseudoGauss(mag);
 	}
 	
 	/*
@@ -27,7 +30,7 @@ public abstract class Gene {
 	 * because its functionality varies slightly between the child classes, because of the difference in
 	 * possible mutations that could occur.
 	 */
-	public abstract Gene mutate(double rand);
+	public abstract Gene mutate(double rand, double mag);
 	
 	
 	/*
@@ -35,14 +38,14 @@ public abstract class Gene {
 	 * the actual mutation process happens. it takes in a list of mutations, given by the child class,
 	 * and chooses one to execute based on the randomly generated parameter 'rand'.
 	 */
-	protected Gene mutate(Mutation[] mutations, double rand) {
+	protected Gene mutate(Mutation[] mutations, double rand, double mag) {
 		int index = (int) rand*mutations.length;
 		Gene mutant = clone();
-		mutations[index].getMutant(mutant);
+		mutations[index].getMutant(mutant, mag);
 		return mutant;
 	}
 	
 	protected interface Mutation {
-		public void getMutant(Gene mutant);
+		public void getMutant(Gene mutant, double mag);
 	}
 }

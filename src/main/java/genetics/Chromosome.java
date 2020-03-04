@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import ecology.Species;
+import network.Organism;
 import staticUtils.RNG;
 
 /*
@@ -14,8 +15,6 @@ import staticUtils.RNG;
 public class Chromosome extends ArrayList<Gene> {
 	private static final long serialVersionUID = 2471841169414882405L; //This is just because ArrayLists are Serializable
 	private Centromere centromere;
-	private static double mutationRate = Species.mutationRate;
-	private static double invMutationRate; // used to speed up computation
 	
 	public Chromosome(int chromosomeNum) {
 		centromere = new Centromere(chromosomeNum);
@@ -37,19 +36,8 @@ public class Chromosome extends ArrayList<Gene> {
 	/*
 	 * Used during intial genome creation, to speed up diversification and variety within the genome.
 	 */
-	public Chromosome copyAndMutate() {
-		return new Chromosome(this).mutateAll(true).mutateAll(true);
-	}
-	
-	/*
-	 * Used during initial genome creation, to create a full haploid set of initially empty (except for centromeres) chromosomes.
-	 */
-	public static Chromosome[] generate(int diploidNum) {
-		Chromosome[] chromosomes = new Chromosome[diploidNum];
-		for (int i = 0; i < diploidNum; i++) {
-			chromosomes[i] = new Chromosome(i+1);
-		}
-		return chromosomes;
+	public Chromosome copyAndMutate(double mMag) {
+		return new Chromosome(this).forceMutateAll(mMag).forceMutateAll(mMag).forceMutateAll(mMag);
 	}
 	
 	/*
@@ -73,18 +61,18 @@ public class Chromosome extends ArrayList<Gene> {
 	/*
 	 * Used in recombination (and the above 'copyAndMutate' method) to mutate all genes contained in the chromosome.
 	 */
-	Chromosome mutateAll(boolean forced) {
-		UnaryOperator<Gene> mutator;
-		if (forced) {
-			mutator = (gene) -> gene.mutate(RNG.getDouble());
-		} else {
-			mutator = (gene) -> {
-				double rand = RNG.getDouble();
-				if (rand < mutationRate) return gene.mutate(rand*invMutationRate);
-				else return gene;
-			};
-		}
+	Chromosome mutateAll(Organism org) {
+		UnaryOperator<Gene> mutator = (gene) -> {
+			double rand = RNG.getDouble();
+			if (rand < org.getMRate()) return gene.mutate(rand*org.getInvMRate(), org.getMMag());
+			else return gene;
+		};
 		replaceAll(mutator);
+		return this;
+	}
+	
+	Chromosome forceMutateAll(double mMag) {
+		replaceAll((gene)-> gene.mutate(RNG.getDouble(), mMag));
 		return this;
 	}
 
@@ -137,6 +125,11 @@ public class Chromosome extends ArrayList<Gene> {
 	public void append(Gene gene) {
 		if (RNG.getBoolean()) add(0,gene);
 		else add(gene);
+	}
+	
+	public void insert(Gene gene) {
+		int randIndex = RNG.getIntRange(0,size()-1);
+		add(randIndex, gene);
 	}
 	
 	public String toString() {

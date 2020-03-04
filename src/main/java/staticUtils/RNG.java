@@ -28,6 +28,14 @@ public class RNG {
 		return (getDouble() + getDouble() + getDouble())/3.0;
 	}
 	
+	public static double getBoundPseudoGauss(double min, double max, double sigma) {
+		double output;
+		do {
+			output = getPseudoGauss(sigma);
+		} while (output > max || output < min);
+		return output;	
+	}
+	
 	public static long getAnyLong() {
 		return ThreadLocalRandom.current().nextLong(Long.MIN_VALUE+1, Long.MAX_VALUE);
 	}
@@ -142,6 +150,10 @@ public class RNG {
 	
 	public static <E> E sampleSet(Set<E> set) {
 		return new ArrayList<E>(set).get(getIntMax(set.size()));
+	}
+	
+	public static <E> E sampleList(List<E> list) {
+		return list.get(getIntMax(list.size()));
 	}
 	
 	

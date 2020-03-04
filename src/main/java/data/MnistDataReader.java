@@ -37,19 +37,11 @@ public class MnistDataReader {
 		
 		Species.bottomWidth = pixelCount;
 
-//		System.out.println("Image magic number is " + imageMagicNum);
-//		System.out.println("number of items is " + imageCount);
-//		System.out.println("number of pixels is: " + pixelCount);
-
 		DataInputStream labelStream = new DataInputStream(
 				new BufferedInputStream(new FileInputStream(pathHeader + prefix + labelSuffix)));
 		@SuppressWarnings("unused")
 		int labelMagicNum = labelStream.readInt();
 		int labelCount = labelStream.readInt();
-
-//		System.out.println("Label magic number is: " + labelMagicNum);
-//		System.out.println("number of labels is: " + labelCount);
-
 
 		assert imageCount == labelCount;
 	

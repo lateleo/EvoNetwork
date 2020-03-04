@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ecology.Species;
+import network.Organism;
 import staticUtils.RNG;
 
 /*
@@ -11,7 +12,6 @@ import staticUtils.RNG;
  * used in the organization of the genome.
  */
 public class HomologPair {
-	private static double slipFactor = Species.slipFactor;
 	int chromNum;
 	Chromosome a;
 	Chromosome b;
@@ -20,7 +20,7 @@ public class HomologPair {
 		this.a = a;
 		this.b = b;
 		this.chromNum = a.chromNum();
-
+		
 	}
 	
 	public HomologPair copy() {
@@ -30,7 +30,7 @@ public class HomologPair {
 	/*
 	 * Used in the reproduction process to get a single recombinant chromosome from both homologs.
 	 */
-	public Chromosome getRecombinant(boolean forcedMutation) {
+	public Chromosome getRecombinant(boolean forcedMutation, Organism org) {
 		int minHead = Math.min(a.getHead(), b.getHead());
 		int minTail = Math.min(a.getTail(), b.getTail());
 		int randIndex = RNG.getIntRange(0 - minHead, minTail);
@@ -38,13 +38,14 @@ public class HomologPair {
 		Chromosome newChrom = ((whichChrom)?a:b).copy();
 		int slip;
 		if (randIndex < 0) {
-			slip = (int) RNG.getBoundGauss(0-(newChrom.getHead() + randIndex), 0-randIndex, slipFactor);
+			slip = (int) RNG.getBoundPseudoGauss(0-(newChrom.getHead() + randIndex), 0-randIndex, org.getSlip());
 		} else {
-			slip = (int) RNG.getBoundGauss(0-randIndex, newChrom.getTail()-randIndex, slipFactor);
+			slip = (int) RNG.getBoundPseudoGauss(0-randIndex, newChrom.getTail()-randIndex, org.getSlip());
 		}
 		List<Gene> subSequence = ((whichChrom)? b : a).subSequence(randIndex);
 		newChrom.recombine(randIndex + slip, subSequence);
-		return newChrom.mutateAll(forcedMutation);
+		if (forcedMutation) return newChrom.forceMutateAll(org.getMMag());
+		else return newChrom.mutateAll(org);
 	}
 	
 	/*

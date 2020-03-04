@@ -37,6 +37,7 @@ import genetics.Gene;
 import network.BottomLayer;
 import network.MidLayer;
 import network.NeuralNetwork;
+import utils.NodeVector;
 
 /*
  * This class is used solely as a sandbox to test the functionality of various parts of the application.
@@ -49,7 +50,12 @@ public class FunctionalityTester {
 
 
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
-		
+		int i = 0;
+		while (true) {
+			System.out.println(i);
+			i++;
+		}
+
 	}
 	
 	public static boolean check(int val) {

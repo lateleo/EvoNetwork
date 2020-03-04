@@ -1,5 +1,6 @@
 package genetics;
 
+import staticUtils.MathUtils;
 import staticUtils.RNG;
 import utils.ConnTuple;
 import utils.NodeVector;
@@ -13,72 +14,76 @@ import utils.NodeVector;
  */
 public class ConnGene extends Gene {
 	private static Mutation[] mutations = new Mutation[] {
-			(gene) -> gene.mutateXpr(),
-			(gene) -> ((ConnGene) gene).mutateInputLayer(),
-			(gene) -> ((ConnGene) gene).mutateOutputLayer(),
-			(gene) -> ((ConnGene) gene).mutateInputVector(),
-			(gene) -> ((ConnGene) gene).mutateOutputVector(),
-			(gene) -> ((ConnGene) gene).mutateWeight()
+			(gene, mag) -> gene.mutateActivation(mag),
+			(gene, mag) -> gene.mutateXpr(mag),
+			(gene, mag) -> ((ConnGene) gene).mutateInputLayer(mag),
+			(gene, mag) -> ((ConnGene) gene).mutateOutputLayer(mag),
+			(gene, mag) -> ((ConnGene) gene).mutateInputVector(mag),
+			(gene, mag) -> ((ConnGene) gene).mutateOutputVector(mag),
+			(gene, mag) -> ((ConnGene) gene).mutateWeight(mag)
 	};
 	
-	public double inLayNum, outLayNum, weight;
-	public NodeVector inVector, outVector;
+	public double inLayNum, inNodeX, inNodeY, outLayNum, outNodeX, outNodeY, weight;
 	
 	
-	public ConnGene(double xprLevel, double inLayNum, double outLayNum, NodeVector inVector, NodeVector outVector, double weight) {
+	public ConnGene(double activation, double xprLevel, double inLayNum, double inNodeX, double inNodeY, double outLayNum, double outNodeX, double outNodeY, double weight) {
+		this.activation = activation;
 		this.xprLevel = xprLevel;
 		this.inLayNum = inLayNum;
+		this.inNodeX = inNodeX;
+		this.inNodeY = inNodeY;
 		this.outLayNum = outLayNum;
-		this.inVector = inVector;
-		this.outVector = outVector;
+		this.outNodeX = outNodeX;
+		this.outNodeY = outNodeY;
 		this.weight = weight;
 	}
 	
-	public ConnGene(boolean positive, ConnTuple tuple) {
-		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfPseudoGauss();
+	public ConnGene(boolean posAct, boolean posXpr, ConnTuple tuple) {
+		this.activation = ((posAct) ? 1 : -1)*RNG.getHalfPseudoGauss();
+		this.xprLevel = ((posXpr) ? 1 : -1)*RNG.getHalfPseudoGauss();
 		this.inLayNum = tuple.iLay() + RNG.getUnitPseudoGauss();
+		this.inNodeX = tuple.iNode().getX() + RNG.getUnitPseudoGauss();
+		this.inNodeY = tuple.iNode().getY() + RNG.getUnitPseudoGauss();
 		this.outLayNum = tuple.oLay() + RNG.getUnitPseudoGauss();
-		double inX = tuple.iNode().getX() + RNG.getUnitPseudoGauss();
-		double inY = tuple.iNode().getY() + RNG.getUnitPseudoGauss();
-		this.inVector = new NodeVector(inX, inY);
-		double outX = tuple.oNode().getX() + RNG.getUnitPseudoGauss();
-		double outY = tuple.oNode().getY() + RNG.getUnitPseudoGauss();
-		this.outVector = new NodeVector(outX, outY);
+		this.outNodeX = tuple.oNode().getX() + RNG.getUnitPseudoGauss();
+		this.outNodeY = tuple.oNode().getY() + RNG.getUnitPseudoGauss();
 		this.weight = RNG.getGauss();
 	}
 	
-	private void mutateInputLayer() {
-		inLayNum = Math.max(0.0, inLayNum + RNG.getPseudoGauss(mMag));
+	private void mutateInputLayer(double mag) {
+		inLayNum = Math.max(0.0, inLayNum + RNG.getPseudoGauss(mag));
 	}
 	
-	private void mutateOutputLayer() {
-		 outLayNum = Math.max(0.0, outLayNum + RNG.getPseudoGauss(mMag));
+	private void mutateOutputLayer(double mag) {
+		 outLayNum = Math.max(0.0, outLayNum + RNG.getPseudoGauss(mag));
 	}
 	
-	private void mutateInputVector() {
-		double mag = RNG.getHalfPseudoGauss(mMag);
+	private void mutateInputVector(double mag) {
+		double vectorMag = RNG.getHalfPseudoGauss(mag);
 		double theta = RNG.getDouble()*2*Math.PI;
-		inVector.add(mag, theta);
+		inNodeX += vectorMag*MathUtils.cos(theta);
+		inNodeY += vectorMag*MathUtils.sin(theta);
 	}
 	
-	private void mutateOutputVector() {
-		double mag = RNG.getHalfPseudoGauss(mMag);
+	private void mutateOutputVector(double mag) {
+		double vectorMag = RNG.getHalfPseudoGauss(mag);
 		double theta = RNG.getDouble()*2*Math.PI;
-		outVector.add(mag, theta);
+		outNodeX += vectorMag*MathUtils.cos(theta);
+		outNodeY += vectorMag*MathUtils.sin(theta);
 	}
 	
-	private void mutateWeight() {
-		weight += RNG.getPseudoGauss(mMag);
+	private void mutateWeight(double mag) {
+		weight += RNG.getPseudoGauss(mag);
 	}
 
 	@Override
 	protected Gene clone() {
-		return new ConnGene(xprLevel, inLayNum, outLayNum, inVector.clone(), outVector.clone(), weight);
+		return new ConnGene(activation, xprLevel, inLayNum, inNodeX, inNodeY, outLayNum, outNodeX, outNodeY, weight);
 	}
 
 	@Override
-	public Gene mutate(double rand) {
-		return mutate(mutations, rand);
+	public Gene mutate(double rand, double mag) {
+		return mutate(mutations, rand, mag);
 	}
 
 }

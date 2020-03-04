@@ -3,6 +3,7 @@ package genetics;
 import java.util.HashSet;
 import java.util.Set;
 
+import staticUtils.MathUtils;
 import utils.ConnTuple;
 
 //	Used for Orphan removal and but created/added to in earlier steps for efficiency
@@ -18,7 +19,7 @@ public class NodePhene extends Phenotype {
 	}
 	
 	public double getLearnRate() {
-		if (learnRate == null) learnRate = 1/(1 + Math.pow(Math.E, -getAvg(1)));	
+		if (learnRate == null) learnRate = MathUtils.sigmoid(getAvg(1));	
 		return learnRate;
 	}
 	

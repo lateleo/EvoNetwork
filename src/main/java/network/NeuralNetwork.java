@@ -15,13 +15,14 @@ import utils.ConnTuple;
 import utils.NodeVector;
 
 public class NeuralNetwork implements Runnable {
+	private static boolean printed = false;
 	private static int batchSize = Species.batchSize;
 	private static MnistImage[][] images = Species.images;
 	private static MnistImage[] currentImageSet = images[0];
 	private static int currentBatchNum = 0;
 	
 	MnistImage currentImage;
-		
+	
 	private Organism org;
 	private BottomLayer bottom;
 	private TopLayer top;
@@ -32,10 +33,11 @@ public class NeuralNetwork implements Runnable {
 	private int size = 0;
 	
 	public boolean nanFound = false;
-		
+	
 	public NeuralNetwork(Organism org) {
 		this.org = org;
-		Transcriptome xscript = org.genome().transcribe();
+		Transcriptome xscript = org.genome().transcriptome();
+		xscript.transcribeNetworkGenes();
 		TreeMap<Integer,TreeMap<NodeVector,NodePhene>> laysAndNodes = xscript.getLaysAndNodes();
 		TreeMap<ConnTuple,Connection> conns = getConns(xscript.getConnWeights());
 		this.bottom = new BottomLayer(this, CMUtils.subMap(conns, (tuple) -> tuple.iLay() == 0));
@@ -43,8 +45,10 @@ public class NeuralNetwork implements Runnable {
 		for (Map.Entry<Integer, TreeMap<NodeVector,NodePhene>> entry : laysAndNodes.entrySet()) {
 			int layNum = entry.getKey();
 			TreeMap<NodeVector,NodePhene> nodePhenes = entry.getValue();
-			size += nodePhenes.size();
-			if (layNum != -1) upperLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
+			if (layNum != -1) {
+				upperLayers.add(new MidLayer(nodePhenes, conns, this, layNum));
+				size += nodePhenes.size();
+			}
 		}
 		this.top = new TopLayer(laysAndNodes.get(-1), conns, this);
 		upperLayers.add(top);
@@ -69,6 +73,7 @@ public class NeuralNetwork implements Runnable {
 			accuracy = 1 - top.getLoss()*lossScalar;
 			if (!Double.isFinite(accuracy)) {
 				nanFound = true;
+				Population.getInstance().remove(org);
 				System.out.println("Non-Finite Accuracy: " + accuracy);
 			}
 		} else {

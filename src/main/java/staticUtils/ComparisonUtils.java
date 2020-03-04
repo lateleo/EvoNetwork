@@ -11,7 +11,7 @@ public class ComparisonUtils {
 		if (a == b) return 0;
 		if (a == -1) return 1;
 		if (b == -1) return -1;
-		else return a - b;
+		else return (int) Math.signum(a - b);
 	}
 	
 	public static int compareUpperLayers(UpperLayer a, UpperLayer b) {
@@ -20,7 +20,7 @@ public class ComparisonUtils {
 	
 	public static int compareNodeTuples(NodeTuple a, NodeTuple b) {
 		int layComp = compareLayNums(a.layer(), b.layer());
-		return ((layComp == 0) ? compareNodeVectors(a.node(), b.node()) : layComp);
+		return (int)Math.signum((layComp == 0) ? compareNodeVectors(a.node(), b.node()) : layComp);
 	}
 	
 	public static int compareConnTuples(ConnTuple a, ConnTuple b) {
@@ -30,7 +30,7 @@ public class ComparisonUtils {
 	
 	public static int compareNodeVectors(NodeVector a, NodeVector b) {
 		double magDif = a.getMagnitude() - b.getMagnitude();
-		return (int)((magDif == 0) ? a.getTheta() - b.getTheta() : magDif);
+		return (int)Math.signum((magDif == 0) ? a.getTheta() - b.getTheta() : magDif);
 	}
 
 }

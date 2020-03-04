@@ -17,9 +17,8 @@ public class ConnTuple implements Comparable<ConnTuple> {
 	}
 
 	public ConnTuple(ConnGene gene) {
-		in = new NodeTuple((int) gene.inLayNum, gene.inVector.snapToGrid());
-		NodeVector outVector = (gene.outLayNum == -1) ? gene.outVector.getUnitVector() : gene.outVector.snapToGrid();
-		out = new NodeTuple((int) Math.floor(gene.outLayNum), outVector);
+		in = new NodeTuple((int) gene.inLayNum, NodeVector.inFromConnGene(gene));
+		out = new NodeTuple((int) Math.floor(gene.outLayNum), NodeVector.outFromConnGene(gene));
 	}
 	
 	public ConnTuple(int iLay, NodeVector iNode, int oLay, NodeVector oNode) {

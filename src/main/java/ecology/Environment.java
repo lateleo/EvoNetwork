@@ -5,29 +5,31 @@ public class Environment {
 	public static void main(String[] args) {
 		System.out.println("Start");
 		
-		double mRate = 0.05;
-		double mMag = 1.25;
-		double slip = 2;
+		double mRateFactor = 0;
+		double mMagFactor = 2;
+		double slipFactor = 5;
 		
 		int haploidNum = 10;
-		int layers = 3;
-		int nodes = 25;
-		int conns = 10;
+		int layers = 2;
+		int nodes = 15;
+		int conns = 20;
 		
-		int topRedundancy = 5;
+		int topRedundancy = 10;
 		int bottomRedundancy = 3;
+		double dormancy = 0.5;
 		int popSize = 10;
-		int simGens = 10;
-		int batchSize = 500;
+		int simGens = 5;
+		int batchSize = 100;
 		double targetAccuracy = 0.9;
 		
 		long startTime = System.currentTimeMillis();
 		Species.initialize("original", batchSize);
-		Population pop = Species.createPopulation(mRate,  mMag,  slip, haploidNum,  layers,  nodes, conns,
-				topRedundancy, bottomRedundancy, popSize,  simGens);
+		Population pop = Species.createPopulation(mRateFactor,  mMagFactor,  slipFactor, haploidNum,  layers,  nodes, conns,
+				topRedundancy, bottomRedundancy, dormancy, popSize,  simGens);
 		System.out.println("Simulating First Few Generations...");
 		pop.simulateGenerations();
-		pop.iterate(targetAccuracy);
+//		pop.iterate(targetAccuracy);
+		pop.runEpoch(300);
 		
 		long endTime = System.currentTimeMillis();
 		long seconds = (endTime - startTime)/1000;
@@ -42,7 +44,7 @@ public class Environment {
 			minutes -= 60;
 		}
 		System.out.println("Training Done: " + hours + "h" + minutes + "m" + seconds + "s");
-//		pop.testGeneration();
+		pop.testGeneration();
 		System.out.println("Done.");
 	}
 

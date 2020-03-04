@@ -1,7 +1,5 @@
 package data;
 
-import utils.NodeVector;
-
 public class MnistImage {
 	private int size;
 	private int label;
@@ -22,9 +20,7 @@ public class MnistImage {
 		return data;
 	}
 
-	public int getValue(NodeVector vector) {
-		int x = (int) (vector.getX() + size/2);
-		int y = (int) (vector.getY() + size/2);
+	public int getValue(int x, int y) {
 		return data[x][y];
 	}
 

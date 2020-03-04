@@ -4,34 +4,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ecology.Species;
+import genetics.ConnGene;
+import genetics.NodeGene;
 import staticUtils.ComparisonUtils;
+import staticUtils.MathUtils;
 
 public class NodeVector implements Comparable<NodeVector> {
 	private static int topNodes = Species.topNodes;
-	private static int bottomWidth = Species.bottomWidth;
+	private static int minBottom = Species.minBottom;
+	private static int maxBottom = Species.maxBottom;
 	public static List<NodeVector> bottomVectors = setBottomVectors();
 	public static List<NodeVector> unitVectors = setUnitVectors();
 	private double x, y;
 	
 	private static List<NodeVector> setBottomVectors() {
 		List<NodeVector> bottomVectors = new ArrayList<>();
-		int start = bottomWidth/2;
-		int stop = bottomWidth - start;
-		for (int x = start; x < stop; x++) for (int y = start; y < stop; y++) bottomVectors.add(new NodeVector(x,y));
+		for (int x = minBottom; x < maxBottom; x++) {
+			for (int y = minBottom; y < maxBottom; y++) {
+				bottomVectors.add(new NodeVector(x,y));
+			}
+		}
 		return bottomVectors;
 	}
 	
 	private static List<NodeVector> setUnitVectors() {
 		List<NodeVector> unitVectors = new ArrayList<>();
+		double halfTop = topNodes/2.0;
 		for (int i = 0; i < topNodes; i++) {
-			double theta = 2*i*Math.PI/topNodes;
-			unitVectors.add(new NodeVector(Math.cos(theta), Math.sin(theta)));
+			double theta = (i/halfTop)*Math.PI;
+			unitVectors.add(new NodeVector(MathUtils.cos(theta), MathUtils.sin(theta)));
 		}
 		return unitVectors;
 	}
 		
 	public static NodeVector fromMagTheta(double mag, double theta) {
-		return new NodeVector(mag*Math.cos(theta), mag*Math.sin(theta));
+		return new NodeVector(mag*MathUtils.cos(theta), mag*MathUtils.sin(theta));
+	}
+	
+	public static NodeVector fromNodeGene(NodeGene gene) {
+		return fromLayXY((int) Math.floor(gene.layerNum), gene.nodeX, gene.nodeY);
+	}
+	
+	public static NodeVector inFromConnGene(ConnGene gene) {
+		return fromLayXY((int) Math.floor(gene.inLayNum), gene.inNodeX, gene.inNodeY);
+	}
+	
+	public static NodeVector outFromConnGene(ConnGene gene) {
+		return fromLayXY((int) Math.floor(gene.outLayNum), gene.outNodeX, gene.outNodeY);
+	}
+	
+	public static NodeVector fromLayXY(int layNum, double geneX, double geneY) {
+		double x, y;
+		if (layNum != -1) {
+			x = round(geneX);
+			y = round(geneY);
+		} else {
+			double theta = Math.atan2(geneY, geneX);
+			if (theta < 0) theta += 2*Math.PI;
+			double floor = Math.floor(theta*topNodes/(2*Math.PI));
+			double qTheta = floor*2*Math.PI/topNodes;
+			x = MathUtils.cos(qTheta);
+			y = MathUtils.sin(qTheta);
+		}
+		return new NodeVector(x,y);
 	}
 	
 	public NodeVector(double x, double y) {
@@ -57,9 +92,10 @@ public class NodeVector implements Comparable<NodeVector> {
 	}
 	
 	public NodeVector addTheta(double phi) {
+		double magnitude = getMagnitude();
 		double theta = phi + getTheta();
-		x = Math.cos(theta);
-		y = Math.sin(theta);
+		x = magnitude*MathUtils.cos(theta);
+		y = magnitude*MathUtils.sin(theta);
 		return this;
 	}
 	
@@ -75,24 +111,19 @@ public class NodeVector implements Comparable<NodeVector> {
 	
 	public NodeVector getUnitVector() {
 		double qTheta = 2*getThetaFloor()*Math.PI/topNodes;
-		return new NodeVector(Math.cos(qTheta), Math.sin(qTheta));
+		return new NodeVector(MathUtils.cos(qTheta), MathUtils.sin(qTheta));
 	}
 	
-	public NodeVector snapToGrid() {
-		return new NodeVector(round(x),round(y));
-	}
+//	public NodeVector snapToGrid() {
+//		return new NodeVector(round(x),round(y));
+//	}
 	
 	public NodeVector clone() {
 		return new NodeVector(x,y);
 	}
 	
-	private int round(double i) {
+	private static int round(double i) {
 		return (int)((i % 1 == 0.5) ? Math.ceil(i) : Math.round(i));
-	}
-	
-	public void add(double mag, double theta) {
-		x += mag*Math.cos(theta);
-		y += mag*Math.sin(theta);
 	}
 	
 	public int compareTo(NodeVector other) {

@@ -76,6 +76,20 @@ public class Population {
 		}
 	}
 	
+	public void runEpoch(int generations) {
+		Long start = System.currentTimeMillis();
+		for (int i = 1; i <= generations; i++) {
+			runGeneration();
+			if (i == 1 || i == generations || (System.currentTimeMillis() - start) >= 2000) {
+				meanAccuracy = Stats.getMean(adults, org -> org.getNetwork().getAccuracy());
+				maxAge = Stats.getMaxInt(adults, org -> (int) org.getAge());
+				System.out.println("Gen " + i + "\tMax Age: " + maxAge +"\tAccuracy: " + meanAccuracy);
+//				start = System.currentTimeMillis();
+			}
+			if (i < generations) getNextGeneration();
+		}
+	}
+	
 	public void runGeneration() {
 //		System.out.print("Building Networks...");
 		youth.forEach(org -> org.buildNetwork());
@@ -83,9 +97,12 @@ public class Population {
 		adults.addAll(youth);
 		youth.clear();
 		List<Organism> orgs = new ArrayList<>(adults);
-		NeuralNetwork.nextBatch();
-//		System.out.print("Running Batch...");
-		orgs.forEach(org -> org.run());
+		for (int i = 0; i < 4; i++) {
+//			System.out.print("Running Batch...");
+			NeuralNetwork.nextBatch();
+			for (Organism org : adults) org.run();
+			for (Organism org : adults) org.learn();
+		}
 //		System.out.println("Done");
 	}
 
@@ -94,7 +111,6 @@ public class Population {
 		for (Organism org : adults) org.updatePerformance();
 		updateFitness();
 		filterOrganisms();
-		for (Organism org : adults) org.learn();
 		repopulate(false);
 	}
 
@@ -128,14 +144,13 @@ public class Population {
 			return (int) (Math.signum(delta) * Math.ceil(Math.abs(delta)));
 		});
 		Organism best = adults.get(0);
-		while (adults.size()*2 > populationSize) {
+		while (adults.size() > 0.5*populationSize) {
 			for (ListIterator<Organism> iter = adults.listIterator(); iter.hasNext();) {
 				Organism org = iter.next();
 				if (adults.size()*2 > populationSize) {
 					if (!org.equals(best) && RNG.getGauss() > org.getFitness()) {
 						iter.remove();
-					} 
-
+					}
 				}
 			}
 		}

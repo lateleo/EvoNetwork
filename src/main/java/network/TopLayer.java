@@ -11,7 +11,6 @@ public class TopLayer extends UpperLayer {
 	public TopLayer(Map<NodeVector,NodePhene> nodePhenes, Map<ConnTuple,Connection> conns, NeuralNetwork network) {
 		super(nodePhenes, conns, network, -1);
 	}
-	
 
 	@Override
 	protected UpperNode addNode(NodeVector vector, NodePhene phene, Map<ConnTuple, Connection> conns) {
@@ -28,7 +27,6 @@ public class TopLayer extends UpperLayer {
 		int label = network.currentImage.getLabel();
 		for (Node node : nodes) ((TopNode) node).updateError(sum, label);
 	}
-
 	
 	public double getLoss() {
 		double loss = 0;

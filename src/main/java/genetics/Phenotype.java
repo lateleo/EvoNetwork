@@ -4,17 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Phenotype {
-	private Double xprSum = null;
+	private boolean summed = false;
+	private double xprSum;
+	private double absXprSum;
 	List<double[]> vals = new ArrayList<double[]>();
 	
 	public double getXprSum() {
-		if (xprSum == null) {
-			xprSum = 0.0;
+		calcXpr();
+		return xprSum;
+	}
+	
+	public double getAbsXprSum() {
+		calcXpr();
+		return absXprSum;
+	}
+	
+	
+	private void calcXpr() {
+		if (!summed) {
 			for (double[] pair : vals) {
 				xprSum += pair[0];
+				absXprSum += Math.abs(pair[0]);
 			}				
 		}
-		return xprSum;
 	}
 	
 	protected double getAvg(int index) {
@@ -22,7 +34,7 @@ public abstract class Phenotype {
 		for (double[] pair : vals) {
 			sum += pair[0]*pair[index];
 		}
-		return sum/getXprSum();
+		return sum/getAbsXprSum();
 	}
 
 }

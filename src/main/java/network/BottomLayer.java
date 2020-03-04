@@ -2,7 +2,6 @@ package network;
 
 import java.util.Map;
 
-import ecology.Species;
 import utils.ConnTuple;
 import utils.NodeVector;
 

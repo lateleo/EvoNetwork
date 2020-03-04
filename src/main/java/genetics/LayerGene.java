@@ -11,45 +11,43 @@ import staticUtils.RNG;
  */
 public class LayerGene extends Gene {
 	private static Mutation[] mutations = new Mutation[] {
-			(gene) -> gene.mutateXpr(),
-			(gene) -> ((LayerGene) gene).mutateLayNum()
+			(gene, mag) -> gene.mutateActivation(mag),
+			(gene, mag) -> gene.mutateXpr(mag),
+			(gene, mag) -> ((LayerGene) gene).mutateLayNum(mag)
 	};
 	
 	public double layerNum;
 	
-	public LayerGene(double xprLevel, double layerNum) {
+	public LayerGene(double activation, double xprLevel, double layerNum) {
+		this.activation = activation;
 		this.xprLevel = xprLevel;
 		this.layerNum = layerNum;
 	}
 	
-	public LayerGene(boolean positive, int layerNum) {
-		this.xprLevel = ((positive) ? 1 : -1)*RNG.getHalfPseudoGauss();
+	public LayerGene(boolean posAct, boolean posXpr, int layerNum) {
+		this.activation = ((posAct) ? 1 : -1)*RNG.getHalfPseudoGauss();
+		this.xprLevel = ((posXpr) ? 1 : -1)*RNG.getHalfPseudoGauss();
 		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
 	}
 	
-	public LayerGene(int layerNum) {
-		this.xprLevel = RNG.getPseudoGauss();
-		this.layerNum = layerNum + RNG.getUnitPseudoGauss();
-	}
-	
-	private void mutateLayNum() {
-		layerNum = Math.max(1.0, layerNum + RNG.getPseudoGauss(mMag));
+	private void mutateLayNum(double mag) {
+		layerNum = Math.max(1.0, layerNum + RNG.getPseudoGauss(mag));
 	}
 
 	@Override
 	protected Gene clone() {
-		return new LayerGene(xprLevel, layerNum);
+		return new LayerGene(activation, xprLevel, layerNum);
 	}
 
 	@Override
-	public Gene mutate(double rand) {
-		return mutate(mutations, rand);
+	public Gene mutate(double rand, double mag) {
+		return mutate(mutations, rand, mag);
 	}
 	
 	public String toString() {
 		DecimalFormat format = new DecimalFormat();
 		format.setMaximumFractionDigits(3);
-		return "[" + format.format(xprLevel) + ", " + format.format(layerNum) + "]";
+		return "[" + format.format(activation) + ", " + format.format(xprLevel) + ", " + format.format(layerNum) + "]";
 	}
 
 }
